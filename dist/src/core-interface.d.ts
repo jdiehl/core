@@ -16,10 +16,10 @@ export interface ICoreConfig {
 export interface ICoreContext extends Koa.Context {
 }
 export interface ICoreServices {
-    CacheService: CacheService;
-    MongoService: MongoService;
-    SlackService: SlackService;
-    TokenService: TokenService;
+    cache: CacheService;
+    mongo: MongoService;
+    slack: SlackService;
+    token: TokenService;
 }
 export declare class CoreService<C extends ICoreConfig = ICoreConfig, S extends ICoreServices = ICoreServices> {
     protected config: C;

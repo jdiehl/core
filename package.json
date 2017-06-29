@@ -8,19 +8,27 @@
     "url": "https://github.com/jdiehl/core.git"
   },
   "scripts": {
-    "test": "tslint --project tsconfig.json",
+    "test": "tslint *.ts src/**.ts test/**.ts; mocha -r ts-node/register test/**.test.ts",
     "build": "tsc --project tsconfig.json",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run test && npm run build"
   },
   "keywords": [],
   "author": "Jonathan Diehl",
   "license": "ISC",
   "devDependencies": {
+    "@types/chai": "^4.0.1",
+    "@types/koa-session": "^3.0.0",
+    "@types/mocha": "^2.2.41",
+    "@types/sinon": "^2.3.2",
+    "chai": "^4.0.2",
+    "mocha": "^3.4.2",
+    "sinon": "^2.3.6",
+    "ts-node": "^3.1.0",
     "tslint": "^5.4.3",
-    "typescript": "^2.3.4"
+    "typescript": "^2.4.1"
   },
   "dependencies": {
-    "@-)/utils": "^1.0.1",
+    "@-)/utils": "^1.0.2",
     "@types/koa": "^2.0.39",
     "@types/koa-bodyparser": "^3.0.23",
     "@types/koa-cache-control": "^2.0.0",
@@ -28,7 +36,7 @@
     "@types/koa-router": "^7.0.22",
     "@types/mongodb": "^2.2.6",
     "@types/mz": "0.0.31",
-    "@types/node": "^8.0.3",
+    "@types/node": "^8.0.5",
     "@types/request": "0.0.44",
     "@types/request-promise-native": "^1.0.5",
     "koa": "^2.3.0",
@@ -36,6 +44,7 @@
     "koa-cache-control": "^2.0.0",
     "koa-logger": "^3.0.0",
     "koa-router": "^7.2.1",
+    "koa-session": "^5.3.0",
     "mongo": "^0.1.0",
     "mz": "^2.6.0",
     "request": "^2.81.0",

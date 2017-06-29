@@ -9,6 +9,7 @@
     "no-console": false,
     "no-empty-interface": false,
     "no-var-requires": false,
+    "no-unused-expression": false,
     "quotemark": [ true, "single", "jsx-double" ],
     "semicolon": [ true, "never" ],
     "trailing-comma": [ false ]

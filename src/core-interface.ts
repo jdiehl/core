@@ -25,7 +25,7 @@ export interface ICoreConfig {
     key?: string
     maxAge?: number
   }
-  slackWebhook?: string
+  slack?: string
 }
 
 export interface ICoreContext extends Koa.Context {

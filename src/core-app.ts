@@ -3,14 +3,16 @@ import * as bodyParser from 'koa-bodyparser'
 import * as cacheControl from 'koa-cache-control'
 import * as logger from 'koa-logger'
 import * as Router from 'koa-router'
+import * as session from 'koa-session'
 
-import { each, eachAsync } from '@-)/utils'
+import { each, eachAsync, extend } from '@-)/utils'
 import { CoreService, ICoreConfig, ICoreServices } from './core-interface'
 
-import { CacheService, MongoService, SlackService, TokenService } from './services'
+import { AuthService, CacheService, DbService, SlackService, TokenService } from './services'
 const coreServices = {
+  auth: AuthService,
   cache: CacheService,
-  mongo: MongoService,
+  db: DbService,
   slack: SlackService,
   token: TokenService
 }
@@ -45,9 +47,15 @@ export abstract class CoreApp<C extends ICoreConfig, S extends ICoreServices> {
   // initialize the server
   private async initServer(): Promise<void> {
     this.server = new Koa()
+    this.server.keys = this.config.keys
     this.server.use(logger())
     this.server.use(cacheControl({ noCache: true }))
     this.server.use(bodyParser())
+    this.server.use(session(this.sessionConfig()))
+  }
+
+  private sessionConfig(): any {
+    return extend({ key: 's', maxAge: 2592000000 }, this.config.session)
   }
 
   // initialize and install all services

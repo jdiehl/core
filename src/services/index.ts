@@ -1,4 +1,5 @@
+export { AuthService } from './auth-service'
 export { CacheService } from './cache-service'
-export { MongoService } from './mongo-service'
+export { DbService } from './db-service'
 export { SlackService } from './slack-service'
 export { TokenService } from './token-service'

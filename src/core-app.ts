@@ -8,11 +8,12 @@ import * as session from 'koa-session'
 import { each, eachAsync, extend } from '@-)/utils'
 import { CoreService, ICoreConfig, ICoreServices } from './core-interface'
 
-import { AuthService, CacheService, DbService, SlackService, TokenService } from './services'
+import { AuthService, CacheService, DbService, EmailService, SlackService, TokenService } from './services'
 const coreServices = {
   auth: AuthService,
   cache: CacheService,
   db: DbService,
+  email: EmailService,
   slack: SlackService,
   token: TokenService
 }

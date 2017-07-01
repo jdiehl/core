@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import { SinonStub, stub } from 'sinon'
 import { TokenService } from '../'
 
-describe.only('token', () => {
+describe('token', () => {
   let token: TokenService
   const next: SinonStub = stub()
   const reject: SinonStub = stub()

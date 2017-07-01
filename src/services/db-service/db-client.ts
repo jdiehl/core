@@ -21,7 +21,7 @@ export interface IDbInsertOneResult {
 export interface IDbUpdateResult {
   modifiedCount: number
   upsertedCount: number
-  upsertedIds: { _id: IDbObjectID }
+  upsertedId: { _id: IDbObjectID }
 }
 
 export interface IDbIndexOptions {

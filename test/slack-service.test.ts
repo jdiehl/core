@@ -1,7 +1,9 @@
 import { expect } from 'chai'
 import * as request from 'request-promise-native'
 import { SinonStub, stub } from 'sinon'
+
 import { SlackService } from '../'
+import { mockServices, resetMockServices } from './util'
 
 describe('slack', () => {
   let slack: SlackService
@@ -14,8 +16,9 @@ describe('slack', () => {
   })
 
   beforeEach(async () => {
+    resetMockServices()
     post.resetHistory()
-    slack = new SlackService({ slack: 'my/key' } as any, [] as any)
+    slack = new SlackService({ slack: 'my/key' } as any, mockServices as any)
   })
 
   after(() => {

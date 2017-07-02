@@ -2,22 +2,20 @@ import { expect } from 'chai'
 import { stub } from 'sinon'
 
 import { StatsService } from '../'
+import { mockCollection, mockServices, resetMockServices } from './util'
 
-describe.only('stats', () => {
-  const insertOne = stub().resolves()
-  const collection = stub().returns({ insertOne })
-  const db = { collection }
+describe('stats', () => {
   let stats: StatsService
 
   beforeEach(async () => {
-    insertOne.resetHistory()
-    stats = new StatsService({ stats: { collection: 'test' } } as any, { db } as any)
+    resetMockServices()
+    stats = new StatsService({ stats: { collection: 'test' } } as any, mockServices as any)
     await stats.init()
   })
 
   it('should request a collection', async () => {
-    expect(collection.callCount).to.equal(1)
-    expect(collection.getCall(0).args).to.deep.equal(['test'])
+    expect(mockServices.db.collection.callCount).to.equal(1)
+    expect(mockServices.db.collection.getCall(0).args).to.deep.equal(['test'])
   })
 
   it('should install a middleware', async () => {
@@ -57,8 +55,8 @@ describe.only('stats', () => {
     const params = {}
     const body = {}
     await stats.store({ method, path, user, params, body } as any)
-    expect(insertOne.callCount).to.equal(1)
-    expect(insertOne.getCall(0).args).to.deep.equal([{ userId: 'user', method, path, params, body }])
+    expect(mockCollection.insertOne.callCount).to.equal(1)
+    expect(mockCollection.insertOne.getCall(0).args).to.deep.equal([{ userId: 'user', method, path, params, body }])
   })
 
   it('store() should mask passwords', async () => {
@@ -67,17 +65,17 @@ describe.only('stats', () => {
     const params = {}
     const body = { email: 'a@b.c', password: 'hello' }
     await stats.store({ method, path, params, body } as any)
-    expect(insertOne.callCount).to.equal(1)
+    expect(mockCollection.insertOne.callCount).to.equal(1)
     const doc = { method, path, params, body: { email: 'a@b.c', password: '######' } }
-    expect(insertOne.getCall(0).args).to.deep.equal([doc])
+    expect(mockCollection.insertOne.getCall(0).args).to.deep.equal([doc])
   })
 
   it('store() should include a header field', async () => {
-    stats = new StatsService({ stats: { includeHeader: ['bar'] } } as any, { db } as any)
+    stats = new StatsService({ stats: { includeHeader: ['bar'] } } as any, mockServices as any)
     await stats.init()
     const context = { method: 'GET', path: '/', params: {}, body: {}, header: { bar: 'myHeader' }}
     await stats.store(context as any)
-    expect(insertOne.getCall(0).args).to.deep.equal([context])
+    expect(mockCollection.insertOne.getCall(0).args).to.deep.equal([context])
   })
 
 })

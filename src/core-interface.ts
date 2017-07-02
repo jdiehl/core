@@ -4,12 +4,22 @@ import * as Koa from 'koa'
 import * as Router from 'koa-router'
 import { ConnectionOptions } from 'tls'
 
-import { AuthService, CacheService, DbService, EmailService, SlackService, TokenService } from './services'
 import { IAuthUser } from './services/auth-service/auth-service'
 import { EmailSendService } from './services/email-service/email-service'
 
+import {
+  AuthService,
+  CacheService,
+  DbService,
+  EmailService,
+  SlackService,
+  StatsService,
+  TokenService
+} from './services'
+
 export interface ICoreConfig {
   auth?: {
+    collection?: string
     encoding?: string
     digest?: string
     iterations?: number
@@ -65,6 +75,7 @@ export interface ICoreServices {
   db: DbService
   email: EmailService
   slack: SlackService
+  stats: StatsService
   token: TokenService
 }
 

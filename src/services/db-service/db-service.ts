@@ -6,6 +6,16 @@ import { DbClientMongodb } from './db-client-mongodb'
 export class DbService extends CoreService {
   private client: IDbClient
 
+  collection<T>(name: string): IDbCollection<T> {
+    return this.client.collection<T>(name)
+  }
+
+  async drop(name: string): Promise<boolean> {
+    return this.client.drop(name)
+  }
+
+  // CoreService
+
   async beforeInit() {
     if (!this.config.db) return
     const dbUrl = url.parse(this.config.db)
@@ -18,13 +28,7 @@ export class DbService extends CoreService {
     await this.client.destroy()
   }
 
-  collection<T>(name: string): IDbCollection<T> {
-    return this.client.collection<T>(name)
-  }
-
-  async drop(name: string): Promise<boolean> {
-    return this.client.drop(name)
-  }
+  // private
 
   private createClient(dbUrl: url.Url): IDbClient {
     switch (dbUrl.protocol) {

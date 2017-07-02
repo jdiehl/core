@@ -47,6 +47,8 @@ export class CacheService extends CoreService {
     })
   }
 
+  // private
+
   private createClient(cacheUrl: url.Url): ICacheClient {
     switch (cacheUrl.protocol) {
     case 'mem:': return new CacheClientMem()

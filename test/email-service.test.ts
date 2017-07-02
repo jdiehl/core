@@ -1,7 +1,9 @@
 import { expect } from 'chai'
 import * as nodemailer from 'nodemailer'
 import { stub } from 'sinon'
+
 import { EmailService } from '../'
+import { mockServices, resetMockServices } from './util'
 
 const LiveTest = {
   from: 'from@example.com',
@@ -19,12 +21,13 @@ describe('email', () => {
   describe.skip('live', () => {
 
     beforeEach(async () => {
+      resetMockServices()
       email = new EmailService({ email: {
         auth: { user: LiveTest.from, pass: LiveTest.pass },
         from: LiveTest.from,
         logger: true,
         service: LiveTest.service
-      } } as any, [] as any)
+      } } as any, mockServices as any)
       await email.init()
     })
 
@@ -43,9 +46,11 @@ describe('email', () => {
     })
 
     beforeEach(async () => {
+      resetMockServices()
       sendMail.resetHistory()
       createTransport.resetHistory()
-      email = new EmailService({ email: { from: 'me', host: 'host', port: 1234, pool: {} } } as any, [] as any)
+      const config = { email: { from: 'me', host: 'host', port: 1234, pool: {} } }
+      email = new EmailService(config as any, mockServices as any)
       await email.init()
     })
 

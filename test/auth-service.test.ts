@@ -1,13 +1,16 @@
 import { expect } from 'chai'
 import * as crypto from 'crypto'
 import { stub } from 'sinon'
+
 import { AuthService } from '../'
+import { mockServices, resetMockServices } from './util'
 
 describe('auth', () => {
   let auth: AuthService
 
   beforeEach(async () => {
-    auth = new AuthService({ auth: { secret: 'mysecret', prefix: '/auth' } } as any, {} as any)
+    resetMockServices()
+    auth = new AuthService({ auth: { secret: 'mysecret', prefix: '/auth' } } as any, mockServices as any)
     await auth.init()
   })
 

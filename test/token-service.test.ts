@@ -1,6 +1,8 @@
 import { expect } from 'chai'
 import { SinonStub, stub } from 'sinon'
+
 import { TokenService } from '../'
+import { mockServices, resetMockServices } from './util'
 
 describe('token', () => {
   let token: TokenService
@@ -15,9 +17,10 @@ describe('token', () => {
   }
 
   beforeEach(async () => {
+    resetMockServices()
     next.resetHistory()
     reject.resetHistory()
-    token = new TokenService({ tokens: { user: 'xxx', admin: 'yyy' } } as any, [] as any)
+    token = new TokenService({ tokens: { user: 'xxx', admin: 'yyy' } } as any, mockServices as any)
   })
 
   it('should allow the correct user token', () => {

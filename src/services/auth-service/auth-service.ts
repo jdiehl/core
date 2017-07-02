@@ -22,12 +22,6 @@ export class AuthService<Profile = {}> extends CoreService {
 
   private collection: IDbCollection<IAuthUserInternal<Profile>>
 
-  async init() {
-    if (!this.config.auth) throw new Error('Missing auth config')
-    this.collection = this.services.db.collection('auth')
-    this.collection.createIndex({ email: 1 }, { unique: true })
-  }
-
   async find(): Promise<Array<IAuthUser<Profile>>> {
     const users = await this.collection.find().toArray()
     return this.sanitize(users)
@@ -60,9 +54,19 @@ export class AuthService<Profile = {}> extends CoreService {
     return this.sanitizeOne(user._id)
   }
 
+  // CoreService
+
+  async init() {
+    if (!this.config.auth) return
+    this.collection = this.services.db.collection(this.config.auth.collection || 'auth')
+    this.collection.createIndex({ email: 1 }, { unique: true })
+  }
+
   install(server: Koa): Router {
     return makeRouter(this.config, this.services)
   }
+
+  // private
 
   private async makeSalt(): Promise<string> {
     const { saltlen, encoding } = this.config.auth!

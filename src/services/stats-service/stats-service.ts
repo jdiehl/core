@@ -15,18 +15,6 @@ export interface IStats {
 export class StatsService extends CoreService {
   stats: IDbCollection
 
-  async init() {
-    if (!this.config.stats) return
-    this.stats = this.services.db.collection<IStats>(this.config.stats.collection || 'stats')
-  }
-
-  install(server: Koa): void {
-    server.use(async (context: ICoreContext, next: () => void) => {
-      await next()
-      await this.store(context)
-    })
-  }
-
   async store(context: ICoreContext): Promise<void> {
     if (!this.config.stats) throw new Error('Missing stats configuration')
 
@@ -53,6 +41,20 @@ export class StatsService extends CoreService {
 
     // store doc
     await this.stats.insertOne(doc)
+  }
+
+  // CoreService
+
+  async init() {
+    if (!this.config.stats) return
+    this.stats = this.services.db.collection<IStats>(this.config.stats.collection || 'stats')
+  }
+
+  install(server: Koa): void {
+    server.use(async (context: ICoreContext, next: () => void) => {
+      await next()
+      await this.store(context)
+    })
   }
 
 }

@@ -5,7 +5,8 @@ import * as Router from 'koa-router'
 import { ConnectionOptions } from 'tls'
 
 import { AuthService, CacheService, DbService, EmailService, SlackService, TokenService } from './services'
-import { EmailSendService } from './services/email-service'
+import { IAuthUser } from './services/auth-service/auth-service'
+import { EmailSendService } from './services/email-service/email-service'
 
 export interface ICoreConfig {
   auth?: {
@@ -20,7 +21,6 @@ export interface ICoreConfig {
   cache?: string
   db?: string
   email?: {
-    // tslint:disable-next-line:max-line-length
     service?: EmailSendService
     port?: number
     host?: string
@@ -36,7 +36,8 @@ export interface ICoreConfig {
       maxMessages?: boolean
       rateDelta?: boolean
       rateLimit?: boolean
-    }
+    } | false
+    proxy?: string
     from?: string
   },
   keys: string[]
@@ -51,6 +52,7 @@ export interface ICoreConfig {
 }
 
 export interface ICoreContext extends Koa.Context {
+  user: IAuthUser<any>
 }
 
 export interface ICoreServices {

@@ -1,6 +1,21 @@
 export { CoreApp } from './src/core-app'
-export { CoreService, ICoreConfig, ICoreContext, ICoreServices } from './src/core-interface'
-export { CacheService, DbService, EmailService, SlackService, TokenService } from './src/services'
+
+export {
+  CoreService,
+  ICoreConfig,
+  ICoreContext,
+  ICoreServices
+} from './src/core-interface'
+
+export {
+  AuthService,
+  CacheService,
+  DbService,
+  EmailService,
+  SlackService,
+  StatsService,
+  TokenService
+} from './src/services'
 
 export {
   IDbCollection,
@@ -13,4 +28,9 @@ export {
   IDbUpdateOptions
 } from './src/services/db-service/db-client'
 
-export { EmailSendService, IEmailAttachment, IEmailSendOptions, IEmailSendResult} from './src/services/email-service'
+export {
+  EmailSendService,
+  IEmailAttachment,
+  IEmailSendOptions,
+  IEmailSendResult
+} from './src/services/email-service/email-service'

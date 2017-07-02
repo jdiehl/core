@@ -49,6 +49,10 @@ export interface ICoreConfig {
     maxAge?: number
   }
   slack?: string
+  stats?: {
+    collection: string
+    includeHeader?: string[]
+  }
 }
 
 export interface ICoreContext extends Koa.Context {

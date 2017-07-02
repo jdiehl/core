@@ -5,13 +5,19 @@ import { StatsService } from '../'
 
 describe.only('stats', () => {
   const insertOne = stub().resolves()
-  const db = { collection: () => ({ insertOne }) }
+  const collection = stub().returns({ insertOne })
+  const db = { collection }
   let stats: StatsService
 
   beforeEach(async () => {
     insertOne.resetHistory()
-    stats = new StatsService({} as any, { db } as any)
+    stats = new StatsService({ stats: { collection: 'test' } } as any, { db } as any)
     await stats.init()
+  })
+
+  it('should request a collection', async () => {
+    expect(collection.callCount).to.equal(1)
+    expect(collection.getCall(0).args).to.deep.equal(['test'])
   })
 
   it('should install a middleware', async () => {
@@ -29,7 +35,7 @@ describe.only('stats', () => {
     const context = {}
     await middleware(context, async () => {})
     expect(store.callCount).to.equal(1)
-    expect(store.calledWith(context)).to.be.true
+    expect(store.getCall(0).args).to.deep.equal([context])
   })
 
   it('should not call stats.store() from the middleware on an error', async () => {
@@ -52,7 +58,7 @@ describe.only('stats', () => {
     const body = {}
     await stats.store({ method, path, user, params, body } as any)
     expect(insertOne.callCount).to.equal(1)
-    expect(insertOne.calledWith({ userId: 'user', method, path, params, body })).to.be.true
+    expect(insertOne.getCall(0).args).to.deep.equal([{ userId: 'user', method, path, params, body }])
   })
 
   it('store() should mask passwords', async () => {
@@ -60,10 +66,18 @@ describe.only('stats', () => {
     const path = '/test2'
     const params = {}
     const body = { email: 'a@b.c', password: 'hello' }
-    await stats.store({ method, path, user: undefined, params, body } as any)
+    await stats.store({ method, path, params, body } as any)
     expect(insertOne.callCount).to.equal(1)
-    const doc = { userId: undefined, method, path, params, body: { email: 'a@b.c', password: '######' } }
-    expect(insertOne.calledWith(doc)).to.be.true
+    const doc = { method, path, params, body: { email: 'a@b.c', password: '######' } }
+    expect(insertOne.getCall(0).args).to.deep.equal([doc])
+  })
+
+  it('store() should include a header field', async () => {
+    stats = new StatsService({ stats: { includeHeader: ['bar'] } } as any, { db } as any)
+    await stats.init()
+    const context = { method: 'GET', path: '/', params: {}, body: {}, header: { bar: 'myHeader' }}
+    await stats.store(context as any)
+    expect(insertOne.getCall(0).args).to.deep.equal([context])
   })
 
 })

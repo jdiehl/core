@@ -25,23 +25,23 @@ export class AuthService<Profile = {}> extends CoreService {
 
   async update(id: string | ObjectID, profile: Profile): Promise<void> {
     if (typeof id === 'string') id = new ObjectID(id)
-    await this.collection.updateOne({ _id: id }, { profile })
+    await this.collection.updateOne({ _id: id }, { $set: { profile } })
   }
 
   async login(email: string, password: string): Promise<IUser<Profile> | void> {
     const user = await this.collection.findOne({ email })
-    const hash = await this.makeHash(user.salt, email, password)
+    const hash = await this.makeHash(user.salt, this.config.auth!.secret, password)
     if (hash !== user.hash) return
     return this.sanitizeOne(user)
   }
 
   async signup(email: string, password: string, role: string, profile?: Profile): Promise<IUser<Profile>> {
     const salt = await this.makeSalt()
-    const hash = await this.makeHash(salt, email, password)
+    const hash = await this.makeHash(salt, this.config.auth!.secret, password)
     const user: any = { email, salt, hash, role, profile }
     const res = await this.collection.insertOne(user)
     user._id = res.insertedId
-    return this.sanitizeOne(user._id)
+    return this.sanitizeOne(user)
   }
 
   // CoreService

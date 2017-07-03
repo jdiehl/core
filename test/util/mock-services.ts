@@ -4,36 +4,43 @@ import { SinonStub, stub } from 'sinon'
 import { CoreService, ICoreServices } from '../../'
 
 export interface IMockServices {
-  auth: {
-    find: SinonStub
-    findOne: SinonStub
-    update: SinonStub
-    login: SinonStub
-    signup: SinonStub
-  }
-  cache: {
-    get: SinonStub
-    set: SinonStub
-    flush: SinonStub
-  }
-  db: {
-    collection: SinonStub
-  }
-  email: {
-    send: SinonStub
-  }
-  slack: {
-    post: SinonStub
-  }
-  stats: {
-    store: SinonStub
-  }
-  token: {
-    require: SinonStub
-  }
+  auth: { find: SinonStub, findOne: SinonStub, update: SinonStub, login: SinonStub, signup: SinonStub }
+  cache: { get: SinonStub, set: SinonStub, flush: SinonStub }
+  db: { collection: SinonStub }
+  email: { send: SinonStub }
+  slack: { post: SinonStub }
+  stats: { store: SinonStub }
+  token: { require: SinonStub }
 }
 
-function makeCursorStub(): Record<string, SinonStub> {
+export interface IMockCollection {
+  count: SinonStub
+  createIndex: SinonStub
+  deleteMany: SinonStub
+  deleteOne: SinonStub
+  drop: SinonStub
+  dropIndex: SinonStub
+  find: SinonStub
+  findOne: SinonStub
+  insertMany: SinonStub
+  insertOne: SinonStub
+  updateMany: SinonStub
+  updateOne: SinonStub
+}
+
+export interface IMockCursor {
+  count: SinonStub
+  filter: SinonStub
+  limit: SinonStub
+  map: SinonStub
+  next: SinonStub
+  project: SinonStub
+  skip: SinonStub
+  sort: SinonStub
+  toArray: SinonStub
+}
+
+function mackMockCursor(): IMockCursor {
   const cursor: any = {}
   cursor.count = stub().resolves()
   cursor.filter = stub().returns(cursor)
@@ -47,7 +54,7 @@ function makeCursorStub(): Record<string, SinonStub> {
   return cursor
 }
 
-function makeCollectionStub(cursor: any): Record<string, SinonStub> {
+function makeMockCollection(cursor: any): IMockCollection {
   return {
     count: stub().resolves(),
     createIndex: stub().resolves(),
@@ -55,7 +62,7 @@ function makeCollectionStub(cursor: any): Record<string, SinonStub> {
     deleteOne: stub().resolves(),
     drop: stub().resolves(),
     dropIndex: stub().resolves(),
-    find: stub().resolves(cursor),
+    find: stub().returns(cursor),
     findOne: stub().resolves(),
     insertMany: stub().resolves(),
     insertOne: stub().resolves(),
@@ -64,7 +71,7 @@ function makeCollectionStub(cursor: any): Record<string, SinonStub> {
   }
 }
 
-function makeMockServiceStub(asyncMethods?: string[], methods?: string[]): any {
+function makeMockService(asyncMethods?: string[], methods?: string[]): any {
   const service: any = {
     beforeInit: stub().resolves(),
     destroy: stub().resolves(),
@@ -80,15 +87,15 @@ function makeMockServiceStub(asyncMethods?: string[], methods?: string[]): any {
   return service
 }
 
-function makeMockServiceStubs(collection: any): IMockServices {
+function makeMockServices(collection: any): IMockServices {
   const services: IMockServices = {
-    auth: makeMockServiceStub(['find', 'findOne', 'update', 'login', 'signup']),
-    cache: makeMockServiceStub(['get', 'set', 'flush']),
-    db: makeMockServiceStub(['drop']),
-    email: makeMockServiceStub(['send']),
-    slack: makeMockServiceStub(['post']),
-    stats: makeMockServiceStub(['store']),
-    token: makeMockServiceStub(undefined, ['require'])
+    auth: makeMockService(['find', 'findOne', 'update', 'login', 'signup']),
+    cache: makeMockService(['get', 'set', 'flush']),
+    db: makeMockService(['drop']),
+    email: makeMockService(['send']),
+    slack: makeMockService(['post']),
+    stats: makeMockService(['store']),
+    token: makeMockService(undefined, ['require'])
   }
   services.db.collection = stub().returns(collection)
   return services
@@ -102,6 +109,6 @@ export function resetMockServices() {
   each(mockCursor, method => method.resetHistory())
 }
 
-export const mockCursor = makeCursorStub()
-export const mockCollection = makeCollectionStub(mockCursor)
-export const mockServices = makeMockServiceStubs(mockCollection)
+export const mockCursor: IMockCursor = mackMockCursor()
+export const mockCollection: IMockCollection = makeMockCollection(mockCursor)
+export const mockServices: IMockServices = makeMockServices(mockCollection)

@@ -4,7 +4,7 @@ import { stub } from 'sinon'
 import { StatsService } from '../'
 import { mockCollection, mockServices, resetMockServices } from './util'
 
-describe.only('stats', () => {
+describe('stats', () => {
   let stats: StatsService
 
   beforeEach(async () => {

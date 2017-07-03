@@ -1,6 +1,7 @@
 import { clone } from '@-)/utils'
 import { Url } from 'url'
-import { ICacheClient } from './cache-client'
+
+import { ICacheClient } from './cache-interface'
 
 export class CacheClientMem implements ICacheClient {
   private store: Record<string, any>

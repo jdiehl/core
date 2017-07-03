@@ -1,9 +1,10 @@
 import * as Koa from 'koa'
 import * as url from 'url'
+
 import { CoreService, ICoreContext } from '../../core-interface'
-import { ICacheClient } from './cache-client'
 import { CacheClientMem } from './cache-client-mem'
 import { CacheClientRedis } from './cache-client-redis'
+import { ICacheClient } from './cache-interface'
 
 export class CacheService extends CoreService {
   private client: ICacheClient

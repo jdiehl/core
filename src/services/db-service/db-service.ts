@@ -1,7 +1,8 @@
 import * as url from 'url'
+
 import { CoreService } from '../../core-interface'
-import { IDbClient, IDbCollection } from './db-client'
 import { DbClientMongodb } from './db-client-mongodb'
+import { IDbClient, IDbCollection } from './db-interface'
 
 export class DbService extends CoreService {
   private client: IDbClient

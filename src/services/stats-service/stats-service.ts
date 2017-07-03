@@ -1,21 +1,14 @@
 import { extend } from '@-)/utils'
 import * as Koa from 'koa'
-import { CoreService, ICoreContext } from '../../core-interface'
-import { IDbCollection } from '../db-service/db-client'
 
-export interface IStats {
-  method: string
-  path: string
-  userId?: string
-  params: Record<string, string>
-  body: any
-  header?: Record<string, string>
-}
+import { CoreService, ICoreContext } from '../../core-interface'
+import { IDbCollection } from '../db-service/db-interface'
+import { IStats } from './stats-interface'
 
 export class StatsService extends CoreService {
   stats: IDbCollection
 
-  async store(context: ICoreContext): Promise<void> {
+  async store(context: ICoreContext, date: Date, time: number): Promise<void> {
     if (!this.config.stats) throw new Error('Missing stats configuration')
 
     // extract values
@@ -26,7 +19,7 @@ export class StatsService extends CoreService {
     if (body && body.password) body = extend(body, { password: '######' })
 
     // create stats doc
-    const doc: IStats = { method, path, params, body }
+    const doc: Partial<IStats> = { date, time, method, path, params, body }
 
     // add user id
     if (user) doc.userId = user._id.toString()
@@ -52,8 +45,10 @@ export class StatsService extends CoreService {
 
   install(server: Koa): void {
     server.use(async (context: ICoreContext, next: () => void) => {
+      const start = new Date()
       await next()
-      await this.store(context)
+      const time = new Date().getTime() - start.getTime()
+      await this.store(context, start, time)
     })
   }
 

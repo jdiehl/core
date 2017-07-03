@@ -2,32 +2,22 @@ import * as Koa from 'koa'
 import * as Router from 'koa-router'
 import { Collection, ObjectID } from 'mongodb'
 import { crypto } from 'mz'
+
 import { CoreService, ICoreContext } from '../../core-interface'
-import { IDbCollection } from '../db-service/db-client'
+import { IDbCollection } from '../db-service/db-interface'
+import { IUser, IUserInternal } from './auth-interface'
 import { makeRouter } from './auth-router'
-
-export interface IAuthUser<Profile> {
-  _id: ObjectID
-  email: string
-  role: string
-  profile?: Profile
-}
-
-interface IAuthUserInternal<Profile> extends IAuthUser<Profile> {
-  hash: string
-  salt: string
-}
 
 export class AuthService<Profile = {}> extends CoreService {
 
-  private collection: IDbCollection<IAuthUserInternal<Profile>>
+  private collection: IDbCollection<IUserInternal<Profile>>
 
-  async find(): Promise<Array<IAuthUser<Profile>>> {
+  async find(): Promise<Array<IUser<Profile>>> {
     const users = await this.collection.find().toArray()
     return this.sanitize(users)
   }
 
-  async findOne(id: string | ObjectID): Promise<IAuthUser<Profile>> {
+  async findOne(id: string | ObjectID): Promise<IUser<Profile>> {
     if (typeof id === 'string') id = new ObjectID(id)
     const user = await this.collection.findOne(id)
     return this.sanitizeOne(user)
@@ -38,14 +28,14 @@ export class AuthService<Profile = {}> extends CoreService {
     await this.collection.updateOne({ _id: id }, { profile })
   }
 
-  async login(email: string, password: string): Promise<IAuthUser<Profile> | void> {
+  async login(email: string, password: string): Promise<IUser<Profile> | void> {
     const user = await this.collection.findOne({ email })
     const hash = await this.makeHash(user.salt, email, password)
     if (hash !== user.hash) return
     return this.sanitizeOne(user)
   }
 
-  async signup(email: string, password: string, role: string, profile?: Profile): Promise<IAuthUser<Profile>> {
+  async signup(email: string, password: string, role: string, profile?: Profile): Promise<IUser<Profile>> {
     const salt = await this.makeSalt()
     const hash = await this.makeHash(salt, email, password)
     const user: any = { email, salt, hash, role, profile }
@@ -81,11 +71,11 @@ export class AuthService<Profile = {}> extends CoreService {
     return buf.toString(encoding || 'base64')
   }
 
-  private sanitize(users: Array<IAuthUserInternal<Profile>>): Array<IAuthUser<Profile>> {
+  private sanitize(users: Array<IUserInternal<Profile>>): Array<IUser<Profile>> {
     return users.map(user => this.sanitizeOne(user))
   }
 
-  private sanitizeOne(user: IAuthUserInternal<Profile>): IAuthUser<Profile> {
+  private sanitizeOne(user: IUserInternal<Profile>): IUser<Profile> {
     return {
       _id: user._id,
       email: user.email,

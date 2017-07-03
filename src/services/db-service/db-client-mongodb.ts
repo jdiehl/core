@@ -1,6 +1,7 @@
 import { Collection, Db, MongoClient } from 'mongodb'
 import { Url } from 'url'
-import { IDbClient, IDbCollection } from './db-client'
+
+import { IDbClient, IDbCollection } from './db-interface'
 
 export class DbClientMongodb implements IDbClient {
   private client: Db

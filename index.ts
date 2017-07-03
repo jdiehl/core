@@ -18,6 +18,10 @@ export {
 } from './src/services'
 
 export {
+  IUser
+} from './src/services/auth-service/auth-interface'
+
+export {
   IDbCollection,
   IDbObjectID,
   IDbDeleteResult,
@@ -26,7 +30,7 @@ export {
   IDbUpdateResult,
   IDbIndexOptions,
   IDbUpdateOptions
-} from './src/services/db-service/db-client'
+} from './src/services/db-service/db-interface'
 
 export {
   EmailSendService,

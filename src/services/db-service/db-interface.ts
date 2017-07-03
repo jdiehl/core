@@ -4,6 +4,10 @@ export interface IDbObjectID {
   toString(): string
 }
 
+export interface IDbObject {
+  _id: IDbObjectID
+}
+
 export interface IDbDeleteResult {
     deletedCount?: number
 }

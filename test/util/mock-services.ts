@@ -3,6 +3,36 @@ import { each } from '@-)/utils'
 import { SinonStub, stub } from 'sinon'
 import { CoreService, ICoreServices } from '../../'
 
+export interface IMockServices {
+  auth: {
+    find: SinonStub
+    findOne: SinonStub
+    update: SinonStub
+    login: SinonStub
+    signup: SinonStub
+  }
+  cache: {
+    get: SinonStub
+    set: SinonStub
+    flush: SinonStub
+  }
+  db: {
+    collection: SinonStub
+  }
+  email: {
+    send: SinonStub
+  }
+  slack: {
+    post: SinonStub
+  }
+  stats: {
+    store: SinonStub
+  }
+  token: {
+    require: SinonStub
+  }
+}
+
 function makeCursorStub(): Record<string, SinonStub> {
   const cursor: any = {}
   cursor.count = stub().resolves()
@@ -50,8 +80,8 @@ function makeMockServiceStub(asyncMethods?: string[], methods?: string[]): any {
   return service
 }
 
-function makeMockServiceStubs(collection: any): any {
-  const services = {
+function makeMockServiceStubs(collection: any): IMockServices {
+  const services: IMockServices = {
     auth: makeMockServiceStub(['find', 'findOne', 'update', 'login', 'signup']),
     cache: makeMockServiceStub(['get', 'set', 'flush']),
     db: makeMockServiceStub(['drop']),

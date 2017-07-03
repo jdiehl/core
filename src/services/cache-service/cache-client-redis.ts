@@ -1,7 +1,8 @@
 import { parseJSON, promise } from '@-)/utils'
 import { createClient, RedisClient } from 'redis'
 import { Url } from 'url'
-import { ICacheClient } from './cache-client'
+
+import { ICacheClient } from './cache-interface'
 
 export class CacheClientRedis implements ICacheClient {
   private client: RedisClient

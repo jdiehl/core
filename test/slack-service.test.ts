@@ -30,9 +30,9 @@ describe('slack', () => {
     const text = 'something'
     await slack.post(text, attachments)
     expect(post.callCount).to.equal(1)
-    expect(post.calledWith('https://hooks.slack.com/services/my/key')).to.be.true
+    expect(post.args[0]).to.deep.equal(['https://hooks.slack.com/services/my/key'])
     expect(json.callCount).to.equal(1)
-    expect(json.calledWith({ attachments, text })).to.be.true
+    expect(json.args[0]).to.deep.equal([{ attachments, text }])
   })
 
 })

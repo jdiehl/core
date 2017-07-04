@@ -6,7 +6,7 @@ import { AuthService, IUser } from '../'
 import { IUserInternal } from '../src/services/auth/auth-interface'
 import { mockCollection, mockCursor, mockServices, resetMockServices } from './util'
 
-describe.only('auth', () => {
+describe('auth', () => {
   let auth: AuthService
   let u1: IUserInternal
   let u2: IUserInternal
@@ -52,7 +52,7 @@ describe.only('auth', () => {
     const user = await auth.findOne(id)
     expect(user).to.deep.equal({ _id: 'id1', email: 'u1@b.c', profile: { name: 'Peter' }, role: 'user' })
     expect(mockCollection.findOne.callCount).to.equal(1)
-    expect(mockCollection.findOne.getCall(0).args[0]).to.equal(id)
+    expect(mockCollection.findOne.args[0][0]).to.equal(id)
   })
 
   it('update() should update a user', async () => {
@@ -60,7 +60,7 @@ describe.only('auth', () => {
     const profile = {}
     await auth.update(id, profile)
     expect(mockCollection.updateOne.callCount).to.equal(1)
-    expect(mockCollection.updateOne.getCall(0).args).to.deep.equal([{ _id: id }, { $set: { profile } }])
+    expect(mockCollection.updateOne.args[0]).to.deep.equal([{ _id: id }, { $set: { profile } }])
   })
 
   it('login() should find the requested user', async () => {
@@ -113,7 +113,7 @@ describe.only('auth', () => {
     it('login() should call pbkdf2', async () => {
       await auth.login('u1@b.c', 'password')
       expect(pbkdf2.callCount).to.equal(1)
-      expect(pbkdf2.getCall(0).args).to.deep.equal(['mysecret,password', 'salt1', 1, 512, 'sha512'])
+      expect(pbkdf2.args[0]).to.deep.equal(['mysecret,password', 'salt1', 1, 512, 'sha512'])
     })
 
     it('signup() should call randomBytes', async () => {
@@ -124,7 +124,7 @@ describe.only('auth', () => {
     it('signup() should call pbkdf2', async () => {
       await auth.signup('u1@b.c', 'password', 'user')
       expect(pbkdf2.callCount).to.equal(1)
-      expect(pbkdf2.getCall(0).args).to.deep.equal(['mysecret,password', 'random', 1, 512, 'sha512'])
+      expect(pbkdf2.args[0]).to.deep.equal(['mysecret,password', 'random', 1, 512, 'sha512'])
     })
 
   })

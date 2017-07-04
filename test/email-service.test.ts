@@ -60,14 +60,15 @@ describe('email', () => {
 
     it('should call createTransport', async () => {
       expect(createTransport.callCount).to.equal(1)
-      expect(createTransport.calledWith({ host: 'host', port: 1234, pool: { pool: true } }, { from: 'me' })).to.be.true
+      const options = { host: 'host', port: 1234, pool: { pool: true } }
+      expect(createTransport.args[0]).to.deep.equal([options, { from: 'me' }])
     })
 
     it('send() should call sendMail', async () => {
       const res = await email.send({ to: 'you', subject: 'hello', text: 'world' })
       expect(res).to.equal('ok')
       expect(sendMail.callCount).to.equal(1)
-      expect(sendMail.calledWith({ to: 'you', subject: 'hello', text: 'world' })).to.be.true
+      expect(sendMail.args[0]).to.deep.equal([{ to: 'you', subject: 'hello', text: 'world' }])
     })
 
   })

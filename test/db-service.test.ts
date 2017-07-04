@@ -86,7 +86,7 @@ describe('db-service', () => {
       const mongo = new DbService({ db: 'mongodb://host/db' } as any, [] as any)
       await mongo.beforeInit()
       expect(connect.callCount).to.equal(1)
-      expect(connect.calledWith('mongodb://host/db')).to.be.true
+      expect(connect.args[0]).to.deep.equal(['mongodb://host/db'])
     })
 
     it('collection() should fetch a collection from the database server', async () => {
@@ -95,7 +95,7 @@ describe('db-service', () => {
       const res = await mongo.collection('something')
       expect(res).to.equal('ok')
       expect(collection.callCount).to.equal(1)
-      expect(collection.calledWith('something')).to.be.true
+      expect(collection.args[0]).to.deep.equal(['something'])
     })
 
   })

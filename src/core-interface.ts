@@ -54,6 +54,10 @@ export interface ICoreConfig {
   port: number
   prefix?: string
   tokens?: { [domain: string]: string }
+  router: {
+    prefix?: string
+    requireToken?: string
+  }
   session?: {
     key?: string
     maxAge?: number

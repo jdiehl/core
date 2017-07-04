@@ -49,7 +49,7 @@ export class AuthService<Profile = {}> extends CoreService {
   async init() {
     if (!this.config.auth) return
     this.collection = this.services.db.collection(this.config.auth.collection || 'auth')
-    this.collection.createIndex({ email: 1 }, { unique: true })
+    this.collection.createIndex('email', { unique: true })
   }
 
   install(server: Koa): Router {

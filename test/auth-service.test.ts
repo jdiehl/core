@@ -33,6 +33,11 @@ describe.only('auth', () => {
     await auth.init()
   })
 
+  it('should create a unique index on email', () => {
+    expect(mockCollection.createIndex.callCount).to.equal(1)
+    expect(mockCollection.createIndex.args[0]).to.deep.equal(['email', { unique: true }])
+  })
+
   it('find() should find and sanitize users', async () => {
     const users = await auth.find()
     expect(users).to.deep.equal([
@@ -58,9 +63,29 @@ describe.only('auth', () => {
     expect(mockCollection.updateOne.getCall(0).args).to.deep.equal([{ _id: id }, { $set: { profile } }])
   })
 
-  it('login() should authenticate a user', async () => {
+  it('login() should find the requested user', async () => {
     const res = await auth.login('u1@b.c', 'secret')
+    expect(mockCollection.findOne.callCount).to.equal(1)
+    expect(mockCollection.findOne.args[0]).to.deep.equal([{ email: 'u1@b.c' }])
     expect(res).to.deep.equal({ _id: 'id1', email: 'u1@b.c', profile: { name: 'Peter' }, role: 'user' })
+  })
+
+  it('login() should reject a wrong password', async () => {
+    const res = await auth.login('u1@b.c', 'wrong')
+    expect(res).to.be.undefined
+  })
+
+  it('signup() should create a new user', async () => {
+    const res = await auth.signup('u3@b.c', 'hello', 'user', { name: 'Fred' })
+    expect(res).to.deep.equal({ _id: 'newid', email: 'u3@b.c', profile: { name: 'Fred' }, role: 'user' })
+    expect(mockCollection.insertOne.callCount).to.equal(1)
+    expect(mockCollection.insertOne.args[0]).to.have.length(1)
+    const user = mockCollection.insertOne.args[0][0]
+    expect(user.email).to.equal('u3@b.c')
+    expect(user.role).to.equal('user')
+    expect(user.hash).to.be.a('string')
+    expect(user.salt).to.be.a('string')
+    expect(user.profile).to.deep.equal({ name: 'Fred' })
   })
 
   describe('mock-crypto', () => {

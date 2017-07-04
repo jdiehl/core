@@ -4,7 +4,7 @@ import { Collection, ObjectID } from 'mongodb'
 import { crypto } from 'mz'
 
 import { CoreService, ICoreContext } from '../../core-interface'
-import { IDbCollection } from '../db-service/db-interface'
+import { IDbCollection } from '../db/db-interface'
 import { IUser, IUserInternal } from './auth-interface'
 import { makeRouter } from './auth-router'
 

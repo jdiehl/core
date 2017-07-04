@@ -2,7 +2,7 @@ import { extend } from '@-)/utils'
 import * as Koa from 'koa'
 
 import { CoreService, ICoreContext } from '../../core-interface'
-import { IDbCollection } from '../db-service/db-interface'
+import { IDbCollection } from '../db/db-interface'
 import { IStats } from './stats-interface'
 
 export class StatsService extends CoreService {

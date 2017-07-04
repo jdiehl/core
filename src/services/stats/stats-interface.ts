@@ -1,4 +1,4 @@
-import { IDbObject } from '../db-service/db-interface'
+import { IDbObject } from '../db/db-interface'
 
 export interface IStats extends IDbObject {
   date: Date

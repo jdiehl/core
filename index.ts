@@ -19,7 +19,7 @@ export {
 
 export {
   IUser
-} from './src/services/auth-service/auth-interface'
+} from './src/services/auth/auth-interface'
 
 export {
   IDbCollection,
@@ -30,11 +30,11 @@ export {
   IDbUpdateResult,
   IDbIndexOptions,
   IDbUpdateOptions
-} from './src/services/db-service/db-interface'
+} from './src/services/db/db-interface'
 
 export {
   EmailSendService,
   IEmailAttachment,
   IEmailSendOptions,
   IEmailSendResult
-} from './src/services/email-service/email-service'
+} from './src/services/email/email-interface'

@@ -4,8 +4,8 @@ import * as Koa from 'koa'
 import * as Router from 'koa-router'
 import { ConnectionOptions } from 'tls'
 
-import { IAuthUser } from './services/auth-service/auth-service'
-import { EmailSendService } from './services/email-service/email-service'
+import { IUser } from './services/auth/auth-interface'
+import { EmailSendService } from './services/email/email-interface'
 
 import {
   AuthService,
@@ -66,7 +66,7 @@ export interface ICoreConfig {
 }
 
 export interface ICoreContext extends Koa.Context {
-  user: IAuthUser<any>
+  user: IUser<any>
 }
 
 export interface ICoreServices {

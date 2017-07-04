@@ -3,14 +3,19 @@ import { crypto } from 'mz'
 import { stub } from 'sinon'
 
 import { AuthService, IUser } from '../'
+import { IUserInternal } from '../src/services/auth/auth-interface'
 import { mockCollection, mockCursor, mockServices, resetMockServices } from './util'
 
 describe.only('auth', () => {
   let auth: AuthService
-  const u1 = { _id: 'id1', email: 'u1@b.c', hash: 'hash1', profile: { name: 'Peter' }, salt: 'salt1', role: 'user' }
-  const u2 = { _id: 'id2', email: 'u2@b.c', hash: 'hash2', profile: { name: 'Susan' }, salt: 'salt2', role: 'admin' }
+  let u1: IUserInternal
+  let u2: IUserInternal
 
-  before(() => {
+  before(async () => {
+    const hashBuffer = await crypto.pbkdf2('mysecret,secret', 'salt1', 1, 512, 'sha512')
+    const hash = hashBuffer.toString('base64')
+    u1 = { _id: 'id1', email: 'u1@b.c', hash, profile: { name: 'Peter' }, salt: 'salt1', role: 'user' }
+    u2 = { _id: 'id2', email: 'u2@b.c', hash: 'hash2', profile: { name: 'Susan' }, salt: 'salt2', role: 'admin' }
     mockCursor.toArray.resolves([u1, u2])
     mockCollection.findOne.resolves(u1)
     mockCollection.insertOne.resolves({ insertedId: 'newid' })
@@ -24,7 +29,7 @@ describe.only('auth', () => {
 
   beforeEach(async () => {
     resetMockServices()
-    auth = new AuthService({ auth: { secret: 'mysecret', prefix: '/auth' } } as any, mockServices as any)
+    auth = new AuthService({ auth: { secret: 'mysecret', prefix: '/auth', iterations: 1 } } as any, mockServices as any)
     await auth.init()
   })
 
@@ -53,6 +58,11 @@ describe.only('auth', () => {
     expect(mockCollection.updateOne.getCall(0).args).to.deep.equal([{ _id: id }, { $set: { profile } }])
   })
 
+  it('login() should authenticate a user', async () => {
+    const res = await auth.login('u1@b.c', 'secret')
+    expect(res).to.deep.equal({ _id: 'id1', email: 'u1@b.c', profile: { name: 'Peter' }, role: 'user' })
+  })
+
   describe('mock-crypto', () => {
     const cryptoPbkdf2 = crypto.pbkdf2
     const cryptoRandomBytes = crypto.randomBytes
@@ -78,7 +88,7 @@ describe.only('auth', () => {
     it('login() should call pbkdf2', async () => {
       await auth.login('u1@b.c', 'password')
       expect(pbkdf2.callCount).to.equal(1)
-      expect(pbkdf2.getCall(0).args).to.deep.equal(['mysecret,password', 'salt1', 10000, 512, 'sha512'])
+      expect(pbkdf2.getCall(0).args).to.deep.equal(['mysecret,password', 'salt1', 1, 512, 'sha512'])
     })
 
     it('signup() should call randomBytes', async () => {
@@ -89,7 +99,7 @@ describe.only('auth', () => {
     it('signup() should call pbkdf2', async () => {
       await auth.signup('u1@b.c', 'password', 'user')
       expect(pbkdf2.callCount).to.equal(1)
-      expect(pbkdf2.getCall(0).args).to.deep.equal(['mysecret,password', 'random', 10000, 512, 'sha512'])
+      expect(pbkdf2.getCall(0).args).to.deep.equal(['mysecret,password', 'random', 1, 512, 'sha512'])
     })
 
   })

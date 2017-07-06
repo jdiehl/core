@@ -84,9 +84,10 @@ export interface ICoreServices {
 }
 
 export class CoreService<C extends ICoreConfig = ICoreConfig, S extends ICoreServices = ICoreServices> {
-  constructor(protected config: C, protected services: S) {}
-  async beforeInit() {}
-  async init() {}
-  install(server: Koa): Router | void {}
-  async destroy() {}
+  router?: Router
+  constructor(public config: C, public services: S) {}
+  async beforeInit(): Promise<void> {}
+  async init(): Promise<void> {}
+  install(server: Koa): void {}
+  async destroy(): Promise<void> {}
 }

@@ -70,10 +70,9 @@ export abstract class CoreApp<C extends ICoreConfig, S extends ICoreServices> {
 
     // install
     const router = new Router({ prefix: this.config.prefix })
-    await eachAsync<CoreService>(this.services, service => {
-      const modRouter = service.install(this.server)
-      if (!modRouter) return
-      router.use(modRouter.routes(), modRouter.allowedMethods())
+    each<CoreService>(this.services, service => {
+      if (service.install) service.install(this.server)
+      if (service.router) router.use(service.router.routes(), service.router.allowedMethods())
     })
     this.server.use(router.routes())
     this.server.use(router.allowedMethods())

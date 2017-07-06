@@ -12,6 +12,7 @@ export {
   CacheService,
   DbService,
   EmailService,
+  RouterService,
   SlackService,
   StatsService,
   TokenService
@@ -38,3 +39,15 @@ export {
   IEmailSendOptions,
   IEmailSendResult
 } from './src/services/email/email-interface'
+
+export {
+  IRouterOptions
+} from './src/services/router/router-interface'
+
+export {
+  Delete,
+  Get,
+  Post,
+  Put,
+  Router
+} from './src/services/router/router-decorators'

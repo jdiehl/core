@@ -15,6 +15,7 @@ export {
   RouterService,
   SlackService,
   StatsService,
+  TemplateService,
   TokenService
 } from './src/services'
 

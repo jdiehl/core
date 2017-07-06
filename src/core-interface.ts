@@ -14,6 +14,7 @@ import {
   EmailService,
   SlackService,
   StatsService,
+  TemplateService,
   TokenService
 } from './services'
 
@@ -80,6 +81,7 @@ export interface ICoreServices {
   email: EmailService
   slack: SlackService
   stats: StatsService
+  template: TemplateService
   token: TokenService
 }
 

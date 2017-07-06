@@ -9,7 +9,7 @@ import { stub } from 'sinon'
 import { CoreService, Delete, Get, Post, Put, Router, RouterService } from '../'
 import { mockServices, resetMockServices } from './util'
 
-describe.only('router', () => {
+describe('router', () => {
   let service: CoreService
   let server: Koa
   let instance: Server

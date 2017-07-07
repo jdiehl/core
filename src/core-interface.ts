@@ -67,6 +67,9 @@ export interface ICoreConfig {
   stats?: {
     collection: string
     includeHeader?: string[]
+  },
+  template?: {
+    templates?: Record<string, string>
   }
 }
 

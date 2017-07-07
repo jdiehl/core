@@ -1,0 +1,6 @@
+Hello {{person.first}} {{person.last}}
+Don't forget:
+{{#items}}
+* {{.}}
+{{/items}}
+{{>partial}}

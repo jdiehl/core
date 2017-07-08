@@ -11,9 +11,9 @@ describe('core-model', () => {
   const afterUpdate = stub()
   const afterDelete = stub()
   const beforeFindOne = stub()
-  const beforeFind = stub()
-  const beforeInsert = stub()
-  const beforeUpdate = stub()
+  const beforeFind = stub().returnsArg(0)
+  const beforeInsert = stub().returnsArg(0)
+  const beforeUpdate = stub().returnsArg(1)
   const beforeDelete = stub()
   const transform = stub().returnsArg(0)
   let model: CoreModel

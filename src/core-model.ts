@@ -10,23 +10,11 @@ export interface ICoreModelFindOptions {
   project?: object
 }
 
-export abstract class CoreModel<T extends IDbObject = any> extends CoreService {
-  abstract collectionName: string
+export abstract class CoreModel<Int extends IDbObject = any, Ext extends IDbObject = Int> extends CoreService {
+  protected abstract collectionName: string
   protected collection: IDbCollection
 
-  async afterFindOne?(object: T): Promise<T>
-  async afterFind?(objects: T[], query?: object, options?: ICoreModelFindOptions): Promise<T[]>
-  async afterInsert?(object: T): Promise<T>
-  async afterUpdate?(id: string, values: Partial<T>): Promise<void>
-  async afterDelete?(id: string): Promise<void>
-  async beforeFindOne?(id: string): Promise<void>
-  async beforeFind?(query?: object, options?: ICoreModelFindOptions): Promise<void>
-  async beforeInsert?(values: Partial<T>): Promise<void>
-  async beforeUpdate?(id: string, values: Partial<T>): Promise<void>
-  async beforeDelete?(id: string): Promise<void>
-  async transform?(object: T): Promise<T>
-
-  async findOne(id: string): Promise<T> {
+  async findOne(id: string): Promise<Ext> {
     if (this.beforeFindOne) await this.beforeFindOne(id)
     const objectID = this.services.db.objectID(id)
     let object = await this.collection.findOne({ _id: objectID })
@@ -35,8 +23,8 @@ export abstract class CoreModel<T extends IDbObject = any> extends CoreService {
     return object
   }
 
-  async find(query?: object, options?: ICoreModelFindOptions): Promise<T[]> {
-    if (this.beforeFind) await this.beforeFind(query, options)
+  async find(query?: object, options?: ICoreModelFindOptions): Promise<Ext[]> {
+    if (this.beforeFind) query = await this.beforeFind(query, options)
     const cursor = this.collection.find(query)
     if (options) {
       if (options.sort) cursor.sort(options.sort)
@@ -50,19 +38,19 @@ export abstract class CoreModel<T extends IDbObject = any> extends CoreService {
     return objects
   }
 
-  async insert(values: Partial<T>): Promise<T> {
-    if (this.beforeInsert) await this.beforeInsert(values)
+  async insert(values: Partial<Ext>): Promise<Ext> {
+    if (this.beforeInsert) values = await this.beforeInsert(values)
     const res = await this.collection.insertOne(values)
     if (res.insertedCount !== 1) throw new Error('Could not insert object')
-    let object = clone(values) as T
+    let object = clone(values) as any
     object._id = res.insertedId
     if (this.afterInsert) object = await this.afterInsert(object)
     if (this.transform) object = await this.transform(object)
     return object
   }
 
-  async update(id: string, values: Partial<T>): Promise<void> {
-    if (this.beforeUpdate) await this.beforeUpdate(id, values)
+  async update(id: string, values: Partial<Ext>): Promise<void> {
+    if (this.beforeUpdate) values = await this.beforeUpdate(id, values)
     const objectID = this.services.db.objectID(id)
     const res = await this.collection.updateOne({ _id: objectID }, { $set: values })
     if (res.modifiedCount !== 1) throw new Error('Could not update object')
@@ -80,7 +68,21 @@ export abstract class CoreModel<T extends IDbObject = any> extends CoreService {
   // CoreService
 
   async init() {
-    this.collection = this.services.db.collection<T>(this.collectionName)
+    this.collection = this.services.db.collection<Int>(this.collectionName)
   }
+
+  // Hooks
+
+  protected async afterFindOne?(object: Int): Promise<Int>
+  protected async afterFind?(objects: Int[], query?: object, options?: ICoreModelFindOptions): Promise<Int[]>
+  protected async afterInsert?(object: Int): Promise<Int>
+  protected async afterUpdate?(id: string, values: Partial<Ext>): Promise<void>
+  protected async afterDelete?(id: string): Promise<void>
+  protected async beforeFindOne?(id: string): Promise<void>
+  protected async beforeFind?(query?: object, options?: ICoreModelFindOptions): Promise<object>
+  protected async beforeInsert?(values: Partial<Ext>): Promise<Partial<Ext>>
+  protected async beforeUpdate?(id: string, values: Partial<Ext>): Promise<Partial<Ext>>
+  protected async beforeDelete?(id: string): Promise<void>
+  protected async transform?(object: Int): Promise<Ext>
 
 }

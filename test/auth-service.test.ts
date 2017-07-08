@@ -14,26 +14,30 @@ describe('auth', () => {
   before(async () => {
     const hashBuffer = await crypto.pbkdf2('mysecret,secret', 'salt1', 1, 512, 'sha512')
     const hash = hashBuffer.toString('base64')
-    u1 = { _id: 'id1', email: 'u1@b.c', hash, profile: { name: 'Peter' }, salt: 'salt1', role: 'user' }
-    u2 = { _id: 'id2', email: 'u2@b.c', hash: 'hash2', profile: { name: 'Susan' }, salt: 'salt2', role: 'admin' }
+    u1 = { _id: 'id1', email: 'u1@b.c', hash, profile: { name: 'Peter' }, role: 'user', salt: 'salt1', verified: true }
+    u2 = { _id: 'id2', email: 'u2@b.c', hash: 'hash2', profile: { name: 'Susan' }, role: 'admin', salt: 'salt2',
+      verified: true }
     mockCursor.toArray.resolves([u1, u2])
     mockCollection.findOne.resolves(u1)
+    mockServices.token.use.resolves({ type: 'signup', user: 'id3' })
   })
 
   after(() => {
     mockCursor.toArray.resolves([{ _id: 'id1' }, { _id: 'id2' }])
     mockCollection.findOne.resolves({ _id: 'id1' })
+    mockServices.token.use.resolves()
   })
 
   beforeEach(async () => {
     resetMockServices()
-    auth = new AuthService({ auth: { secret: 'mysecret', prefix: '/auth', iterations: 1 } } as any, mockServices as any)
+    const config = { auth: { secret: 'mysecret', prefix: '/auth', iterations: 1, verifyEmail: true } }
+    auth = new AuthService(config as any, mockServices as any)
     await auth.init()
   })
 
   it('should create a unique index on email', () => {
     expect(mockCollection.createIndex.callCount).to.equal(1)
-    expect(mockCollection.createIndex.args[0]).to.deep.equal(['email', { unique: true }])
+    expect(mockCollection.createIndex.args[0]).to.deep.equal([['email', 'verified'], { unique: true }])
   })
 
   it('find() should find and sanitize users', async () => {
@@ -63,12 +67,18 @@ describe('auth', () => {
   it('login() should find the requested user', async () => {
     const res = await auth.login('u1@b.c', 'secret')
     expect(mockCollection.findOne.callCount).to.equal(1)
-    expect(mockCollection.findOne.args[0]).to.deep.equal([{ email: 'u1@b.c' }])
+    expect(mockCollection.findOne.args[0]).to.deep.equal([{ email: 'u1@b.c', verified: true }])
     expect(res).to.deep.equal({ _id: 'id1', email: 'u1@b.c', profile: { name: 'Peter' }, role: 'user' })
   })
 
   it('login() should reject a wrong password', async () => {
     await expectRejection(() => auth.login('u1@b.c', 'wrong'), 'Invalid Login')
+  })
+
+  it('login() should reject an unverified user', async () => {
+    mockCollection.findOne.resolves()
+    await expectRejection(() => auth.login('u3@b.c', 'secret'), 'Invalid Login')
+    mockCollection.findOne.resolves(u1)
   })
 
   it('insert() should create a new user', async () => {
@@ -80,8 +90,29 @@ describe('auth', () => {
     expect(user.email).to.equal('u3@b.c')
     expect(user.role).to.equal('user')
     expect(user.hash).to.be.a('string')
+    expect(user.hash).to.have.length(684)
     expect(user.salt).to.be.a('string')
+    expect(user.hash).to.have.length(684)
     expect(user.profile).to.deep.equal({ name: 'Fred' })
+    expect(user.verified).to.be.undefined
+  })
+
+  it('insert() should send a signup email with verification token', async () => {
+    await auth.insert({ email: 'u3@b.c', password: 'hello', role: 'user' })
+    expect(mockServices.email.sendTemplate.callCount).to.equal(1)
+    expect(mockServices.email.sendTemplate.args[0]).to.deep.equal([
+      'signup',
+      { user: { _id: 'id1', email: 'u3@b.c', role: 'user' }, token: 'token-ok' },
+      { subject: 'Please confirm your email address', to: 'u3@b.c' }
+    ])
+  })
+
+  it('verify() should verify a user', async () => {
+    await auth.verify('key')
+    expect(mockServices.token.use.callCount).to.equal(1)
+    expect(mockServices.token.use.args[0]).to.deep.equal(['key'])
+    expect(mockCollection.updateOne.callCount).to.equal(1)
+    expect(mockCollection.updateOne.args[0]).to.deep.equal([{ _id: 'id3' }, { $set: { verified: true } }])
   })
 
   describe('mock-crypto', () => {

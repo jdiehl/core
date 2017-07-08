@@ -9,6 +9,7 @@ export interface IUser<Profile = any> extends IDbObject {
 export interface IUserInternal<Profile = any> extends IUser<Profile> {
   hash: string
   salt: string
+  verified?: boolean
 }
 
 export interface IAuthToken {

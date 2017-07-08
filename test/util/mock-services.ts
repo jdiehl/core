@@ -7,10 +7,10 @@ export interface IMockServices {
   auth: { find: SinonStub, findOne: SinonStub, update: SinonStub, login: SinonStub, signup: SinonStub }
   cache: { get: SinonStub, set: SinonStub, flush: SinonStub }
   db: { collection: SinonStub, objectID: SinonStub }
-  email: { send: SinonStub }
+  email: { send: SinonStub, sendTemplate: SinonStub }
   slack: { post: SinonStub }
   stats: { store: SinonStub }
-  token: { require: SinonStub }
+  token: { require: SinonStub, create: SinonStub, use: SinonStub }
 }
 
 export interface IMockCollection {
@@ -91,14 +91,15 @@ function makeMockServices(collection: any): IMockServices {
   const services: IMockServices = {
     auth: makeMockService(['find', 'findOne', 'update', 'login', 'signup']),
     cache: makeMockService(['get', 'set', 'flush']),
-    db: makeMockService(['drop']),
+    db: makeMockService(['drop'], ['collection', 'objectID']),
     email: makeMockService(['send', 'sendTemplate']),
     slack: makeMockService(['post']),
     stats: makeMockService(['store']),
     token: makeMockService(undefined, ['create', 'use', 'require'])
   }
-  services.db.objectID = stub().returnsArg(0)
-  services.db.collection = stub().returns(collection)
+  services.db.collection.returns(collection)
+  services.db.objectID.returnsArg(0)
+  services.token.create.resolves('token-ok')
   return services
 }
 

@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import { stub } from 'sinon'
 
 import { StatsService } from '../'
-import { mockCollection, mockServices, resetMockServices } from './util'
+import { expectRejection, mockCollection, mockServices, resetMockServices } from './util'
 
 describe('stats', () => {
   let stats: StatsService
@@ -45,9 +45,7 @@ describe('stats', () => {
     const store = stub().resolves()
     stats.store = store
     stats.install({ use } as any)
-    try {
-      await middleware({}, async () => { throw new Error() })
-    } catch (err) {}
+    await expectRejection(() => middleware({}, async () => { throw new Error() }))
     expect(store.callCount).to.equal(0)
   })
 

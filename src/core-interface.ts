@@ -26,6 +26,7 @@ export interface ICoreConfig {
     saltlen?: number
     secret: string
     prefix: string
+    verifyEmail: boolean
   }
   cache?: string
   db?: string

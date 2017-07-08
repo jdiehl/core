@@ -7,7 +7,8 @@ export class AuthService<Profile = {}> extends CoreModel<IUserInternal<Profile>,
   protected collectionName: string
 
   async login(email: string, password: string): Promise<IUser<Profile> | void> {
-    const user = await this.collection.findOne({ email })
+    const user = await this.collection.findOne({ email, verified: true })
+    if (!user) throw new Error('Invalid Login')
     const hash = await this.makeHash(user.salt, this.config.auth!.secret, password)
     if (hash !== user.hash) throw new Error('Invalid Login')
     return this.transform(user)
@@ -16,6 +17,9 @@ export class AuthService<Profile = {}> extends CoreModel<IUserInternal<Profile>,
   async verify(token: string): Promise<void> {
     const info = await this.services.token.use<IAuthToken>(token)
     if (!info || info.type !== 'signup') throw new Error('Invalid token')
+    const userId = this.services.db.objectID(info.user)
+    const res = await this.collection.updateOne({ _id: userId }, { $set: { verified: true } })
+    if (res.modifiedCount !== 1) throw new Error('Could not verify user')
   }
 
   // CoreService
@@ -24,7 +28,7 @@ export class AuthService<Profile = {}> extends CoreModel<IUserInternal<Profile>,
     if (!this.config.auth) return
     this.collectionName = this.config.auth.collection || 'auth'
     await super.init()
-    this.collection.createIndex('email', { unique: true })
+    this.collection.createIndex(['email', 'verified'], { unique: true })
   }
 
   // CoreModel
@@ -37,20 +41,27 @@ export class AuthService<Profile = {}> extends CoreModel<IUserInternal<Profile>,
     const { password, email, role, profile } = obj
     const salt = await this.makeSalt()
     const hash = await this.makeHash(salt, this.config.auth!.secret, password)
-    return { email, salt, hash, role, profile }
-  }
-
-  protected async afterInsert(user: IUserInternal<Profile>): Promise<IUserInternal<Profile>> {
-    const reference: IAuthToken = { type: 'signup', user: user._id.toString() }
-    const token = await this.services.token.create(reference, { useCount: 1, validFor: '1d' })
-    const subject = 'Please verify your email address'
-    this.services.email.sendTemplate('signup', { user, token }, { subject, to: user.email })
+    const user: any = { email, salt, hash, role }
+    if (profile) user.profile = profile
+    if (!this.config.auth!.verifyEmail) user.verified = true
     return user
   }
 
-  protected async transform(user: IUserInternal<Profile>): Promise<IUser<Profile>> {
-    const { _id, email, profile, role } = user
-    return { _id, email, profile, role }
+  protected async afterInsert(userInternal: IUserInternal<Profile>): Promise<IUserInternal<Profile>> {
+    if (!this.config.auth!.verifyEmail) return userInternal
+    const reference: IAuthToken = { type: 'signup', user: userInternal._id.toString() }
+    const token = await this.services.token.create(reference, { useCount: 1, validFor: '1d' })
+    const subject = 'Please confirm your email address'
+    const user = await this.transform(userInternal)
+    this.services.email.sendTemplate('signup', { user, token }, { subject, to: userInternal.email })
+    return userInternal
+  }
+
+  protected async transform(userInternal: IUserInternal<Profile>): Promise<IUser<Profile>> {
+    const { _id, email, profile, role } = userInternal
+    const user: IUser = { _id, email, role }
+    if (profile) user.profile = profile
+    return user
   }
 
   // private

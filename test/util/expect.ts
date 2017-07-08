@@ -8,7 +8,7 @@ export async function expectRejection(code: () => Promise<any>, expectedMessage?
     error = err
   }
   if (error === undefined) {
-    expect.fail(message)
+    expect.fail(undefined, undefined, message || 'Promise was not rejected')
   } else if (expectedMessage) {
     expect(error.message).to.equal(expectedMessage, message)
   }

@@ -38,7 +38,7 @@ export abstract class CoreModel<Int extends IDbObject = any, Ext extends IDbObje
     return objects
   }
 
-  async insert(values: Partial<Ext>): Promise<Ext> {
+  async insert(values: object): Promise<Ext> {
     if (this.beforeInsert) values = await this.beforeInsert(values)
     const res = await this.collection.insertOne(values)
     if (res.insertedCount !== 1) throw new Error('Could not insert object')
@@ -49,7 +49,7 @@ export abstract class CoreModel<Int extends IDbObject = any, Ext extends IDbObje
     return object
   }
 
-  async update(id: string, values: Partial<Ext>): Promise<void> {
+  async update(id: string, values: object): Promise<void> {
     if (this.beforeUpdate) values = await this.beforeUpdate(id, values)
     const objectID = this.services.db.objectID(id)
     const res = await this.collection.updateOne({ _id: objectID }, { $set: values })
@@ -76,12 +76,12 @@ export abstract class CoreModel<Int extends IDbObject = any, Ext extends IDbObje
   protected async afterFindOne?(object: Int): Promise<Int>
   protected async afterFind?(objects: Int[], query?: object, options?: ICoreModelFindOptions): Promise<Int[]>
   protected async afterInsert?(object: Int): Promise<Int>
-  protected async afterUpdate?(id: string, values: Partial<Ext>): Promise<void>
+  protected async afterUpdate?(id: string, values: object): Promise<void>
   protected async afterDelete?(id: string): Promise<void>
   protected async beforeFindOne?(id: string): Promise<void>
   protected async beforeFind?(query?: object, options?: ICoreModelFindOptions): Promise<object>
-  protected async beforeInsert?(values: Partial<Ext>): Promise<Partial<Ext>>
-  protected async beforeUpdate?(id: string, values: Partial<Ext>): Promise<Partial<Ext>>
+  protected async beforeInsert?(values: object): Promise<object>
+  protected async beforeUpdate?(id: string, values: object): Promise<object>
   protected async beforeDelete?(id: string): Promise<void>
   protected async transform?(object: Int): Promise<Ext>
 

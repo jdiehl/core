@@ -46,11 +46,10 @@ describe('auth', () => {
   })
 
   it('findOne() should find and sanitize a user', async () => {
-    const id: any = {}
-    const user = await auth.findOne(id)
+    const user = await auth.findOne('id')
     expect(user).to.deep.equal({ _id: 'id1', email: 'u1@b.c', profile: { name: 'Peter' }, role: 'user' })
     expect(mockCollection.findOne.callCount).to.equal(1)
-    expect(mockCollection.findOne.args[0][0]).to.equal(id)
+    expect(mockCollection.findOne.args[0][0]).to.deep.equal({ _id: 'id' })
   })
 
   it('update() should update a user', async () => {
@@ -69,12 +68,16 @@ describe('auth', () => {
   })
 
   it('login() should reject a wrong password', async () => {
-    const res = await auth.login('u1@b.c', 'wrong')
-    expect(res).to.be.undefined
+    try {
+      await auth.login('u1@b.c', 'wrong')
+      expect(false).to.be.true
+    } catch (err) {
+      expect(err.message).to.equal('Invalid Login')
+    }
   })
 
-  it('signup() should create a new user', async () => {
-    const res = await auth.signup('u3@b.c', 'hello', 'user', { name: 'Fred' })
+  it('insert() should create a new user', async () => {
+    const res = await auth.insert({ email: 'u3@b.c', password: 'hello', role: 'user', profile: { name: 'Fred' } })
     expect(res).to.deep.equal({ _id: 'id1', email: 'u3@b.c', profile: { name: 'Fred' }, role: 'user' })
     expect(mockCollection.insertOne.callCount).to.equal(1)
     expect(mockCollection.insertOne.args[0]).to.have.length(1)
@@ -109,18 +112,20 @@ describe('auth', () => {
     })
 
     it('login() should call pbkdf2', async () => {
-      await auth.login('u1@b.c', 'password')
+      try {
+        await auth.login('u1@b.c', 'password')
+      } catch (err) {}
       expect(pbkdf2.callCount).to.equal(1)
       expect(pbkdf2.args[0]).to.deep.equal(['mysecret,password', 'salt1', 1, 512, 'sha512'])
     })
 
-    it('signup() should call randomBytes', async () => {
-      await auth.signup('u1@b.c', 'password', 'user')
+    it('insert() should call randomBytes', async () => {
+      await auth.insert({ email: 'u1@b.c', password: 'password', role: 'user' })
       expect(randomBytes.callCount).to.equal(1)
     })
 
-    it('signup() should call pbkdf2', async () => {
-      await auth.signup('u1@b.c', 'password', 'user')
+    it('insert() should call pbkdf2', async () => {
+      await auth.insert({ email: 'u1@b.c', password: 'password', role: 'user' })
       expect(pbkdf2.callCount).to.equal(1)
       expect(pbkdf2.args[0]).to.deep.equal(['mysecret,password', 'random', 1, 512, 'sha512'])
     })

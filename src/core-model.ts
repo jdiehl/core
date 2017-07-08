@@ -14,6 +14,11 @@ export abstract class CoreModel<T extends IDbObject = any> extends CoreService {
   abstract collectionName: string
   protected collection: IDbCollection
 
+  async afterFindOne?(object: T): Promise<T>
+  async afterFind?(objects: T[], query?: object, options?: ICoreModelFindOptions): Promise<T[]>
+  async afterInsert?(object: T): Promise<T>
+  async afterUpdate?(id: string, values: Partial<T>): Promise<void>
+  async afterDelete?(id: string): Promise<void>
   async beforeFindOne?(id: string): Promise<void>
   async beforeFind?(query?: object, options?: ICoreModelFindOptions): Promise<void>
   async beforeInsert?(values: Partial<T>): Promise<void>
@@ -25,9 +30,8 @@ export abstract class CoreModel<T extends IDbObject = any> extends CoreService {
     if (this.beforeFindOne) await this.beforeFindOne(id)
     const objectID = this.services.db.objectID(id)
     let object = await this.collection.findOne({ _id: objectID })
-    if (this.transform) {
-      object = await this.transform(object)
-    }
+    if (this.afterFindOne) object = await this.afterFindOne(object)
+    if (this.transform) object = await this.transform(object)
     return object
   }
 
@@ -41,6 +45,7 @@ export abstract class CoreModel<T extends IDbObject = any> extends CoreService {
       if (options.project) cursor.project(options.project)
     }
     let objects = await cursor.toArray()
+    if (this.afterFind) objects = await this.afterFind(objects)
     if (this.transform) objects = await mapAsync(objects, async o => this.transform!(o))
     return objects
   }
@@ -51,6 +56,7 @@ export abstract class CoreModel<T extends IDbObject = any> extends CoreService {
     if (res.insertedCount !== 1) throw new Error('Could not insert object')
     let object = clone(values) as T
     object._id = res.insertedId
+    if (this.afterInsert) object = await this.afterInsert(object)
     if (this.transform) object = await this.transform(object)
     return object
   }
@@ -60,6 +66,7 @@ export abstract class CoreModel<T extends IDbObject = any> extends CoreService {
     const objectID = this.services.db.objectID(id)
     const res = await this.collection.updateOne({ _id: objectID }, { $set: values })
     if (res.modifiedCount !== 1) throw new Error('Could not update object')
+    if (this.afterUpdate) await this.afterUpdate(id, values)
   }
 
   async delete(id: string): Promise<void> {
@@ -67,6 +74,7 @@ export abstract class CoreModel<T extends IDbObject = any> extends CoreService {
     const objectID = this.services.db.objectID(id)
     const res = await this.collection.deleteOne({ _id: objectID })
     if (res.deletedCount !== 1) throw new Error('Could not delete object')
+    if (this.afterDelete) await this.afterDelete(id)
   }
 
   // CoreService

@@ -5,6 +5,11 @@ import { CoreModel } from '../'
 import { mockCollection, mockCursor, mockServices, resetMockServices } from './util'
 
 describe('core-model', () => {
+  const afterFindOne = stub().returnsArg(0)
+  const afterFind = stub().returnsArg(0)
+  const afterInsert = stub().returnsArg(0)
+  const afterUpdate = stub()
+  const afterDelete = stub()
   const beforeFindOne = stub()
   const beforeFind = stub()
   const beforeInsert = stub()
@@ -14,6 +19,11 @@ describe('core-model', () => {
   let model: CoreModel
   class TestModel extends CoreModel {
     collectionName: 'test'
+    async afterFindOne(...args: any[]) { return afterFindOne(...args) }
+    async afterFind(...args: any[]) { return afterFind(...args) }
+    async afterInsert(...args: any[]) { return afterInsert(...args) }
+    async afterUpdate(...args: any[]) { return afterUpdate(...args) }
+    async afterDelete(...args: any[]) { return afterDelete(...args) }
     async beforeFindOne(...args: any[]) { return beforeFindOne(...args) }
     async beforeFind(...args: any[]) { return beforeFind(...args) }
     async beforeInsert(...args: any[]) { return beforeInsert(...args) }
@@ -24,6 +34,11 @@ describe('core-model', () => {
 
   beforeEach(async () => {
     resetMockServices()
+    afterFindOne.resetHistory()
+    afterFind.resetHistory()
+    afterInsert.resetHistory()
+    afterUpdate.resetHistory()
+    afterDelete.resetHistory()
     beforeFindOne.resetHistory()
     beforeFind.resetHistory()
     beforeInsert.resetHistory()
@@ -38,6 +53,12 @@ describe('core-model', () => {
     await model.findOne('id')
     expect(beforeFindOne.callCount).to.equal(1)
     expect(beforeFindOne.args[0]).to.deep.equal(['id'])
+  })
+
+  it('findOne() should call afterFindOne', async () => {
+    await model.findOne('id')
+    expect(afterFindOne.callCount).to.equal(1)
+    expect(afterFindOne.args[0]).to.deep.equal([{ _id: 'id1' }])
   })
 
   it('findOne() should call transform', async () => {
@@ -61,6 +82,12 @@ describe('core-model', () => {
     expect(beforeFind.args[0]).to.have.length(2)
     expect(beforeFind.args[0][0]).to.equal(a)
     expect(beforeFind.args[0][1]).to.equal(b)
+  })
+
+  it('find() should call afterFind', async () => {
+    await model.find()
+    expect(afterFind.callCount).to.equal(1)
+    expect(afterFind.args[0]).to.deep.equal([[{ _id: 'id1' }, { _id: 'id2' }]])
   })
 
   it('find() should call transform', async () => {
@@ -90,10 +117,16 @@ describe('core-model', () => {
     expect(beforeInsert.args[0]).to.deep.equal([{ a: 1 }])
   })
 
+  it('insert() should call afterInsert', async () => {
+    await model.insert({ a: 1 })
+    expect(afterInsert.callCount).to.equal(1)
+    expect(afterInsert.args[0]).to.deep.equal([{ _id: 'id1', a: 1 }])
+  })
+
   it('insert() should call transform', async () => {
     await model.insert({ a: 1 })
     expect(transform.callCount).to.equal(1)
-    expect(transform.args[0]).to.deep.equal([{ a: 1, _id: 'id1' }])
+    expect(transform.args[0]).to.deep.equal([{ _id: 'id1', a: 1 }])
   })
 
   it('insert() should insert a record', async () => {
@@ -109,6 +142,12 @@ describe('core-model', () => {
     expect(beforeUpdate.args[0]).to.deep.equal(['id', { b: 2 }])
   })
 
+  it('update() should call afterUpdate', async () => {
+    await model.update('id', { b: 2 })
+    expect(afterUpdate.callCount).to.equal(1)
+    expect(afterUpdate.args[0]).to.deep.equal(['id', { b: 2 }])
+  })
+
   it('update() should update a record', async () => {
     await model.update('id', { x: 1 })
     expect(mockCollection.updateOne.callCount).to.equal(1)
@@ -119,6 +158,12 @@ describe('core-model', () => {
     await model.delete('id')
     expect(beforeDelete.callCount).to.equal(1)
     expect(beforeDelete.args[0]).to.deep.equal(['id'])
+  })
+
+  it('delete() should call afterDelete', async () => {
+    await model.delete('id')
+    expect(afterDelete.callCount).to.equal(1)
+    expect(afterDelete.args[0]).to.deep.equal(['id'])
   })
 
   it('delete() should delete a record', async () => {

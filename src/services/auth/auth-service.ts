@@ -1,10 +1,6 @@
-import * as Koa from 'koa'
-import * as Router from 'koa-router'
-import { Collection, ObjectID } from 'mongodb'
 import { crypto } from 'mz'
 
 import { CoreModel } from '../../core-model'
-import { IDbCollection } from '../db/db-interface'
 import { IUser, IUserInternal } from './auth-interface'
 
 export class AuthService<Profile = {}> extends CoreModel<IUserInternal<Profile>, IUser<Profile>> {

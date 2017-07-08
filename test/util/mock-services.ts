@@ -92,10 +92,10 @@ function makeMockServices(collection: any): IMockServices {
     auth: makeMockService(['find', 'findOne', 'update', 'login', 'signup']),
     cache: makeMockService(['get', 'set', 'flush']),
     db: makeMockService(['drop']),
-    email: makeMockService(['send']),
+    email: makeMockService(['send', 'sendTemplate']),
     slack: makeMockService(['post']),
     stats: makeMockService(['store']),
-    token: makeMockService(undefined, ['require'])
+    token: makeMockService(undefined, ['create', 'use', 'require'])
   }
   services.db.objectID = stub().returnsArg(0)
   services.db.collection = stub().returns(collection)

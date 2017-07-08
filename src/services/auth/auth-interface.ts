@@ -10,3 +10,8 @@ export interface IUserInternal<Profile = any> extends IUser<Profile> {
   hash: string
   salt: string
 }
+
+export interface IAuthToken {
+  type: 'signup'
+  user: string
+}

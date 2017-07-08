@@ -1,7 +1,7 @@
 import { crypto } from 'mz'
 
 import { CoreModel } from '../../core-model'
-import { IUser, IUserInternal } from './auth-interface'
+import { IAuthToken, IUser, IUserInternal } from './auth-interface'
 
 export class AuthService<Profile = {}> extends CoreModel<IUserInternal<Profile>, IUser<Profile>> {
   protected collectionName: string
@@ -11,6 +11,11 @@ export class AuthService<Profile = {}> extends CoreModel<IUserInternal<Profile>,
     const hash = await this.makeHash(user.salt, this.config.auth!.secret, password)
     if (hash !== user.hash) throw new Error('Invalid Login')
     return this.transform(user)
+  }
+
+  async verify(token: string): Promise<void> {
+    const info = await this.services.token.use<IAuthToken>(token)
+    if (!info || info.type !== 'signup') throw new Error('Invalid token')
   }
 
   // CoreService
@@ -35,13 +40,17 @@ export class AuthService<Profile = {}> extends CoreModel<IUserInternal<Profile>,
     return { email, salt, hash, role, profile }
   }
 
+  protected async afterInsert(user: IUserInternal<Profile>): Promise<IUserInternal<Profile>> {
+    const reference: IAuthToken = { type: 'signup', user: user._id.toString() }
+    const token = await this.services.token.create(reference, { useCount: 1, validFor: '1d' })
+    const subject = 'Please verify your email address'
+    this.services.email.sendTemplate('signup', { user, token }, { subject, to: user.email })
+    return user
+  }
+
   protected async transform(user: IUserInternal<Profile>): Promise<IUser<Profile>> {
-    return {
-      _id: user._id,
-      email: user.email,
-      profile: user.profile,
-      role: user.role
-    }
+    const { _id, email, profile, role } = user
+    return { _id, email, profile, role }
   }
 
   // private

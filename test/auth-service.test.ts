@@ -4,7 +4,7 @@ import { stub } from 'sinon'
 
 import { AuthService, IUser } from '../'
 import { IUserInternal } from '../src/services/auth/auth-interface'
-import { mockCollection, mockCursor, mockServices, resetMockServices } from './util'
+import { expectRejection, mockCollection, mockCursor, mockServices, resetMockServices } from './util'
 
 describe('auth', () => {
   let auth: AuthService
@@ -68,12 +68,7 @@ describe('auth', () => {
   })
 
   it('login() should reject a wrong password', async () => {
-    try {
-      await auth.login('u1@b.c', 'wrong')
-      expect(false).to.be.true
-    } catch (err) {
-      expect(err.message).to.equal('Invalid Login')
-    }
+    await expectRejection(() => auth.login('u1@b.c', 'wrong'), 'Invalid Login')
   })
 
   it('insert() should create a new user', async () => {
@@ -112,9 +107,7 @@ describe('auth', () => {
     })
 
     it('login() should call pbkdf2', async () => {
-      try {
-        await auth.login('u1@b.c', 'password')
-      } catch (err) {}
+      await expectRejection(() => auth.login('u1@b.c', 'password'), 'Invalid Login')
       expect(pbkdf2.callCount).to.equal(1)
       expect(pbkdf2.args[0]).to.deep.equal(['mysecret,password', 'salt1', 1, 512, 'sha512'])
     })

@@ -7,7 +7,7 @@ import { del, get, post, put } from 'request-promise-native'
 import { stub } from 'sinon'
 
 import { CoreService, Delete, Get, Post, Put, Router, RouterService } from '../'
-import { mockServices, resetMockServices } from './util'
+import { expectRejection, mockServices, resetMockServices } from './util'
 
 describe('router', () => {
   let service: CoreService
@@ -57,9 +57,7 @@ describe('router', () => {
   })
 
   it('get() should not call a method', async () => {
-    try {
-      await get(`${host}`)
-    } catch (err) {}
+    await expectRejection(async () => await get(host))
     expect(sGet.callCount).to.equal(0)
     expect(sGetMore.callCount).to.equal(0)
     expect(sPost.callCount).to.equal(0)

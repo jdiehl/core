@@ -11,7 +11,7 @@ export interface IEmailSendOptions {
   from?: string
   to: string | string[],
   subject: string,
-  text: string | Buffer | NodeJS.ReadableStream,
+  text?: string | Buffer | NodeJS.ReadableStream,
   html?: string | Buffer | NodeJS.ReadableStream,
   attachments?: IEmailAttachment[]
 }

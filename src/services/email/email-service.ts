@@ -11,6 +11,11 @@ export class EmailService extends CoreService {
     return res
   }
 
+  async sendTemplate(template: string, vars: Record<string, any>, options: IEmailSendOptions) {
+    options.html = await this.services.template.render(template, vars)
+    return this.send(options)
+  }
+
   // CoreService
 
   async init(): Promise<void> {

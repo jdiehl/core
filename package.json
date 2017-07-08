@@ -32,7 +32,7 @@
     "request-promise-native": "^1.0.4"
   },
   "devDependencies": {
-    "@-)/utils": "^1.0.4",
+    "@-)/utils": "^1.0.5",
     "@types/chai": "^4.0.1",
     "@types/koa": "^2.0.39",
     "@types/koa-bodyparser": "^3.0.23",

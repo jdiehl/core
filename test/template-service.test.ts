@@ -5,7 +5,7 @@ import { stub } from 'sinon'
 import { TemplateService } from '../'
 import { mockServices, resetMockServices } from './util'
 
-describe.only('template', () => {
+describe('template', () => {
   let template: TemplateService
 
   beforeEach(async () => {

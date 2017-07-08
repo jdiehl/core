@@ -1,7 +1,7 @@
-import { Collection, Db, MongoClient } from 'mongodb'
+import { Collection, Db, MongoClient, ObjectID } from 'mongodb'
 import { Url } from 'url'
 
-import { IDbClient, IDbCollection } from './db-interface'
+import { IDbClient, IDbCollection, IDbObjectID } from './db-interface'
 
 export class DbClientMongodb implements IDbClient {
   private client: Db
@@ -21,6 +21,10 @@ export class DbClientMongodb implements IDbClient {
 
   async drop(name: string): Promise<boolean> {
     return this.client.dropCollection(name)
+  }
+
+  objectID(id: string): IDbObjectID {
+    return new ObjectID(id)
   }
 
 }

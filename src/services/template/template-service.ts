@@ -4,7 +4,7 @@ import { parse, render } from 'mustache'
 import { fs } from 'mz'
 import { extname } from 'path'
 
-import { CoreService, ICoreContext } from '../../core-interface'
+import { CoreService } from '../../core-service'
 
 export class TemplateService extends CoreService {
 

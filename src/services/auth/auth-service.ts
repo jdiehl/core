@@ -3,7 +3,7 @@ import * as Router from 'koa-router'
 import { Collection, ObjectID } from 'mongodb'
 import { crypto } from 'mz'
 
-import { CoreService, ICoreContext } from '../../core-interface'
+import { CoreService } from '../../core-service'
 import { IDbCollection } from '../db/db-interface'
 import { IUser, IUserInternal } from './auth-interface'
 import { makeRouter } from './auth-router'

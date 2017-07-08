@@ -1,7 +1,7 @@
 import * as path from 'path'
 import { post } from 'request-promise-native'
 
-import { CoreService } from '../../core-interface'
+import { CoreService } from '../../core-service'
 
 export class SlackService extends CoreService {
 

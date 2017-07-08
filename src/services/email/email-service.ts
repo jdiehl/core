@@ -1,6 +1,6 @@
 import { createTransport, Transporter } from 'nodemailer'
 
-import { CoreService } from '../../core-interface'
+import { CoreService } from '../../core-service'
 import { IEmailSendOptions, IEmailSendResult } from './email-interface'
 
 export class EmailService extends CoreService {

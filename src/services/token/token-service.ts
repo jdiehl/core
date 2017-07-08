@@ -1,5 +1,7 @@
 import { Middleware, Request } from 'koa'
-import { CoreService, ICoreContext } from '../../core-interface'
+
+import { ICoreContext } from '../../core-interface'
+import { CoreService } from '../../core-service'
 
 export class TokenService extends CoreService {
 

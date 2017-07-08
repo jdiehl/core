@@ -1,7 +1,8 @@
 import * as Koa from 'koa'
 import * as url from 'url'
 
-import { CoreService, ICoreContext } from '../../core-interface'
+import { ICoreContext } from '../../core-interface'
+import { CoreService } from '../../core-service'
 import { CacheClientMem } from './cache-client-mem'
 import { CacheClientRedis } from './cache-client-redis'
 import { ICacheClient } from './cache-interface'

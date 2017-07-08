@@ -1,7 +1,8 @@
 import { extend } from '@-)/utils'
 import * as Koa from 'koa'
 
-import { CoreService, ICoreContext } from '../../core-interface'
+import { ICoreContext } from '../../core-interface'
+import { CoreService } from '../../core-service'
 import { IDbCollection } from '../db/db-interface'
 import { IStats } from './stats-interface'
 

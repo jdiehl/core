@@ -1,5 +1,3 @@
-// tslint:disable:no-empty
-// tslint:disable:max-classes-per-file
 import * as Koa from 'koa'
 import * as Router from 'koa-router'
 import { ConnectionOptions } from 'tls'
@@ -86,13 +84,4 @@ export interface ICoreServices {
   stats: StatsService
   template: TemplateService
   token: TokenService
-}
-
-export class CoreService<C extends ICoreConfig = ICoreConfig, S extends ICoreServices = ICoreServices> {
-  router?: Router
-  constructor(public config: C, public services: S) {}
-  async beforeInit(): Promise<void> {}
-  async init(): Promise<void> {}
-  install(server: Koa): void {}
-  async destroy(): Promise<void> {}
 }

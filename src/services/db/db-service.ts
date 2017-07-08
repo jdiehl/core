@@ -1,8 +1,8 @@
 import * as url from 'url'
 
-import { CoreService } from '../../core-interface'
+import { CoreService } from '../../core-service'
 import { DbClientMongodb } from './db-client-mongodb'
-import { IDbClient, IDbCollection } from './db-interface'
+import { IDbClient, IDbCollection, IDbObjectID } from './db-interface'
 
 export class DbService extends CoreService {
   private client: IDbClient
@@ -13,6 +13,10 @@ export class DbService extends CoreService {
 
   async drop(name: string): Promise<boolean> {
     return this.client.drop(name)
+  }
+
+  objectID(id: string): IDbObjectID {
+    return this.client.objectID(id)
   }
 
   // CoreService

@@ -6,7 +6,8 @@ import * as Router from 'koa-router'
 import * as session from 'koa-session'
 
 import { each, eachAsync, extend } from '@-)/utils'
-import { CoreService, ICoreConfig, ICoreServices } from './core-interface'
+import { ICoreConfig, ICoreServices } from './core-interface'
+import { CoreService } from './core-service'
 
 import {
   AuthService,
@@ -73,10 +74,14 @@ export abstract class CoreApp<C extends ICoreConfig, S extends ICoreServices> {
   private async initServices(): Promise<void> {
 
     // beforeInit
-    await eachAsync<CoreService>(this.services, service => service.beforeInit())
+    await eachAsync<CoreService>(this.services, service => {
+      if (service.beforeInit) service.beforeInit()
+    })
 
     // init
-    await eachAsync<CoreService>(this.services, service => service.init())
+    await eachAsync<CoreService>(this.services, service => {
+      if (service.init) service.init()
+    })
 
     // install
     const router = new Router({ prefix: this.config.prefix })

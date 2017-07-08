@@ -9,7 +9,7 @@ export interface IDbObject {
 }
 
 export interface IDbDeleteResult {
-    deletedCount?: number
+  deletedCount?: number
 }
 
 export interface IDbInsertResult {
@@ -72,4 +72,5 @@ export interface IDbClient {
   destroy(): Promise<void>
   drop(name: string): Promise<boolean>
   collection<T>(name: string): any
+  objectID(id: string): IDbObjectID
 }

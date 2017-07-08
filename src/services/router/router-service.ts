@@ -1,4 +1,4 @@
-import { CoreService } from '../../core-interface'
+import { CoreService } from '../../core-service'
 
 export class RouterService extends CoreService {
 }

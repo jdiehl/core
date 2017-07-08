@@ -18,13 +18,11 @@ describe('auth', () => {
     u2 = { _id: 'id2', email: 'u2@b.c', hash: 'hash2', profile: { name: 'Susan' }, salt: 'salt2', role: 'admin' }
     mockCursor.toArray.resolves([u1, u2])
     mockCollection.findOne.resolves(u1)
-    mockCollection.insertOne.resolves({ insertedId: 'newid' })
   })
 
   after(() => {
-    mockCursor.toArray.resolves()
-    mockCollection.findOne.resolves()
-    mockCollection.insertOne.resolves()
+    mockCursor.toArray.resolves([{ _id: 'id1' }, { _id: 'id2' }])
+    mockCollection.findOne.resolves({ _id: 'id1' })
   })
 
   beforeEach(async () => {
@@ -77,7 +75,7 @@ describe('auth', () => {
 
   it('signup() should create a new user', async () => {
     const res = await auth.signup('u3@b.c', 'hello', 'user', { name: 'Fred' })
-    expect(res).to.deep.equal({ _id: 'newid', email: 'u3@b.c', profile: { name: 'Fred' }, role: 'user' })
+    expect(res).to.deep.equal({ _id: 'id1', email: 'u3@b.c', profile: { name: 'Fred' }, role: 'user' })
     expect(mockCollection.insertOne.callCount).to.equal(1)
     expect(mockCollection.insertOne.args[0]).to.have.length(1)
     const user = mockCollection.insertOne.args[0][0]

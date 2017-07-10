@@ -1,18 +1,15 @@
 import { expect } from 'chai'
-import * as Koa from 'koa'
-import * as bodyParser from 'koa-bodyparser'
 import * as KoaRouter from 'koa-router'
 import { Server } from 'net'
 import { del, get, post, put } from 'request-promise-native'
 import { stub } from 'sinon'
 
 import { CoreService, Delete, Get, Post, Put, Router, RouterService } from '../'
-import { expectRejection, mockServices, resetMockServices } from './util'
+import { expectRejection, mockServer, mockServices, resetMockServices } from './util'
 
-describe('router', () => {
+describe.only('router', () => {
   let service: CoreService
-  let server: Koa
-  let instance: Server
+  let server: Server
   let host: string
   const sGet = stub().returns('get-ok')
   const sGetMore = stub().returns('get-more-ok')
@@ -22,25 +19,20 @@ describe('router', () => {
   const sCustom = stub().returns('custom-ok')
   const sCustomMapping = stub().returns(['query.a', 'query.b'])
 
-  before((done) => {
-    @Router({ prefix: '/test', redirect: { '/a': '/b' } })
-    class Service extends CoreService {
-      @Get('/get') async get(...args: any[]) { return sGet.apply(null, args) }
-      @Get('/get/:w', ['params.w', 'request.query']) async getMore(...args: any[]) { return sGetMore.apply(null, args) }
-      @Post('/post', ['request.body']) async post(...args: any[]) { return sPost.apply(null, args) }
-      @Put('/put/:id', ['params.id', 'request.body']) async put(...args: any[]) { return sPut.apply(null, args) }
-      @Delete('/del/:id', ['params.id']) async del(...args: any[]) { return sDel.apply(null, args) }
-      @Get('/custom', sCustomMapping) async custom(...args: any[]) { return sCustom.apply(null, args) }
-    }
+  @Router({ prefix: '/test', redirect: { '/a': '/b' } })
+  class Service extends CoreService {
+    @Get('/get') async get(...args: any[]) { return sGet.apply(null, args) }
+    @Get('/get/:w', ['params.w', 'request.query']) async getMore(...args: any[]) { return sGetMore.apply(null, args) }
+    @Post('/post', ['request.body']) async post(...args: any[]) { return sPost.apply(null, args) }
+    @Put('/put/:id', ['params.id', 'request.body']) async put(...args: any[]) { return sPut.apply(null, args) }
+    @Delete('/del/:id', ['params.id']) async del(...args: any[]) { return sDel.apply(null, args) }
+    @Get('/custom', sCustomMapping) async custom(...args: any[]) { return sCustom.apply(null, args) }
+  }
+
+  before(async () => {
     service = new Service({} as any, {} as any)
-    server = new Koa()
-    server.use(bodyParser())
-    server.use(service.router!.routes())
-    server.use(service.router!.allowedMethods())
-    instance = server.listen(() => {
-      host = `http://127.0.0.1:${instance.address().port}`
-      done()
-    })
+    server = await mockServer(service)
+    host = `http://127.0.0.1:${server.address().port}`
   })
 
   beforeEach(() => {
@@ -52,7 +44,7 @@ describe('router', () => {
   })
 
   after((done) => {
-    instance.close(done)
+    server.close(done)
   })
 
   it('should create a router', () => {
@@ -68,13 +60,13 @@ describe('router', () => {
     expect(sDel.callCount).to.equal(0)
   })
 
-  it('get() should prefix the routes', (done) => {
-    get(`${host}/get`)
-    .then(() => done('get() should throw'))
-    .catch((err) => {
-      expect(err.statusCode).to.equal(404)
-      done()
-    })
+  it('get() should prefix the routes', async () => {
+    await expectRejection(() => get(`${host}/get`), '404 - "Not Found"')
+  })
+
+  it('get() should redirect', async () => {
+    await expectRejection(() => get({ url: `${host}/test/a`, followRedirect: false }),
+      '301 - "Redirecting to <a href=\\"/b\\">/b</a>."')
   })
 
   it('should create a get route', async () => {

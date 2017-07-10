@@ -1,7 +1,7 @@
 import { each, getKeyPath } from '@-)/utils'
 import { Request, Response } from 'koa'
 import * as KoaRouter from 'koa-router'
-import { ICoreContext } from './../../core-interface';
+import { ICoreContext } from './../../core-interface'
 
 import { CoreService } from '../../core-service'
 import { IRouterOptions } from './router-interface'

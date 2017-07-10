@@ -4,6 +4,7 @@ import * as cacheControl from 'koa-cache-control'
 import * as logger from 'koa-logger'
 import * as Router from 'koa-router'
 import * as session from 'koa-session'
+import { Server } from 'net'
 
 import { each, eachAsync, extend } from '@-)/utils'
 import { ICoreConfig, ICoreServices } from './core-interface'
@@ -29,11 +30,16 @@ const coreServices = {
   token: TokenService
 }
 
-export abstract class CoreApp<C extends ICoreConfig, S extends ICoreServices> {
-  private server: Koa
-  private services: S
+export abstract class CoreApp<C extends ICoreConfig = ICoreConfig, S extends ICoreServices = ICoreServices> {
+  instance: Server
+  server: Koa
+  services: S
 
   abstract get customServices(): any
+
+  get port(): number {
+    return this.instance.address().port
+  }
 
   // constructor
   constructor(private config: C) {
@@ -47,7 +53,24 @@ export abstract class CoreApp<C extends ICoreConfig, S extends ICoreServices> {
   async init(): Promise<void> {
     await this.initServer()
     await this.initServices()
-    await this.startServer()
+  }
+
+  // start the server
+  async listen(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.instance = this.server.listen(this.config.port, resolve)
+      this.instance.on('error', (err: Error) => reject(err))
+    })
+  }
+
+  // stop the server
+  async close(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.instance.close((err: Error) => {
+        if (err) return reject(err)
+        resolve()
+      })
+    })
   }
 
   private addServices(services: any, add: any) {
@@ -59,11 +82,11 @@ export abstract class CoreApp<C extends ICoreConfig, S extends ICoreServices> {
   // initialize the server
   private async initServer(): Promise<void> {
     this.server = new Koa()
-    this.server.keys = this.config.keys
+    if (this.config.keys) this.server.keys = this.config.keys
     this.server.use(logger())
     this.server.use(cacheControl({ noCache: true }))
     this.server.use(bodyParser())
-    this.server.use(session(this.sessionConfig()))
+    session(this.sessionConfig(), this.server)
   }
 
   private sessionConfig(): any {
@@ -91,11 +114,6 @@ export abstract class CoreApp<C extends ICoreConfig, S extends ICoreServices> {
     })
     this.server.use(router.routes())
     this.server.use(router.allowedMethods())
-  }
-
-  // start the server
-  private async startServer(): Promise<void> {
-    return new Promise<void>(resolve => this.server.listen(this.config.port, () => resolve()))
   }
 
 }

@@ -50,11 +50,11 @@ export interface ICoreConfig {
     proxy?: string
     from?: string
   },
-  keys: string[]
-  port: number
+  keys?: string[]
+  port?: number
   prefix?: string
   tokens?: { [domain: string]: string }
-  router: {
+  router?: {
     prefix?: string
     requireToken?: string
   }

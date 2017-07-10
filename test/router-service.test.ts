@@ -19,6 +19,8 @@ describe('router', () => {
   const sPost = stub().returns('post-ok')
   const sPut = stub().returns('put-ok')
   const sDel = stub().returns('del-ok')
+  const sCustom = stub().returns('custom-ok')
+  const sCustomMapping = stub().returns(['query.a', 'query.b'])
 
   before((done) => {
     @Router({ prefix: '/test', redirect: { '/a': '/b' } })
@@ -28,6 +30,7 @@ describe('router', () => {
       @Post('/post', ['request.body']) async post(...args: any[]) { return sPost.apply(null, args) }
       @Put('/put/:id', ['params.id', 'request.body']) async put(...args: any[]) { return sPut.apply(null, args) }
       @Delete('/del/:id', ['params.id']) async del(...args: any[]) { return sDel.apply(null, args) }
+      @Get('/custom', sCustomMapping) async custom(...args: any[]) { return sCustom.apply(null, args) }
     }
     service = new Service({} as any, {} as any)
     server = new Koa()
@@ -106,6 +109,16 @@ describe('router', () => {
     expect(res).to.equal('del-ok')
     expect(sDel.callCount).to.equal(1)
     expect(sDel.args[0]).to.deep.equal(['42'])
+  })
+
+  it('should create a get route with custom paramMapping', async () => {
+    const res = await get(`${host}/test/custom?a=1&b=2`)
+    expect(res).to.equal('custom-ok')
+    expect(sCustom.callCount).to.equal(1)
+    expect(sCustom.args[0]).to.deep.equal(['1', '2'])
+    expect(sCustomMapping.callCount).to.equal(1)
+    expect(sCustomMapping.args[0]).to.have.length(1)
+    expect(sCustomMapping.args[0][0]).to.be.an('object')
   })
 
 })

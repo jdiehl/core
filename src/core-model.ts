@@ -1,7 +1,9 @@
 import { clone, extend, mapAsync } from '@-)/utils'
 
+import { ICoreContext } from './core-interface'
 import { CoreService } from './core-service'
 import { IDbCollection, IDbObject } from './services/db/db-interface'
+import { Delete, Get, Post, Put } from './services/router/router-decorators'
 
 export interface ICoreModelFindOptions {
   sort?: object
@@ -13,15 +15,6 @@ export interface ICoreModelFindOptions {
 export abstract class CoreModel<Int extends IDbObject = any, Ext extends IDbObject = Int> extends CoreService {
   protected abstract collectionName: string
   protected collection: IDbCollection
-
-  async findOne(id: string): Promise<Ext> {
-    if (this.beforeFindOne) await this.beforeFindOne(id)
-    const objectID = this.services.db.objectID(id)
-    let object = await this.collection.findOne({ _id: objectID })
-    if (this.afterFindOne) object = await this.afterFindOne(object)
-    if (this.transform) object = await this.transform(object)
-    return object
-  }
 
   async find(query?: object, options?: ICoreModelFindOptions): Promise<Ext[]> {
     if (this.beforeFind) query = await this.beforeFind(query, options)
@@ -36,6 +29,15 @@ export abstract class CoreModel<Int extends IDbObject = any, Ext extends IDbObje
     if (this.afterFind) objects = await this.afterFind(objects)
     if (this.transform) objects = await mapAsync(objects, async o => this.transform!(o))
     return objects
+  }
+
+  async findOne(id: string): Promise<Ext> {
+    if (this.beforeFindOne) await this.beforeFindOne(id)
+    const objectID = this.services.db.objectID(id)
+    let object = await this.collection.findOne({ _id: objectID })
+    if (this.afterFindOne) object = await this.afterFindOne(object)
+    if (this.transform) object = await this.transform(object)
+    return object
   }
 
   async insert(values: object): Promise<Ext> {
@@ -69,6 +71,13 @@ export abstract class CoreModel<Int extends IDbObject = any, Ext extends IDbObje
 
   async init() {
     this.collection = this.services.db.collection<Int>(this.collectionName)
+
+    // Routes must be created here to allow subclassing
+    Get('/', ['query'])(this, 'find')
+    Get('/:id', ['params.id'])(this, 'findOne')
+    Post('/', ['request.body'])(this, 'insert')
+    Put('/:id', ['params.id', 'request.body'])(this, 'update')
+    Delete('/:id', ['params.id'])(this, 'delete')
   }
 
   // Hooks

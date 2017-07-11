@@ -7,7 +7,7 @@ import { stub } from 'sinon'
 import { CoreService, Delete, Get, Post, Put, Router, RouterService } from '../'
 import { expectRejection, mockServer, mockServices, resetMockServices } from './util'
 
-describe.only('router', () => {
+describe('router', () => {
   let service: CoreService
   let server: Server
   let host: string

@@ -1,10 +1,12 @@
 import { each, getKeyPath } from '@-)/utils'
 import { Request, Response } from 'koa'
 import * as KoaRouter from 'koa-router'
-import { ICoreContext } from './../../core-interface'
 
 import { CoreService } from '../../core-service'
 import { IRouterOptions } from './router-interface'
+
+export type RouteMethod = 'get' | 'post' | 'put' | 'delete'
+export type RouteMappingFunction = (context: KoaRouter.IRouterContext) => string[]
 
 function createRouter(target: CoreService): KoaRouter {
   if (!target.router) target.router = new KoaRouter()
@@ -21,8 +23,8 @@ export function Router(options?: IRouterOptions) {
   }
 }
 
-export function Route(method: 'get' | 'post' | 'put' | 'delete', path: string, paramMapping?: string[] | Function) {
-  return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+export function Route(method: RouteMethod, path: string, paramMapping?: string[] | RouteMappingFunction) {
+  return (target: any, propertyKey: string, descriptor?: PropertyDescriptor) => {
     const router = createRouter(target)
     router[method](path, async context => {
       let mapping: string[]
@@ -31,6 +33,7 @@ export function Route(method: 'get' | 'post' | 'put' | 'delete', path: string, p
       } else {
         mapping = paramMapping || []
       }
+      if (!(mapping instanceof Array)) mapping = [mapping]
       const params = mapping.map(key => getKeyPath(context, key))
       let res = target[propertyKey].apply(target, params)
       if (res instanceof Promise) res = await res
@@ -39,15 +42,15 @@ export function Route(method: 'get' | 'post' | 'put' | 'delete', path: string, p
   }
 }
 
-export function Get(path: string, paramMapping?: string[] | Function) {
+export function Get(path: string, paramMapping?: string[] | RouteMappingFunction) {
   return Route('get', path, paramMapping)
 }
-export function Post(path: string, paramMapping?: string[] | Function) {
+export function Post(path: string, paramMapping?: string[] | RouteMappingFunction) {
   return Route('post', path, paramMapping)
 }
-export function Put(path: string, paramMapping?: string[] | Function) {
+export function Put(path: string, paramMapping?: string[] | RouteMappingFunction) {
   return Route('put', path, paramMapping)
 }
-export function Delete(path: string, paramMapping?: string[] | Function) {
+export function Delete(path: string, paramMapping?: string[] | RouteMappingFunction) {
   return Route('delete', path, paramMapping)
 }

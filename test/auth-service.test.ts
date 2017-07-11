@@ -57,11 +57,9 @@ describe('auth', () => {
   })
 
   it('update() should update a user', async () => {
-    const id: any = {}
-    const profile = {}
-    await auth.update(id, profile)
+    await auth.update('id1', { foo: 'bar' })
     expect(mockCollection.updateOne.callCount).to.equal(1)
-    expect(mockCollection.updateOne.args[0]).to.deep.equal([{ _id: id }, { $set: { profile } }])
+    expect(mockCollection.updateOne.args[0]).to.deep.equal([{ _id: 'id1' }, { $set: { profile: { foo: 'bar' } } }])
   })
 
   it('login() should find the requested user', async () => {

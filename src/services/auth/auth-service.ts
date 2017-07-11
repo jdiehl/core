@@ -1,22 +1,28 @@
 import { crypto } from 'mz'
 
 import { CoreModel } from '../../core-model'
+import { Get, Post } from '../router/router-decorators'
 import { IAuthToken, IUser, IUserInternal } from './auth-interface'
+
+export class ErrorUnauthorized extends Error {
+  status = 401
+  message = 'Unauthorized'
+}
 
 export class AuthService<Profile = {}> extends CoreModel<IUserInternal<Profile>, IUser<Profile>> {
   protected collectionName: string
 
   async login(email: string, password: string): Promise<IUser<Profile> | void> {
     const user = await this.collection.findOne({ email, verified: true })
-    if (!user) throw new Error('Invalid Login')
+    if (!user) throw new ErrorUnauthorized()
     const hash = await this.makeHash(user.salt, this.config.auth!.secret, password)
-    if (hash !== user.hash) throw new Error('Invalid Login')
+    if (hash !== user.hash) throw new ErrorUnauthorized()
     return this.transform(user)
   }
 
   async verify(token: string): Promise<void> {
     const info = await this.services.token.use<IAuthToken>(token)
-    if (!info || info.type !== 'signup') throw new Error('Invalid token')
+    if (!info || info.type !== 'signup') throw new ErrorUnauthorized()
     const userId = this.services.db.objectID(info.user)
     const res = await this.collection.updateOne({ _id: userId }, { $set: { verified: true } })
     if (res.modifiedCount !== 1) throw new Error('Could not verify user')
@@ -29,6 +35,11 @@ export class AuthService<Profile = {}> extends CoreModel<IUserInternal<Profile>,
     this.collectionName = this.config.auth.collection || 'auth'
     await super.init()
     this.collection.createIndex(['email', 'verified'], { unique: true })
+
+    // router
+    if (this.config.auth.prefix) this.router!.prefix(this.config.auth.prefix)
+    Post('/login', ['request.body.email', 'request.body.password'])(this, 'login')
+    Get('/verify/:token', ['params.token'])(this, 'verify')
   }
 
   // CoreModel

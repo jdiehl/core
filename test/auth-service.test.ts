@@ -70,12 +70,12 @@ describe('auth', () => {
   })
 
   it('login() should reject a wrong password', async () => {
-    await expectRejection(() => auth.login('u1@b.c', 'wrong'), 'Invalid Login')
+    await expectRejection(() => auth.login('u1@b.c', 'wrong'), 'Unauthorized')
   })
 
   it('login() should reject an unverified user', async () => {
     mockCollection.findOne.resolves()
-    await expectRejection(() => auth.login('u3@b.c', 'secret'), 'Invalid Login')
+    await expectRejection(() => auth.login('u3@b.c', 'secret'), 'Unauthorized')
     mockCollection.findOne.resolves(u1)
   })
 
@@ -136,7 +136,7 @@ describe('auth', () => {
     })
 
     it('login() should call pbkdf2', async () => {
-      await expectRejection(() => auth.login('u1@b.c', 'password'), 'Invalid Login')
+      await expectRejection(() => auth.login('u1@b.c', 'password'), 'Unauthorized')
       expect(pbkdf2.callCount).to.equal(1)
       expect(pbkdf2.args[0]).to.deep.equal(['mysecret,password', 'salt1', 1, 512, 'sha512'])
     })

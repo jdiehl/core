@@ -30,6 +30,20 @@ const coreServices = {
   token: TokenService
 }
 
+export async function errorReporter(context: Koa.Context, next: Function) {
+  try {
+    await next()
+  } catch (err) {
+    context.message = err.message
+    if (err.status) {
+      context.status = err.status
+    } else {
+      context.status = 500
+      context.app.emit('error', err, context)
+    }
+  }
+}
+
 export abstract class CoreApp<C extends ICoreConfig = ICoreConfig, S extends ICoreServices = ICoreServices> {
   instance: Server
   server: Koa
@@ -84,6 +98,7 @@ export abstract class CoreApp<C extends ICoreConfig = ICoreConfig, S extends ICo
     this.server = new Koa()
     if (this.config.keys) this.server.keys = this.config.keys
     this.server.use(logger())
+    this.server.use(errorReporter)
     this.server.use(cacheControl({ noCache: true }))
     this.server.use(bodyParser())
     session(this.sessionConfig(), this.server)

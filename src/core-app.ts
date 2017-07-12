@@ -101,7 +101,7 @@ export abstract class CoreApp<C extends ICoreConfig = ICoreConfig, S extends ICo
     this.server.use(errorReporter)
     this.server.use(cacheControl({ noCache: true }))
     this.server.use(bodyParser())
-    this.server.use(session())
+    this.server.use(session({ store: this.services.cache.sessionStore }))
   }
 
   private sessionConfig(): any {

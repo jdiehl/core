@@ -5,31 +5,63 @@ import { ICoreContext } from '../../core-interface'
 import { CoreService } from '../../core-service'
 import { CacheClientMem } from './cache-client-mem'
 import { CacheClientRedis } from './cache-client-redis'
-import { ICacheClient } from './cache-interface'
+import { ICacheClient, ICacheStore } from './cache-interface'
 
 export class CacheService extends CoreService {
   private client: ICacheClient
+
+  get sessionStore(): ICacheStore {
+    return {
+      destroy: (sid: string) => this.client.del(`session:${sid}`),
+      get: (sid: string) => this.client.get(`session:${sid}`),
+      set: async (sid: string, sess: any, ttl: number) => {
+        await this.client.set(`session:${sid}`, sess)
+        await this.client.expire(`session:${sid}`, ttl)
+      }
+    }
+  }
 
   async get(key: string): Promise<any> {
     return await this.client.get(key)
   }
 
-  async set(key: string, value?: any): Promise<void> {
-    return await this.client.set(key, value)
+  async set(key: string, value: any): Promise<void> {
+    await this.client.set(key, value)
+  }
+
+  async del(key: string): Promise<any> {
+    return await this.client.del(key)
   }
 
   async flush(): Promise<void> {
-    await this.client.flush()
+    this.client.flush()
+  }
+
+  async hget(key: string, hkey?: string): Promise<any> {
+    return await this.client.hget(key, hkey)
+  }
+
+  async hset(key: string, value: any): Promise<void>
+  async hset(key: string, hkey: string, value: any): Promise<void>
+  async hset(key: string, hkeyOrValue: any, value?: any): Promise<void> {
+    await this.client.hset(key, hkeyOrValue, value)
+  }
+
+  async hdel(key: string, hkey?: string): Promise<void> {
+    await this.client.hdel(key, hkey)
+  }
+
+  async expire(key: string, ttl: number): Promise<void> {
+    await this.client.expire(key, ttl)
   }
 
   // CoreService
 
   async beforeInit(): Promise<void> {
-    if (!this.config.cache) return
-    const cacheUrl = url.parse(this.config.cache)
-    if (!cacheUrl) return
+    const config = this.config.cache || 'mem://'
+    const cacheUrl = url.parse(config)
     this.client = this.createClient(cacheUrl)
-    await this.client.init(cacheUrl)
+    await this.client.init(config)
   }
 
   async destroy(): Promise<void> {

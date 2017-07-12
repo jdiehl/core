@@ -5,7 +5,8 @@ import { CoreService, ICoreServices } from '../../'
 
 export interface IMockServices {
   auth: { find: SinonStub, findOne: SinonStub, update: SinonStub, login: SinonStub, signup: SinonStub }
-  cache: { get: SinonStub, set: SinonStub, flush: SinonStub }
+  cache: { del: SinonStub, get: SinonStub, set: SinonStub, hdel: SinonStub, hget: SinonStub, hset: SinonStub,
+    expire: SinonStub, flush: SinonStub, sessionStore: SinonStub }
   db: { collection: SinonStub, objectID: SinonStub }
   email: { send: SinonStub, sendTemplate: SinonStub }
   slack: { post: SinonStub }

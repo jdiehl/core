@@ -16,7 +16,7 @@
   "author": "Jonathan Diehl",
   "license": "ISC",
   "dependencies": {
-    "@-)/utils": "^1.0.5",
+    "@-)/utils": "^1.0.6",
     "koa": "^2.3.0",
     "koa-bodyparser": "^4.2.0",
     "koa-cache-control": "^2.0.0",

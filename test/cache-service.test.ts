@@ -217,27 +217,48 @@ describe('cache-service', () => {
       expect(client.expire.args[0][0]).to.equal('a')
       expect(client.expire.args[0][1]).to.equal(13)
     })
+  })
 
-    it('sessionStore.set() should call set and expire on the redis client', async () => {
+  describe('sessionStore', () => {
+    let cache: CacheService
+    const sSet = stub().resolves()
+    const sExpire = stub().resolves()
+    const sGet = stub().resolves('ok')
+    const sDel = stub().resolves()
+
+    class MockCache extends CacheService {
+      createClient(cacheUrl: any): any {
+        return { init: stub().resolves(), set: sSet, expire: sExpire, get: sGet, del: sDel }
+      }
+    }
+
+    beforeEach(async () => {
+      sSet.resetHistory()
+      sExpire.resetHistory()
+      sGet.resetHistory()
+      sDel.resetHistory()
+      cache = new MockCache({} as any, mockServices as any)
+      await cache.beforeInit()
+    })
+
+    it('sessionStore.set() should call set and expire', async () => {
       await cache.sessionStore.set('sid', { foo: 'bar' }, 13)
-      expect(client.set.callCount).to.equal(1)
-      expect(client.set.args[0][0]).to.equal('session:sid')
-      expect(client.set.args[0][1]).to.equal('{"foo":"bar"}')
-      expect(client.expire.callCount).to.equal(1)
-      expect(client.expire.args[0][0]).to.equal('session:sid')
-      expect(client.expire.args[0][1]).to.equal(13)
+      expect(sSet.callCount).to.equal(1)
+      expect(sSet.args[0]).to.deep.equal(['session:sid', { foo: 'bar' }])
+      expect(sExpire.callCount).to.equal(1)
+      expect(sExpire.args[0]).to.deep.equal(['session:sid', 13])
     })
 
-    it('sessionStore.get() should call get on the redis client', async () => {
+    it('sessionStore.get() should call get', async () => {
       await cache.sessionStore.get('sid')
-      expect(client.get.callCount).to.equal(1)
-      expect(client.get.args[0][0]).to.equal('session:sid')
+      expect(sGet.callCount).to.equal(1)
+      expect(sGet.args[0]).to.deep.equal(['session:sid'])
     })
 
-    it('sessionStore.destroy() should call del on the redis client', async () => {
+    it('sessionStore.destroy() should call del', async () => {
       await cache.sessionStore.destroy('sid')
-      expect(client.del.callCount).to.equal(1)
-      expect(client.del.args[0][0]).to.equal('session:sid')
+      expect(sDel.callCount).to.equal(1)
+      expect(sDel.args[0]).to.deep.equal(['session:sid'])
     })
 
   })

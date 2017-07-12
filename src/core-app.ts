@@ -3,7 +3,7 @@ import * as bodyParser from 'koa-bodyparser'
 import * as cacheControl from 'koa-cache-control'
 import * as logger from 'koa-logger'
 import * as Router from 'koa-router'
-import * as session from 'koa-session'
+import * as session from 'koa-session-minimal'
 import { Server } from 'net'
 
 import { each, eachAsync, extend } from '@-)/utils'
@@ -101,7 +101,7 @@ export abstract class CoreApp<C extends ICoreConfig = ICoreConfig, S extends ICo
     this.server.use(errorReporter)
     this.server.use(cacheControl({ noCache: true }))
     this.server.use(bodyParser())
-    session(this.sessionConfig(), this.server)
+    this.server.use(session())
   }
 
   private sessionConfig(): any {

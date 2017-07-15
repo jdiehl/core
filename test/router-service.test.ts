@@ -5,7 +5,7 @@ import { del, get, post, put } from 'request-promise-native'
 import { stub } from 'sinon'
 
 import { CoreService, Delete, Get, Post, Put, Router, RouterService } from '../'
-import { expectRejection, mockServer, mockServices, resetMockServices } from './util'
+import { expectRejection, mockServer } from './util'
 
 describe('router', () => {
   let service: CoreService

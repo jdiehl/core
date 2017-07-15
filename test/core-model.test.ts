@@ -2,9 +2,10 @@ import { expect } from 'chai'
 import { stub } from 'sinon'
 
 import { CoreModel } from '../'
-import { mockCollection, mockCursor, mockServices, resetMockServices } from './util'
+import { mock } from './util'
 
 describe('core-model', () => {
+  const { cursor, collection, services, resetHistory } = mock()
   const afterFindOne = stub().returnsArg(0)
   const afterFind = stub().returnsArg(0)
   const afterInsert = stub().returnsArg(0)
@@ -17,6 +18,7 @@ describe('core-model', () => {
   const beforeDelete = stub()
   const transform = stub().returnsArg(0)
   let model: CoreModel
+
   class TestModel extends CoreModel {
     collectionName: 'test'
     async afterFindOne(...args: any[]) { return afterFindOne(...args) }
@@ -33,7 +35,7 @@ describe('core-model', () => {
   }
 
   beforeEach(async () => {
-    resetMockServices()
+    resetHistory()
     afterFindOne.resetHistory()
     afterFind.resetHistory()
     afterInsert.resetHistory()
@@ -45,7 +47,7 @@ describe('core-model', () => {
     beforeUpdate.resetHistory()
     beforeDelete.resetHistory()
     transform.resetHistory()
-    model = new TestModel({} as any, mockServices as any)
+    model = new TestModel({} as any, services as any)
     await model.init()
   })
 
@@ -70,8 +72,8 @@ describe('core-model', () => {
   it('findOne() should fetch a record', async () => {
     const res = await model.findOne('id')
     expect(res).to.deep.equal({ _id: 'id1' })
-    expect(mockCollection.findOne.callCount).to.equal(1)
-    expect(mockCollection.findOne.args[0]).to.deep.equal([{ _id: 'id' }])
+    expect(collection.findOne.callCount).to.equal(1)
+    expect(collection.findOne.args[0]).to.deep.equal([{ _id: 'id' }])
   })
 
   it('find() should call beforeFind', async () => {
@@ -99,16 +101,16 @@ describe('core-model', () => {
 
   it('findOne() should fetch records', async () => {
     await model.find({ query: 'this' }, { sort: { name: 1 }, skip: 2, limit: 3, project: { key: 'no' } })
-    expect(mockCollection.find.callCount).to.equal(1)
-    expect(mockCollection.find.args[0]).to.deep.equal([{ query: 'this' }])
-    expect(mockCursor.sort.callCount).to.equal(1)
-    expect(mockCursor.sort.args[0]).to.deep.equal([{ name: 1 }])
-    expect(mockCursor.skip.callCount).to.equal(1)
-    expect(mockCursor.skip.args[0]).to.deep.equal([2])
-    expect(mockCursor.limit.callCount).to.equal(1)
-    expect(mockCursor.limit.args[0]).to.deep.equal([3])
-    expect(mockCursor.project.callCount).to.equal(1)
-    expect(mockCursor.project.args[0]).to.deep.equal([{ key: 'no' }])
+    expect(collection.find.callCount).to.equal(1)
+    expect(collection.find.args[0]).to.deep.equal([{ query: 'this' }])
+    expect(cursor.sort.callCount).to.equal(1)
+    expect(cursor.sort.args[0]).to.deep.equal([{ name: 1 }])
+    expect(cursor.skip.callCount).to.equal(1)
+    expect(cursor.skip.args[0]).to.deep.equal([2])
+    expect(cursor.limit.callCount).to.equal(1)
+    expect(cursor.limit.args[0]).to.deep.equal([3])
+    expect(cursor.project.callCount).to.equal(1)
+    expect(cursor.project.args[0]).to.deep.equal([{ key: 'no' }])
   })
 
   it('insert() should call beforeInsert', async () => {
@@ -132,8 +134,8 @@ describe('core-model', () => {
   it('insert() should insert a record', async () => {
     const res = await model.insert({ name: 'susan' })
     expect(res).to.deep.equal({ _id: 'id1', name: 'susan' })
-    expect(mockCollection.insertOne.callCount).to.equal(1)
-    expect(mockCollection.insertOne.args[0]).to.deep.equal([{ name: 'susan' }])
+    expect(collection.insertOne.callCount).to.equal(1)
+    expect(collection.insertOne.args[0]).to.deep.equal([{ name: 'susan' }])
   })
 
   it('update() should call beforeUpdate', async () => {
@@ -150,8 +152,8 @@ describe('core-model', () => {
 
   it('update() should update a record', async () => {
     await model.update('id', { x: 1 })
-    expect(mockCollection.updateOne.callCount).to.equal(1)
-    expect(mockCollection.updateOne.args[0]).to.deep.equal([{ _id: 'id' }, { $set: { x: 1 } }])
+    expect(collection.updateOne.callCount).to.equal(1)
+    expect(collection.updateOne.args[0]).to.deep.equal([{ _id: 'id' }, { $set: { x: 1 } }])
   })
 
   it('delete() should call beforeDelete', async () => {
@@ -168,8 +170,8 @@ describe('core-model', () => {
 
   it('delete() should delete a record', async () => {
     await model.delete('id')
-    expect(mockCollection.deleteOne.callCount).to.equal(1)
-    expect(mockCollection.deleteOne.args[0]).to.deep.equal([{ _id: 'id' }])
+    expect(collection.deleteOne.callCount).to.equal(1)
+    expect(collection.deleteOne.args[0]).to.deep.equal([{ _id: 'id' }])
   })
 
 })

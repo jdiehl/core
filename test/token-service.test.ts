@@ -2,9 +2,10 @@ import { expect } from 'chai'
 import { SinonStub, stub } from 'sinon'
 
 import { TokenService } from '../'
-import { expectRejection, mockServices, resetMockServices } from './util'
+import { expectRejection, mock } from './util'
 
 describe('token', () => {
+  const { services, resetHistory } = mock()
   let token: TokenService
   const next: SinonStub = stub()
   const reject: SinonStub = stub()
@@ -17,18 +18,18 @@ describe('token', () => {
   }
 
   before(() => {
-    mockServices.cache.get.resolves({ reference: 'ok' })
+    services.cache.get.resolves({ reference: 'ok' })
   })
 
   after(() => {
-    mockServices.cache.get.resolves()
+    services.cache.get.resolves()
   })
 
   beforeEach(async () => {
-    resetMockServices()
+    resetHistory()
     next.resetHistory()
     reject.resetHistory()
-    token = new TokenService({ tokens: { user: 'xxx', admin: 'yyy' } } as any, mockServices as any)
+    token = new TokenService({ tokens: { user: 'xxx', admin: 'yyy' } } as any, services as any)
   })
 
   it('should allow the correct user token', () => {
@@ -66,20 +67,20 @@ describe('token', () => {
     const key = await token.create(reference)
     expect(key).to.be.a('string')
     expect(key).to.have.length(128)
-    expect(mockServices.cache.set.callCount).to.equal(1)
-    expect(mockServices.cache.set.args[0]).to.deep.equal([`token:${key}`, { reference }])
+    expect(services.cache.set.callCount).to.equal(1)
+    expect(services.cache.set.args[0]).to.deep.equal([`token:${key}`, { reference }])
   })
 
   it('create() should set the useCount', async () => {
     await token.create({}, { useCount: 3 })
-    expect(mockServices.cache.set.callCount).to.equal(1)
-    expect(mockServices.cache.set.args[0][1]).to.deep.equal({ reference: {}, usesLeft: 3 })
+    expect(services.cache.set.callCount).to.equal(1)
+    expect(services.cache.set.args[0][1]).to.deep.equal({ reference: {}, usesLeft: 3 })
   })
 
   it('create() should set the expiry date', async () => {
     await token.create({}, { validFor: '1s' })
-    expect(mockServices.cache.set.callCount).to.equal(1)
-    const { validUntil } = mockServices.cache.set.args[0][1]
+    expect(services.cache.set.callCount).to.equal(1)
+    const { validUntil } = services.cache.set.args[0][1]
     expect(validUntil).to.be.a('number')
     expect(validUntil - new Date().getTime()).to.be.within(0, 1000)
   })
@@ -87,24 +88,24 @@ describe('token', () => {
   it('use() should retrieve a token', async () => {
     const ref = await token.use('key')
     expect(ref).to.equal('ok')
-    expect(mockServices.cache.get.callCount).to.equal(1)
-    expect(mockServices.cache.get.args[0]).to.deep.equal([`token:key`])
+    expect(services.cache.get.callCount).to.equal(1)
+    expect(services.cache.get.args[0]).to.deep.equal([`token:key`])
   })
 
   it('use() should update the use counter', async () => {
-    mockServices.cache.get.resolves({ reference: 'uses', usesLeft: 3 })
+    services.cache.get.resolves({ reference: 'uses', usesLeft: 3 })
     await token.use('key')
-    expect(mockServices.cache.set.callCount).to.equal(1)
-    expect(mockServices.cache.set.args[0]).to.deep.equal([`token:key`, { reference: 'uses', usesLeft: 2 }])
+    expect(services.cache.set.callCount).to.equal(1)
+    expect(services.cache.set.args[0]).to.deep.equal([`token:key`, { reference: 'uses', usesLeft: 2 }])
   })
 
   it('use() should reject an expired use counter', async () => {
-    mockServices.cache.get.resolves({ reference: 'expired', usesLeft: 0 })
+    services.cache.get.resolves({ reference: 'expired', usesLeft: 0 })
     await expectRejection(() => token.use('key'), 'Invalid Token')
   })
 
   it('use() should reject an expired date', async () => {
-    mockServices.cache.get.resolves({ reference: 'expired', validUntil: new Date().getTime() - 1000 })
+    services.cache.get.resolves({ reference: 'expired', validUntil: new Date().getTime() - 1000 })
     await expectRejection(() => token.use('key'), 'Invalid Token')
   })
 

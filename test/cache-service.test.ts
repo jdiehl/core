@@ -5,92 +5,90 @@ import { stub } from 'sinon'
 
 import { CacheService } from '../'
 import { ICacheStore } from '../src/services/cache/cache-interface'
-import { mockServices, resetMockServices } from './util'
-
-function runLiveTests(config: string) {
-  let cache: CacheService
-
-  beforeEach(async () => {
-    resetMockServices()
-    cache = new CacheService({ cache: config } as any, mockServices as any)
-    await cache.beforeInit()
-    await cache.flush()
-  })
-
-  it('set() should store a simple value', async () => {
-    await cache.set('foo', 'bar')
-    const x = await cache.get('foo')
-    expect(x).to.equal('bar')
-  })
-
-  it('set() should clone an object', async () => {
-    const a = { a: { b: 3 } }
-    await cache.set('something', a)
-    const x = await cache.get('something')
-    expect(x).to.not.equal(a)
-    expect(x).to.deep.equal(a)
-  })
-
-  it('set() should overwrite a previous value', async () => {
-    await cache.set('x', 1)
-    await cache.set('x', 2)
-    const x = await cache.get('x')
-    expect(x).to.equal(2)
-  })
-
-  it('del() should remove a value', async () => {
-    await cache.set('x', 1)
-    await cache.del('x')
-    const x = await cache.get('x')
-    expect(x).to.be.undefined
-  })
-
-  it('hset() should create a hash', async () => {
-    await cache.hset('hash', 'a', 1)
-    await cache.hset('hash', 'b', { x: 2 })
-    const x = await cache.hget('hash')
-    expect(x).to.deep.equal({ a: 1, b: { x: 2 } })
-  })
-
-  it('hset() should update a hash', async () => {
-    await cache.hset('hash', 'a', 1)
-    await cache.hset('hash', 'a', 2)
-    const x = await cache.hget('hash', 'a')
-    expect(x).to.equal(2)
-  })
-
-  it('hdel() should delete a hash', async () => {
-    await cache.hset('hash', 'a', 1)
-    await cache.hdel('hash')
-    const x = await cache.hget('hash')
-    expect(x).to.be.undefined
-  })
-
-  it('expire() should expire a key', async () => {
-    await cache.set('a', 1)
-    await cache.expire('a', .01)
-    const x = await cache.get('a')
-    expect(x).to.equal(1)
-    await wait(11)
-    const y = await cache.get('a')
-    expect(y).to.be.undefined
-  })
-
-  it('flush() should remove all objects', async () => {
-    await cache.set('z', 1)
-    await cache.flush()
-    const x = await cache.get('z')
-    expect(x).to.be.undefined
-  })
-}
+import { mock } from './util'
 
 describe('cache-service', () => {
+  const { services } = mock()
+  let cache: CacheService
 
+  function runLiveTests(config: string) {
+
+    beforeEach(async () => {
+      cache = new CacheService({ cache: config } as any, services as any)
+      await cache.beforeInit()
+      await cache.flush()
+    })
+
+    it('set() should store a simple value', async () => {
+      await cache.set('foo', 'bar')
+      const x = await cache.get('foo')
+      expect(x).to.equal('bar')
+    })
+
+    it('set() should clone an object', async () => {
+      const a = { a: { b: 3 } }
+      await cache.set('something', a)
+      const x = await cache.get('something')
+      expect(x).to.not.equal(a)
+      expect(x).to.deep.equal(a)
+    })
+
+    it('set() should overwrite a previous value', async () => {
+      await cache.set('x', 1)
+      await cache.set('x', 2)
+      const x = await cache.get('x')
+      expect(x).to.equal(2)
+    })
+
+    it('del() should remove a value', async () => {
+      await cache.set('x', 1)
+      await cache.del('x')
+      const x = await cache.get('x')
+      expect(x).to.be.undefined
+    })
+
+    it('hset() should create a hash', async () => {
+      await cache.hset('hash', 'a', 1)
+      await cache.hset('hash', 'b', { x: 2 })
+      const x = await cache.hget('hash')
+      expect(x).to.deep.equal({ a: 1, b: { x: 2 } })
+    })
+
+    it('hset() should update a hash', async () => {
+      await cache.hset('hash', 'a', 1)
+      await cache.hset('hash', 'a', 2)
+      const x = await cache.hget('hash', 'a')
+      expect(x).to.equal(2)
+    })
+
+    it('hdel() should delete a hash', async () => {
+      await cache.hset('hash', 'a', 1)
+      await cache.hdel('hash')
+      const x = await cache.hget('hash')
+      expect(x).to.be.undefined
+    })
+
+    it('expire() should expire a key', async () => {
+      await cache.set('a', 1)
+      await cache.expire('a', .01)
+      const x = await cache.get('a')
+      expect(x).to.equal(1)
+      await wait(11)
+      const y = await cache.get('a')
+      expect(y).to.be.undefined
+    })
+
+    it('flush() should remove all objects', async () => {
+      await cache.set('z', 1)
+      await cache.flush()
+      const x = await cache.get('z')
+      expect(x).to.be.undefined
+    })
+  }
   describe('mem:', () => runLiveTests('mem://'))
   describe.skip('redis:localhost', () => runLiveTests('redis://127.0.0.1:6379/3'))
 
   describe('redis:', () => {
-    let cache: CacheService
     const redisCreateClient = redis.createClient
     const client = {
       del: stub().yields(),
@@ -116,7 +114,7 @@ describe('cache-service', () => {
     beforeEach(async () => {
       createClient.resetHistory()
       each(client, c => c.resetHistory())
-      cache = new CacheService({ cache: 'redis://host:1234/13'} as any, mockServices as any)
+      cache = new CacheService({ cache: 'redis://host:1234/13'} as any, services as any)
       await cache.beforeInit()
     })
 
@@ -220,7 +218,6 @@ describe('cache-service', () => {
   })
 
   describe('sessionStore', () => {
-    let cache: CacheService
     const sSet = stub().resolves()
     const sExpire = stub().resolves()
     const sGet = stub().resolves('ok')
@@ -237,7 +234,7 @@ describe('cache-service', () => {
       sExpire.resetHistory()
       sGet.resetHistory()
       sDel.resetHistory()
-      cache = new MockCache({} as any, mockServices as any)
+      cache = new MockCache({} as any, services as any)
       await cache.beforeInit()
     })
 

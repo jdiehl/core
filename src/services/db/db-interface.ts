@@ -42,7 +42,6 @@ export interface IDbCursor<T = any> {
   count(applySkipLimit: boolean): Promise<number>
   filter(filter: object): IDbCursor<T>
   limit(value: number): IDbCursor<T>
-  // tslint:disable-next-line:ban-types
   map(transform: Function): IDbCursor<T>
   next(): Promise<T>
   project(value: object): IDbCursor<T>

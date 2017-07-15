@@ -4,9 +4,10 @@ import { stub } from 'sinon'
 
 import { AuthService, IUser } from '../'
 import { IUserInternal } from '../src/services/auth/auth-interface'
-import { expectRejection, mockCollection, mockCursor, mockServices, resetMockServices } from './util'
+import { expectRejection, mock } from './util'
 
 describe('auth', () => {
+  const { cursor, collection, services, resetHistory } = mock()
   let auth: AuthService
   let u1: IUserInternal
   let u2: IUserInternal
@@ -17,27 +18,22 @@ describe('auth', () => {
     u1 = { _id: 'id1', email: 'u1@b.c', hash, profile: { name: 'Peter' }, role: 'user', salt: 'salt1', verified: true }
     u2 = { _id: 'id2', email: 'u2@b.c', hash: 'hash2', profile: { name: 'Susan' }, role: 'admin', salt: 'salt2',
       verified: true }
-    mockCursor.toArray.resolves([u1, u2])
-    mockCollection.findOne.resolves(u1)
-    mockServices.token.use.resolves({ type: 'signup', user: 'id3' })
-  })
-
-  after(() => {
-    mockCursor.toArray.resolves([{ _id: 'id1' }, { _id: 'id2' }])
-    mockCollection.findOne.resolves({ _id: 'id1' })
-    mockServices.token.use.resolves()
+    cursor.toArray.resolves([u1, u2])
+    collection.findOne.resolves(u1)
+    services.token.use.resolves({ type: 'signup', user: 'id3' })
+    services.token.create.resolves('token-ok')
   })
 
   beforeEach(async () => {
-    resetMockServices()
+    resetHistory()
     const config = { auth: { secret: 'mysecret', prefix: '/auth', iterations: 1, verifyEmail: true } }
-    auth = new AuthService(config as any, mockServices as any)
+    auth = new AuthService(config as any, services as any)
     await auth.init()
   })
 
   it('should create a unique index on email', () => {
-    expect(mockCollection.createIndex.callCount).to.equal(1)
-    expect(mockCollection.createIndex.args[0]).to.deep.equal([['email', 'verified'], { unique: true }])
+    expect(collection.createIndex.callCount).to.equal(1)
+    expect(collection.createIndex.args[0]).to.deep.equal([['email', 'verified'], { unique: true }])
   })
 
   it('find() should find and sanitize users', async () => {
@@ -46,26 +42,26 @@ describe('auth', () => {
       { _id: 'id1', email: 'u1@b.c', profile: { name: 'Peter' }, role: 'user' },
       { _id: 'id2', email: 'u2@b.c', profile: { name: 'Susan' }, role: 'admin' }
     ])
-    expect(mockCollection.find.callCount).to.equal(1)
+    expect(collection.find.callCount).to.equal(1)
   })
 
   it('findOne() should find and sanitize a user', async () => {
     const user = await auth.findOne('id')
     expect(user).to.deep.equal({ _id: 'id1', email: 'u1@b.c', profile: { name: 'Peter' }, role: 'user' })
-    expect(mockCollection.findOne.callCount).to.equal(1)
-    expect(mockCollection.findOne.args[0][0]).to.deep.equal({ _id: 'id' })
+    expect(collection.findOne.callCount).to.equal(1)
+    expect(collection.findOne.args[0][0]).to.deep.equal({ _id: 'id' })
   })
 
   it('update() should update a user', async () => {
     await auth.update('id1', { foo: 'bar' })
-    expect(mockCollection.updateOne.callCount).to.equal(1)
-    expect(mockCollection.updateOne.args[0]).to.deep.equal([{ _id: 'id1' }, { $set: { profile: { foo: 'bar' } } }])
+    expect(collection.updateOne.callCount).to.equal(1)
+    expect(collection.updateOne.args[0]).to.deep.equal([{ _id: 'id1' }, { $set: { profile: { foo: 'bar' } } }])
   })
 
   it('login() should find the requested user', async () => {
     const res = await auth.login('u1@b.c', 'secret')
-    expect(mockCollection.findOne.callCount).to.equal(1)
-    expect(mockCollection.findOne.args[0]).to.deep.equal([{ email: 'u1@b.c', verified: true }])
+    expect(collection.findOne.callCount).to.equal(1)
+    expect(collection.findOne.args[0]).to.deep.equal([{ email: 'u1@b.c', verified: true }])
     expect(res).to.deep.equal({ _id: 'id1', email: 'u1@b.c', profile: { name: 'Peter' }, role: 'user' })
   })
 
@@ -74,17 +70,17 @@ describe('auth', () => {
   })
 
   it('login() should reject an unverified user', async () => {
-    mockCollection.findOne.resolves()
+    collection.findOne.resolves()
     await expectRejection(() => auth.login('u3@b.c', 'secret'), 'Unauthorized')
-    mockCollection.findOne.resolves(u1)
+    collection.findOne.resolves(u1)
   })
 
   it('insert() should create a new user', async () => {
     const res = await auth.insert({ email: 'u3@b.c', password: 'hello', role: 'user', profile: { name: 'Fred' } })
     expect(res).to.deep.equal({ _id: 'id1', email: 'u3@b.c', profile: { name: 'Fred' }, role: 'user' })
-    expect(mockCollection.insertOne.callCount).to.equal(1)
-    expect(mockCollection.insertOne.args[0]).to.have.length(1)
-    const user = mockCollection.insertOne.args[0][0]
+    expect(collection.insertOne.callCount).to.equal(1)
+    expect(collection.insertOne.args[0]).to.have.length(1)
+    const user = collection.insertOne.args[0][0]
     expect(user.email).to.equal('u3@b.c')
     expect(user.role).to.equal('user')
     expect(user.hash).to.be.a('string')
@@ -97,8 +93,8 @@ describe('auth', () => {
 
   it('insert() should send a signup email with verification token', async () => {
     await auth.insert({ email: 'u3@b.c', password: 'hello', role: 'user' })
-    expect(mockServices.email.sendTemplate.callCount).to.equal(1)
-    expect(mockServices.email.sendTemplate.args[0]).to.deep.equal([
+    expect(services.email.sendTemplate.callCount).to.equal(1)
+    expect(services.email.sendTemplate.args[0]).to.deep.equal([
       'signup',
       { user: { _id: 'id1', email: 'u3@b.c', role: 'user' }, token: 'token-ok' },
       { subject: 'Please confirm your email address', to: 'u3@b.c' }
@@ -107,10 +103,10 @@ describe('auth', () => {
 
   it('verify() should verify a user', async () => {
     await auth.verify('key')
-    expect(mockServices.token.use.callCount).to.equal(1)
-    expect(mockServices.token.use.args[0]).to.deep.equal(['key'])
-    expect(mockCollection.updateOne.callCount).to.equal(1)
-    expect(mockCollection.updateOne.args[0]).to.deep.equal([{ _id: 'id3' }, { $set: { verified: true } }])
+    expect(services.token.use.callCount).to.equal(1)
+    expect(services.token.use.args[0]).to.deep.equal(['key'])
+    expect(collection.updateOne.callCount).to.equal(1)
+    expect(collection.updateOne.args[0]).to.deep.equal([{ _id: 'id3' }, { $set: { verified: true } }])
   })
 
   describe('mock-crypto', () => {

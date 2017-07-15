@@ -3,9 +3,10 @@ import * as request from 'request-promise-native'
 import { SinonStub, stub } from 'sinon'
 
 import { SlackService } from '../'
-import { mockServices, resetMockServices } from './util'
+import { mock } from './util'
 
 describe('slack', () => {
+  const { services, resetHistory } = mock()
   let slack: SlackService
   const requestPost = request.post
   const json: SinonStub = stub().resolves()
@@ -16,9 +17,9 @@ describe('slack', () => {
   })
 
   beforeEach(async () => {
-    resetMockServices()
+    resetHistory()
     post.resetHistory()
-    slack = new SlackService({ slack: 'my/key' } as any, mockServices as any)
+    slack = new SlackService({ slack: 'my/key' } as any, services as any)
   })
 
   after(() => {

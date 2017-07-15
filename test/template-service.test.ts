@@ -3,18 +3,19 @@ import { expect } from 'chai'
 import { stub } from 'sinon'
 
 import { TemplateService } from '../'
-import { mockServices, resetMockServices } from './util'
+import { mock } from './util'
 
 describe('template', () => {
+  const { services, resetHistory } = mock()
   let template: TemplateService
 
   beforeEach(async () => {
-    resetMockServices()
+    resetHistory()
     const templates = {
       markdown: 'test/resources/markdown.md',
       mustache: 'test/resources/mustache.mst'
     }
-    template = new TemplateService({ template: { templates }} as any, mockServices as any)
+    template = new TemplateService({ template: { templates }} as any, services as any)
     await template.beforeInit()
   })
 

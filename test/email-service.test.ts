@@ -3,7 +3,7 @@ import * as nodemailer from 'nodemailer'
 import { stub } from 'sinon'
 
 import { EmailService } from '../'
-import { mockServices, resetMockServices } from './util'
+import { mock } from './util'
 
 const LiveTest = {
   from: 'from@example.com',
@@ -13,6 +13,7 @@ const LiveTest = {
 }
 
 describe('email', () => {
+  const { services, resetHistory } = mock()
   let email: EmailService
   const nodemailerCreateTransport = nodemailer.createTransport
   const sendMail = stub().resolves('ok')
@@ -21,13 +22,13 @@ describe('email', () => {
   describe.skip('live', () => {
 
     beforeEach(async () => {
-      resetMockServices()
+      resetHistory()
       email = new EmailService({ email: {
         auth: { user: LiveTest.from, pass: LiveTest.pass },
         from: LiveTest.from,
         logger: true,
         service: LiveTest.service
-      } } as any, mockServices as any)
+      } } as any, services as any)
       await email.init()
     })
 
@@ -46,11 +47,11 @@ describe('email', () => {
     })
 
     beforeEach(async () => {
-      resetMockServices()
+      resetHistory()
       sendMail.resetHistory()
       createTransport.resetHistory()
       const config = { email: { from: 'me', host: 'host', port: 1234, pool: {} } }
-      email = new EmailService(config as any, mockServices as any)
+      email = new EmailService(config as any, services as any)
       await email.init()
     })
 

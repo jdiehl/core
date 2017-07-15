@@ -20,7 +20,7 @@ import {
   TokenService
 } from './services'
 
-const coreServices = {
+export const coreServices = {
   auth: AuthService,
   cache: CacheService,
   db: DbService,

@@ -7,9 +7,10 @@ const { del, get, post, put } = request.defaults({ json: true })
 
 import { AuthService } from '../'
 import { mockServer } from './util'
-import { expectRejection, mockServices, resetMockServices } from './util'
+import { expectRejection, mock } from './util'
 
 describe('auth-router', () => {
+  const { services, resetHistory } = mock()
   let auth: AuthService
   let server: Server
   let host: string
@@ -34,7 +35,7 @@ describe('auth-router', () => {
 
   before(async () => {
     const config = { auth: { secret: 'mysecret', prefix: '/auth', iterations: 1, verifyEmail: true } }
-    auth = new Auth(config as any, mockServices as any)
+    auth = new Auth(config as any, services as any)
     await auth.init()
     server = await mockServer(auth)
     host = `http://127.0.0.1:${server.address().port}`
@@ -45,7 +46,7 @@ describe('auth-router', () => {
   })
 
   beforeEach(async () => {
-    resetMockServices()
+    resetHistory()
   })
 
   it('GET / should call find()', async () => {

@@ -3,15 +3,16 @@ import { MongoClient } from 'mongodb'
 import { SinonStub, stub } from 'sinon'
 
 import { DbService, IDbCollection } from '../'
-import { mockServices, resetMockServices } from './util'
+import { mock } from './util'
 
 function runLiveTests(config: string) {
+  const { services, resetHistory } = mock()
   let db: DbService
   let col: IDbCollection
 
   beforeEach(async () => {
-    resetMockServices()
-    db = new DbService({ db: config } as any, mockServices as any)
+    resetHistory()
+    db = new DbService({ db: config } as any, services as any)
     await db.beforeInit()
     col = db.collection('test')
   })

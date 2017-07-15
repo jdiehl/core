@@ -5,9 +5,10 @@ import { del, get, post, put } from 'request-promise-native'
 import { stub } from 'sinon'
 
 import { CoreModel } from '../'
-import { expectRejection, mockServer, mockServices, resetMockServices } from './util'
+import { expectRejection, mock, mockServer } from './util'
 
 describe('core-model-router', () => {
+  const { services, resetHistory } = mock()
   let model: CoreModel
   let server: Server
   let host: string
@@ -27,14 +28,14 @@ describe('core-model-router', () => {
   }
 
   before(async () => {
-    model = new Model({} as any, mockServices as any)
+    model = new Model({} as any, services as any)
     await model.init()
     server = await mockServer(model)
     host = `http://127.0.0.1:${server.address().port}`
   })
 
   beforeEach(() => {
-    resetMockServices()
+    resetHistory()
     sFindOne.resetHistory()
     sFind.resetHistory()
     sInsert.resetHistory()

@@ -38,12 +38,12 @@ export class TokenService extends CoreService {
     const res = await this.services.cache.get(key) as ITokenInfo
     if (!res) throw new Error('Invalid Token')
     if (res.validUntil !== undefined && res.validUntil < new Date().getTime()) {
-      await this.services.cache.set(key)
+      await this.services.cache.del(key)
       throw new Error('Invalid Token')
     }
     if (res.usesLeft !== undefined) {
       if (res.usesLeft <= 0) {
-        await this.services.cache.set(key)
+        await this.services.cache.del(key)
         throw new Error('Invalid Token')
       }
       res.usesLeft--

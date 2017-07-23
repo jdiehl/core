@@ -129,9 +129,9 @@ describe('router', () => {
     expect(sBefore.args[0][2]).to.deep.equal(['more', { x: 'a', y: 'b' }])
   })
 
-  it('should stop if before returns false', async () => {
-    sBefore.resolves(false)
-    await expectRejection(() => get(`${host}/test/get`), '404 - "Not Found"')
+  it('should stop if before is rejected', async () => {
+    sBefore.rejects({ status: 401, message: 'Unauthorized' })
+    await expectRejection(() => get(`${host}/test/get`), '401 - "Unauthorized"')
     expect(sGet.callCount).to.equal(0)
     sBefore.resolves()
   })

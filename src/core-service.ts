@@ -11,6 +11,6 @@ export abstract class CoreService<C extends ICoreConfig = ICoreConfig, S extends
   install?(server: Koa): void
   async destroy?(): Promise<void>
 
-  async before?(context: ICoreContext, key: string, params: any): Promise<boolean | undefined>
+  async before?(context: ICoreContext, key: string, params: any): Promise<void>
   async after?(context: ICoreContext, key: string, res: any): Promise<any>
 }

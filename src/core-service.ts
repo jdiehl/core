@@ -1,7 +1,7 @@
 import * as Koa from 'koa'
 import * as Router from 'koa-router'
 
-import { ICoreConfig, ICoreServices } from './core-interface'
+import { ICoreConfig, ICoreContext, ICoreServices } from './core-interface'
 
 export abstract class CoreService<C extends ICoreConfig = ICoreConfig, S extends ICoreServices = ICoreServices> {
   router?: Router
@@ -10,4 +10,7 @@ export abstract class CoreService<C extends ICoreConfig = ICoreConfig, S extends
   async init?(): Promise<void>
   install?(server: Koa): void
   async destroy?(): Promise<void>
+
+  async before?(context: ICoreContext, key: string, params: any): Promise<boolean | undefined>
+  async after?(context: ICoreContext, key: string, res: any): Promise<any>
 }

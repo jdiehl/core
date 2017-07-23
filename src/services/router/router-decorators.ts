@@ -35,8 +35,15 @@ export function Route(method: RouteMethod, path: string, paramMapping?: string[]
       }
       if (!(mapping instanceof Array)) mapping = [mapping]
       const params = mapping.map(key => getKeyPath(context, key))
+      if (target.before) {
+        const cont = await target.before(context, propertyKey, params)
+        if (cont === false) return
+      }
       let res = target[propertyKey].apply(target, params)
       if (res instanceof Promise) res = await res
+      if (target.after) {
+        res = await target.after(context, propertyKey, res)
+      }
       context.body = res
     })
   }

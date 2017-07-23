@@ -1,4 +1,5 @@
 import { expect } from 'chai'
+import * as Koa from 'koa'
 import * as KoaRouter from 'koa-router'
 import { Server } from 'net'
 import { del, get, post, put } from 'request-promise-native'
@@ -11,6 +12,8 @@ describe('router', () => {
   let service: CoreService
   let server: Server
   let host: string
+  const sBefore = stub()
+  const sAfter = stub().returnsArg(2)
   const sGet = stub().returns('get-ok')
   const sGetMore = stub().returns('get-more-ok')
   const sPost = stub().returns('post-ok')
@@ -21,6 +24,8 @@ describe('router', () => {
 
   @Router({ prefix: '/test', redirect: { '/a': '/b' } })
   class Service extends CoreService {
+    before(...args: any[]) { return sBefore.apply(null, args) }
+    after(...args: any[]) { return sAfter.apply(null, args) }
     @Get('/get') async get(...args: any[]) { return sGet.apply(null, args) }
     @Get('/get/:w', ['params.w', 'request.query']) async getMore(...args: any[]) { return sGetMore.apply(null, args) }
     @Post('/post', ['request.body']) async post(...args: any[]) { return sPost.apply(null, args) }
@@ -36,6 +41,8 @@ describe('router', () => {
   })
 
   beforeEach(() => {
+    sBefore.resetHistory()
+    sAfter.resetHistory()
     sGet.resetHistory()
     sGetMore.resetHistory()
     sPost.resetHistory()
@@ -111,6 +118,44 @@ describe('router', () => {
     expect(sCustomMapping.callCount).to.equal(1)
     expect(sCustomMapping.args[0]).to.have.length(1)
     expect(sCustomMapping.args[0][0]).to.be.an('object')
+  })
+
+  it('should call before', async () => {
+    const res = await get(`${host}/test/get/more?x=a&y=b`)
+    expect(sBefore.callCount).to.equal(1)
+    expect(sBefore.args[0].length).to.equal(3)
+    expect(sBefore.args[0][0]).to.be.an('object')
+    expect(sBefore.args[0][1]).to.equal('getMore')
+    expect(sBefore.args[0][2]).to.deep.equal(['more', { x: 'a', y: 'b' }])
+  })
+
+  it('should stop if before returns false', async () => {
+    sBefore.resolves(false)
+    await expectRejection(() => get(`${host}/test/get`), '404 - "Not Found"')
+    expect(sGet.callCount).to.equal(0)
+    sBefore.resolves()
+  })
+
+  it('should call after', async () => {
+    const res = await post(`${host}/test/post`)
+    expect(sAfter.callCount).to.equal(1)
+    expect(sAfter.args[0].length).to.equal(3)
+    expect(sAfter.args[0][0]).to.be.an('object')
+    expect(sAfter.args[0][1]).to.equal('post')
+    expect(sAfter.args[0][2]).to.equal('post-ok')
+  })
+
+  it('after should transform the result', async () => {
+    sAfter.returnsArg(1)
+    const res = await put(`${host}/test/put/3`)
+    expect(res).to.equal('put')
+    sAfter.returnsArg(2)
+  })
+
+  it('should call before and after in order', async () => {
+    const res = await del(`${host}/test/del/42`)
+    expect(sBefore.calledBefore(sDel)).to.be.true
+    expect(sDel.calledBefore(sAfter)).to.be.true
   })
 
 })

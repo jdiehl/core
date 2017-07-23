@@ -33,7 +33,7 @@ describe('auth', () => {
 
   it('should create a unique index on email', () => {
     expect(collection.createIndex.callCount).to.equal(1)
-    expect(collection.createIndex.args[0]).to.deep.equal([['email', 'verified'], { unique: true }])
+    expect(collection.createIndex.args[0]).to.deep.equal([['email'], { unique: true }])
   })
 
   it('find() should find and sanitize users', async () => {
@@ -61,7 +61,7 @@ describe('auth', () => {
   it('login() should find the requested user', async () => {
     const res = await auth.login('u1@b.c', 'secret')
     expect(collection.findOne.callCount).to.equal(1)
-    expect(collection.findOne.args[0]).to.deep.equal([{ email: 'u1@b.c', verified: true }])
+    expect(collection.findOne.args[0]).to.deep.equal([{ email: 'u1@b.c' }])
     expect(res).to.deep.equal({ _id: 'id1', email: 'u1@b.c', profile: { name: 'Peter' }, role: 'user' })
   })
 
@@ -70,7 +70,7 @@ describe('auth', () => {
   })
 
   it('login() should reject an unverified user', async () => {
-    collection.findOne.resolves()
+    collection.findOne.resolves({})
     await expectRejection(() => auth.login('u3@b.c', 'secret'), 'Unauthorized')
     collection.findOne.resolves(u1)
   })

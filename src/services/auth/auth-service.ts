@@ -13,8 +13,9 @@ export class AuthService<Profile = {}> extends CoreModel<IUserInternal<Profile>,
   protected collectionName: string
 
   async login(email: string, password: string): Promise<IUser<Profile> | void> {
-    const user = await this.collection.findOne({ email, verified: true })
+    const user = await this.collection.findOne({ email })
     if (!user) throw new ErrorUnauthorized()
+    if (!user.verified) throw new ErrorUnauthorized()
     const hash = await this.makeHash(user.salt, this.config.auth!.secret, password)
     if (hash !== user.hash) throw new ErrorUnauthorized()
     return this.transform(user)
@@ -34,7 +35,7 @@ export class AuthService<Profile = {}> extends CoreModel<IUserInternal<Profile>,
     if (!this.config.auth) return
     this.collectionName = this.config.auth.collection || 'auth'
     await super.init()
-    this.collection.createIndex(['email', 'verified'], { unique: true })
+    this.collection.createIndex(['email'], { unique: true })
 
     // router
     if (this.config.auth.prefix) this.router!.prefix(this.config.auth.prefix)

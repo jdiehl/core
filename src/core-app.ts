@@ -56,7 +56,7 @@ export abstract class CoreApp<C extends ICoreConfig = ICoreConfig, S extends ICo
   }
 
   // constructor
-  constructor(private config: C) {
+  constructor(protected config: C) {
     const services: any = {}
     this.addServices(services, coreServices)
     this.addServices(services, this.customServices)
@@ -87,14 +87,14 @@ export abstract class CoreApp<C extends ICoreConfig = ICoreConfig, S extends ICo
     })
   }
 
-  private addServices(services: any, add: any) {
+  protected addServices(services: any, add: any) {
     each<any>(add, (TheService, name) => {
       services[name] = new TheService(this.config, services)
     })
   }
 
   // initialize the server
-  private async initServer(): Promise<void> {
+  protected async initServer(): Promise<void> {
     this.server = new Koa()
     if (this.config.keys) this.server.keys = this.config.keys
     this.server.use(logger())
@@ -104,12 +104,8 @@ export abstract class CoreApp<C extends ICoreConfig = ICoreConfig, S extends ICo
     this.server.use(session({ store: this.services.cache.sessionStore }))
   }
 
-  private sessionConfig(): any {
-    return extend({ key: 's', maxAge: 2592000000 }, this.config.session)
-  }
-
   // initialize and install all services
-  private async initServices(): Promise<void> {
+  protected async initServices(): Promise<void> {
 
     // beforeInit
     await eachAsync<CoreService>(this.services, service => {

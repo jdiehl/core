@@ -1,7 +1,7 @@
 import { each, makeIndex } from '@-)/utils'
 import { ObjectID } from 'mongodb'
 import { SinonStub, stub } from 'sinon'
-import { ICoreServices } from '../../'
+import { CoreApp, CoreService, ICoreServices } from '../../'
 import { coreServices } from '../../src/core-app'
 import { IDbCollection, IDbCursor } from '../../src/services/db/db-interface'
 import { MockifiedObject, MockifiedObjects, mockify, mockifyClasses, mockReset } from './mockify'

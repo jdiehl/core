@@ -73,7 +73,7 @@ export interface ICoreConfig {
 }
 
 export interface ICoreContext extends Koa.Context {
-  user: IUser<any>
+  user?: IUser<any>
 }
 
 export interface ICoreServices {

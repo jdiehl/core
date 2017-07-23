@@ -1,5 +1,7 @@
+import * as Koa from 'koa'
 import { crypto } from 'mz'
 
+import { ICoreContext } from '../../core-interface'
 import { CoreModel } from '../../core-model'
 import { Get, Post } from '../router/router-decorators'
 import { IAuthToken, IUser, IUserInternal } from './auth-interface'
@@ -12,7 +14,7 @@ export class ErrorUnauthorized extends Error {
 export class AuthService<Profile = {}> extends CoreModel<IUserInternal<Profile>, IUser<Profile>> {
   protected collectionName: string
 
-  async login(email: string, password: string): Promise<IUser<Profile> | void> {
+  async login(email: string, password: string): Promise<IUser<Profile>> {
     const user = await this.collection.findOne({ email })
     if (!user) throw new ErrorUnauthorized()
     if (!user.verified) throw new ErrorUnauthorized()
@@ -31,6 +33,14 @@ export class AuthService<Profile = {}> extends CoreModel<IUserInternal<Profile>,
 
   // CoreService
 
+  // require user to be present for all methods
+  async before(context: ICoreContext, key: keyof AuthService, params: any): Promise<void> {
+    if (!context.user) {
+      console.log(401)
+      throw new ErrorUnauthorized()
+    }
+  }
+
   async init() {
     if (!this.config.auth) return
     this.collectionName = this.config.auth.collection || 'auth'
@@ -38,9 +48,26 @@ export class AuthService<Profile = {}> extends CoreModel<IUserInternal<Profile>,
     this.collection.createIndex(['email'], { unique: true })
 
     // router
-    if (this.config.auth.prefix) this.router!.prefix(this.config.auth.prefix)
-    Post('/login', ['request.body.email', 'request.body.password'])(this, 'login')
-    Get('/verify/:token', ['params.token'])(this, 'verify')
+    if (!this.router) return
+    this.router.post('/login', async context => await this.loginRoute(context))
+    this.router.post('/logout', async context => await this.logoutRoute(context))
+    this.router.get('/verify/:token', async context => await this.verifyRoute(context))
+    this.router.get('/user', async (context: ICoreContext) => context.user)
+    if (this.config.auth.prefix) this.router.prefix(this.config.auth.prefix)
+  }
+
+  install(server: Koa) {
+    server.use(async (context: ICoreContext, next: () => Promise<any>) => {
+      if (context.session.user) {
+        const user = await this.findOne(context.session.user)
+        if (user) {
+          context.user = user
+        } else {
+          context.session.user = undefined
+        }
+      }
+      return next()
+    })
   }
 
   // CoreModel
@@ -76,15 +103,35 @@ export class AuthService<Profile = {}> extends CoreModel<IUserInternal<Profile>,
     return user
   }
 
-  // private
+  // routes
 
-  private async makeSalt(): Promise<string> {
+  protected async loginRoute(context: ICoreContext) {
+    const { email, password } = context.request.body
+    const user = await this.login(email, password)
+    context.session.user = user._id.toString()
+    context.status = 200
+  }
+
+  protected async logoutRoute(context: ICoreContext) {
+    delete context.user
+    delete context.session.user
+    context.status = 200
+  }
+
+  protected async verifyRoute(context: ICoreContext) {
+    await this.verify(context.params.token)
+    context.status = 200
+  }
+
+  // protected
+
+  protected async makeSalt(): Promise<string> {
     const { saltlen, encoding } = this.config.auth!
     const buf = await crypto.randomBytes(saltlen || 512)
     return buf.toString(encoding || 'base64')
   }
 
-  private async makeHash(salt: string, ...args: string[]): Promise<string> {
+  protected async makeHash(salt: string, ...args: string[]): Promise<string> {
     const { iterations, keylen, digest, encoding } = this.config.auth!
     const password = args.join()
     const buf = await crypto.pbkdf2(password, salt, iterations || 10000, keylen || 512, digest || 'sha512')

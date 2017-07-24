@@ -18,15 +18,8 @@ import {
 
 export interface ICoreConfig {
   auth?: {
-    collection?: string
-    encoding?: string
-    digest?: string
-    iterations?: number
-    keylen?: number
-    saltlen?: number
-    secret: string
-    prefix: string
-    verifyEmail: boolean
+    prefix?: string
+    verifyEmail?: boolean
   }
   cache?: string
   db?: string
@@ -69,6 +62,15 @@ export interface ICoreConfig {
   },
   template?: {
     templates?: Record<string, string>
+  },
+  user: {
+    secret: string
+    collection?: string
+    encoding?: string
+    digest?: string
+    iterations?: number
+    keylen?: number
+    saltlen?: number
   }
 }
 

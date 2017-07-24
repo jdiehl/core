@@ -41,6 +41,7 @@ export abstract class CoreModel<Int extends IDbObject = any, Ext extends IDbObje
   }
 
   async insert(values: object): Promise<Ext> {
+    if (!this.validate(values, true)) throw new Error('Invalid object')
     if (this.beforeInsert) values = await this.beforeInsert(values)
     const res = await this.collection.insertOne(values)
     if (res.insertedCount !== 1) throw new Error('Could not insert object')
@@ -52,6 +53,7 @@ export abstract class CoreModel<Int extends IDbObject = any, Ext extends IDbObje
   }
 
   async update(id: string, values: object): Promise<void> {
+    if (!this.validate(values, false)) throw new Error('Invalid object')
     if (this.beforeUpdate) values = await this.beforeUpdate(id, values)
     const objectID = this.services.db.objectID(id)
     const res = await this.collection.updateOne({ _id: objectID }, { $set: values })
@@ -79,6 +81,13 @@ export abstract class CoreModel<Int extends IDbObject = any, Ext extends IDbObje
     Put('/:id', ['params.id', 'request.body'])(this, 'update')
     Delete('/:id', ['params.id'])(this, 'delete')
     this.router!.prefix(this.routerPrefix)
+  }
+
+  // Validation
+
+  protected validate(values: any, forInsert: boolean) {
+    if (values._id) return false
+    return true
   }
 
   // Router configuration

@@ -78,6 +78,13 @@ export abstract class CoreModel<Int extends IDbObject = any, Ext extends IDbObje
     Post('/', ['request.body'])(this, 'insert')
     Put('/:id', ['params.id', 'request.body'])(this, 'update')
     Delete('/:id', ['params.id'])(this, 'delete')
+    this.router!.prefix(this.routerPrefix)
+  }
+
+  // Router configuration
+
+  protected get routerPrefix(): string {
+    return `/${this.collectionName}`
   }
 
   // Hooks

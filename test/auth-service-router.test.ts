@@ -24,7 +24,7 @@ describe('auth-router', () => {
   const sVerify = stub().returns('verify-ok')
 
   class Auth extends AuthService {
-    collectionName: 'not-used'
+    collectionName: 'auth'
     async findOne(...args: any[]) { return sFindOne(...args) }
     async find(...args: any[]) { console.trace(); return sFind(...args) }
     async insert(...args: any[]) { return sInsert(...args) }
@@ -35,7 +35,7 @@ describe('auth-router', () => {
   }
 
   before(async () => {
-    const config = { auth: { secret: 'mysecret', prefix: '/auth', iterations: 1, verifyEmail: true } }
+    const config = { auth: { secret: 'mysecret', iterations: 1, verifyEmail: true } }
     auth = new Auth(config as any, services as any)
     await auth.init()
     server = await mockServer(auth, app => auth.install(app))

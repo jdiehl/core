@@ -53,7 +53,6 @@ export class AuthService<Profile = {}> extends CoreModel<IUserInternal<Profile>,
     this.router.post('/logout', async context => await this.logoutRoute(context))
     this.router.get('/verify/:token', async context => await this.verifyRoute(context))
     this.router.get('/user', async (context: ICoreContext) => context.user)
-    if (this.config.auth.prefix) this.router.prefix(this.config.auth.prefix)
   }
 
   install(server: Koa) {

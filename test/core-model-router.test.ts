@@ -19,7 +19,7 @@ describe('core-model-router', () => {
   const sDelete = stub().returns('delete-ok')
 
   class Model extends CoreModel {
-    collectionName: 'not-used'
+    collectionName = 'model'
     async findOne(...args: any[]) { return sFindOne(...args) }
     async find(...args: any[]) { return sFind(...args) }
     async insert(...args: any[]) { return sInsert(...args) }
@@ -47,36 +47,40 @@ describe('core-model-router', () => {
     server.close(done)
   })
 
-  it('GET /? should call find', async () => {
-    const res = await get(`${host}?foo=bar`)
+  it('GET / should not call find', async () => {
+    await expectRejection(async () => await get(`${host}`), '404 - "Not Found"')
+  })
+
+  it('GET /model? should call find', async () => {
+    const res = await get(`${host}/model?foo=bar`)
     expect(res).to.equal('find-ok')
     expect(sFind.callCount).to.equal(1)
     expect(sFind.args[0]).to.deep.equal([{ foo: 'bar' }])
   })
 
-  it('GET /123 should call findOne', async () => {
-    const res = await get(`${host}/123`)
+  it('GET /model/123 should call findOne', async () => {
+    const res = await get(`${host}/model/123`)
     expect(res).to.equal('find-one-ok')
     expect(sFindOne.callCount).to.equal(1)
     expect(sFindOne.args[0]).to.deep.equal(['123'])
   })
 
-  it('POST / should call insert', async () => {
-    const res = await post(`${host}`).json({ a: 1 })
+  it('POST /model/ should call insert', async () => {
+    const res = await post(`${host}/model`).json({ a: 1 })
     expect(res).to.equal('insert-ok')
     expect(sInsert.callCount).to.equal(1)
     expect(sInsert.args[0]).to.deep.equal([{ a: 1 }])
   })
 
-  it('PUT /42 should call update', async () => {
-    const res = await put(`${host}/42`).json({ b: 2 })
+  it('PUT /model/42 should call update', async () => {
+    const res = await put(`${host}/model/42`).json({ b: 2 })
     expect(res).to.equal('update-ok')
     expect(sUpdate.callCount).to.equal(1)
     expect(sUpdate.args[0]).to.deep.equal(['42', { b: 2 }])
   })
 
-  it('DELETE /666 should call delete', async () => {
-    const res = await del(`${host}/123`)
+  it('DELETE /model/666 should call delete', async () => {
+    const res = await del(`${host}/model/123`)
     expect(res).to.equal('delete-ok')
     expect(sDelete.callCount).to.equal(1)
     expect(sDelete.args[0]).to.deep.equal(['123'])

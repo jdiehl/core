@@ -1,19 +1,20 @@
 import { each, makeIndex } from '@-)/utils'
 import { ObjectID } from 'mongodb'
 import { SinonStub, stub } from 'sinon'
-import { CoreApp, CoreService, ICoreServices } from '../../'
+import { CoreApp, CoreService, ICoreConfig, ICoreServices } from '../../'
 import { coreServices } from '../../src/core-app'
 import { IDbCollection, IDbCursor } from '../../src/services/db/db-interface'
-import { MockifiedObject, MockifiedObjects, mockify, mockifyClasses, mockReset } from './mockify'
+import { MockifiedObject, MockifiedObjects, mockify, mockifyClasses, mockifyMany, mockReset } from './mockify'
 
 export type MockCollection = MockifiedObject<IDbCollection>
 export type MockCursor = MockifiedObject<IDbCursor>
 export type MockServices = MockifiedObjects<ICoreServices> & { resetHistory: () => void }
 
-export interface IMockServices {
-  services: MockServices
+export interface IMock {
+  app: CoreApp
   collection: MockCollection
   cursor: MockCursor
+  services: MockServices
   resetHistory: () => void
 }
 
@@ -55,14 +56,21 @@ function mockServices(collection: MockCollection): MockServices {
   return services as MockServices
 }
 
-export function mock(): IMockServices {
+export function mock(config: Partial<ICoreConfig> = {}, preserve: string | string[] = []): IMock {
+  if (!(preserve instanceof Array)) preserve = [preserve]
+  if (config.quiet === undefined) config.quiet = true
   const cursor = mockCursor()
   const collection = mockCollection(cursor)
-  const services = mockServices(collection)
+  const app = new CoreApp(config as any)
+  const services = mockifyMany(app.services, name => preserve.indexOf(name) < 0, m => m.resolves())
+  if (preserve.indexOf('db') < 0) {
+    services.db.collection.returns(collection)
+    services.db.objectID.returnsArg(0)
+  }
   const resetHistory = () => {
     mockReset(cursor)
     mockReset(collection)
     mockReset(services)
   }
-  return { cursor, collection, services, resetHistory }
+  return { app, cursor, collection, services, resetHistory }
 }

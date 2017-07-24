@@ -13,7 +13,8 @@ import {
   SlackService,
   StatsService,
   TemplateService,
-  TokenService
+  TokenService,
+  UserService
 } from './services'
 
 export interface ICoreConfig {
@@ -46,6 +47,7 @@ export interface ICoreConfig {
   keys?: string[]
   port?: number
   prefix?: string
+  quiet?: boolean
   tokens?: { [domain: string]: string }
   router?: {
     prefix?: string
@@ -86,5 +88,6 @@ export interface ICoreServices {
   slack: SlackService
   stats: StatsService
   template: TemplateService
-  token: TokenService
+  token: TokenService,
+  user: UserService
 }

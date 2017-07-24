@@ -15,9 +15,12 @@ import {
   CacheService,
   DbService,
   EmailService,
+  RouterService,
   SlackService,
+  StatsService,
   TemplateService,
-  TokenService
+  TokenService,
+  UserService
 } from './services'
 
 export const coreServices = {
@@ -25,31 +28,36 @@ export const coreServices = {
   cache: CacheService,
   db: DbService,
   email: EmailService,
+  router: RouterService,
   slack: SlackService,
+  stats: StatsService,
   template: TemplateService,
-  token: TokenService
+  token: TokenService,
+  user: UserService
 }
 
-export async function errorReporter(context: Koa.Context, next: Function) {
-  try {
-    await next()
-  } catch (err) {
-    context.message = err.message
-    if (err.status) {
-      context.status = err.status
-    } else {
-      context.status = 500
-      context.app.emit('error', err, context)
+export function errorReporter(config: ICoreConfig): Koa.Middleware {
+  return async (context: Koa.Context, next: Function) => {
+    try {
+      await next()
+    } catch (err) {
+      context.message = err.message
+      if (err.status) {
+        context.status = err.status
+      } else {
+        context.status = 500
+        if (!config.quiet) context.app.emit('error', err, context)
+      }
     }
   }
 }
 
-export abstract class CoreApp<C extends ICoreConfig = ICoreConfig, S extends ICoreServices = ICoreServices> {
+export class CoreApp<C extends ICoreConfig = ICoreConfig, S extends ICoreServices = ICoreServices> {
+  customServices: Record<string, CoreService>
+
   instance: Server
   server: Koa
   services: S
-
-  abstract get customServices(): any
 
   get port(): number {
     return this.instance.address().port
@@ -58,8 +66,9 @@ export abstract class CoreApp<C extends ICoreConfig = ICoreConfig, S extends ICo
   // constructor
   constructor(protected config: C) {
     const services: any = {}
-    this.addServices(services, coreServices)
-    this.addServices(services, this.customServices)
+    each<any>(extend(coreServices, this.customServices), (TheService, name) => {
+      services[name] = new TheService(this.config, services)
+    })
     this.services = services
   }
 
@@ -87,18 +96,12 @@ export abstract class CoreApp<C extends ICoreConfig = ICoreConfig, S extends ICo
     })
   }
 
-  protected addServices(services: any, add: any) {
-    each<any>(add, (TheService, name) => {
-      services[name] = new TheService(this.config, services)
-    })
-  }
-
   // initialize the server
   protected async initServer(): Promise<void> {
     this.server = new Koa()
     if (this.config.keys) this.server.keys = this.config.keys
-    this.server.use(logger())
-    this.server.use(errorReporter)
+    if (!this.config.quiet) this.server.use(logger())
+    this.server.use(errorReporter(this.config))
     this.server.use(cacheControl({ noCache: true }))
     this.server.use(bodyParser())
     this.server.use(session({ store: this.services.cache.sessionStore }))

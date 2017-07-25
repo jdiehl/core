@@ -56,12 +56,17 @@ function mockServices(collection: MockCollection): MockServices {
   return services as MockServices
 }
 
-export function mock(config: Partial<ICoreConfig> = {}, preserve: string | string[] = []): IMock {
+export function mock(
+  config: Partial<ICoreConfig> = {},
+  preserve: string | string[] = [],
+  customServices: any = {}
+): IMock {
   if (!(preserve instanceof Array)) preserve = [preserve]
+  preserve = preserve.concat(Object.keys(customServices))
   if (config.quiet === undefined) config.quiet = true
   const cursor = mockCursor()
   const collection = mockCollection(cursor)
-  const app = new CoreApp(config as any)
+  const app = new CoreApp(config as any, customServices)
   const services = mockifyMany(app.services, name => preserve.indexOf(name) < 0, m => m.resolves())
   if (preserve.indexOf('db') < 0) {
     services.db.collection.returns(collection)

@@ -53,8 +53,6 @@ export function errorReporter(config: ICoreConfig): Koa.Middleware {
 }
 
 export class CoreApp<C extends ICoreConfig = ICoreConfig, S extends ICoreServices = ICoreServices> {
-  customServices: Record<string, CoreService>
-
   instance: Server
   server: Koa
   services: S
@@ -64,7 +62,7 @@ export class CoreApp<C extends ICoreConfig = ICoreConfig, S extends ICoreService
   }
 
   // constructor
-  constructor(protected config: C) {
+  constructor(public config: C, public customServices?: Record<string, CoreService>) {
     const services: any = {}
     each<any>(extend(coreServices, this.customServices), (TheService, name) => {
       services[name] = new TheService(this.config, services)
@@ -112,12 +110,12 @@ export class CoreApp<C extends ICoreConfig = ICoreConfig, S extends ICoreService
 
     // beforeInit
     await eachAsync<CoreService>(this.services, service => {
-      if (service.beforeInit) service.beforeInit()
+      if (service.beforeInit) return service.beforeInit()
     })
 
     // init
-    await eachAsync<CoreService>(this.services, service => {
-      if (service.init) service.init()
+    await eachAsync<CoreService>(this.services, (service, name) => {
+      if (service.init) return service.init()
     })
 
     // install

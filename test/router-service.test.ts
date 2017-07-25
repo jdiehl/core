@@ -6,12 +6,9 @@ import { del, get, post, put } from 'request-promise-native'
 import { stub } from 'sinon'
 
 import { CoreService, Delete, Get, Post, Put, Router, RouterService } from '../'
-import { expectRejection, mockServer } from './util'
+import { expectRejection, mock } from './util'
 
 describe('router', () => {
-  let service: CoreService
-  let server: Server
-  let host: string
   const sBefore = stub()
   const sAfter = stub().returnsArg(2)
   const sGet = stub().returns('get-ok')
@@ -34,10 +31,14 @@ describe('router', () => {
     @Get('/custom', sCustomMapping) async custom(...args: any[]) { return sCustom.apply(null, args) }
   }
 
+  const { app, collection, services, resetHistory } = mock({}, [], { service: Service })
+  const service: Service = (app.services as any).service
+  let host: string
+
   before(async () => {
-    service = new Service({} as any, {} as any)
-    server = await mockServer(service)
-    host = `http://127.0.0.1:${server.address().port}`
+    await app.init()
+    await app.listen()
+    host = `http://127.0.0.1:${app.instance.address().port}`
   })
 
   beforeEach(() => {
@@ -50,8 +51,8 @@ describe('router', () => {
     sDel.resetHistory()
   })
 
-  after((done) => {
-    server.close(done)
+  after(async () => {
+    await app.close()
   })
 
   it('should create a router', () => {

@@ -5,13 +5,9 @@ import { del, get, post, put } from 'request-promise-native'
 import { stub } from 'sinon'
 
 import { CoreModel } from '../'
-import { expectRejection, mock, mockServer } from './util'
+import { expectRejection, mock } from './util'
 
 describe('core-model-router', () => {
-  const { services, resetHistory } = mock()
-  let model: CoreModel
-  let server: Server
-  let host: string
   const sFindOne = stub().returns('find-one-ok')
   const sFind = stub().returns('find-ok')
   const sInsert = stub().returns('insert-ok')
@@ -27,11 +23,13 @@ describe('core-model-router', () => {
     async delete(...args: any[]) { return sDelete(...args) }
   }
 
+  const { app, collection, services, resetHistory } = mock({}, [], { model: Model })
+  let host: string
+
   before(async () => {
-    model = new Model({} as any, services as any)
-    await model.init()
-    server = await mockServer(model)
-    host = `http://127.0.0.1:${server.address().port}`
+    await app.init()
+    await app.listen()
+    host = `http://127.0.0.1:${app.instance.address().port}`
   })
 
   beforeEach(() => {
@@ -43,8 +41,8 @@ describe('core-model-router', () => {
     sDelete.resetHistory()
   })
 
-  after((done) => {
-    server.close(done)
+  after(async () => {
+    await app.close()
   })
 
   it('GET / should not call find', async () => {

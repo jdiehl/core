@@ -41,8 +41,8 @@ export function errorReporter(config: ICoreConfig): Koa.Middleware {
     try {
       await next()
     } catch (err) {
-      context.message = err.message
-      if (err.status) {
+      context.message = err ? (err.message ? err.message : err.toString()) : 'Unknown error'
+      if (err && err.status) {
         context.status = err.status
       } else {
         context.status = 500
@@ -78,6 +78,7 @@ export class CoreApp<C extends ICoreConfig = ICoreConfig, S extends ICoreService
 
   // start the server
   async listen(): Promise<void> {
+    if (this.instance) throw new Error('Server is already listening.')
     return new Promise<void>((resolve, reject) => {
       this.instance = this.server.listen(this.config.port, resolve)
       this.instance.on('error', (err: Error) => reject(err))
@@ -91,6 +92,13 @@ export class CoreApp<C extends ICoreConfig = ICoreConfig, S extends ICoreService
         if (err) return reject(err)
         resolve()
       })
+    })
+  }
+
+  async destroy(): Promise<void> {
+    if (this.instance) await this.close()
+    eachAsync(this.services, async s => {
+      if (s.destroy) await s.destroy()
     })
   }
 

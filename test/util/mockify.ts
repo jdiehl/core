@@ -1,20 +1,21 @@
 import { each } from '@-)/utils'
-import { SinonStub, stub } from 'sinon'
 
 export type MockifiedObjects<T> = { [P in keyof T]: MockifiedObject<T[P]> } & { resetHistory: () => void }
-export type MockifiedObject<T> = { [K in keyof T]: SinonStub }
+export type MockifiedObject<T> = { [K in keyof T]: jest.Mock<any> }
 export type MockFilter = (name: string) => boolean
-export type MockInit = (stub: SinonStub, name: string) => void
+export type MockInit = (stub: jest.Mock<any>, name: string) => void
+
+const x = jest.fn()
 
 export function mockify<T = object>(obj: T, init?: MockInit, objSource = obj): MockifiedObject<T> {
   const mock: any = {}
-  const stubs: SinonStub[] = []
+  const stubs: Array<jest.Mock<any>> = []
 
   function mockifyPrototype(prototype: any) {
     if (!prototype.__proto__) return
     Object.getOwnPropertyNames(prototype).forEach(name => {
       if (typeof prototype[name] === 'function') {
-        mock[name] = stub()
+        mock[name] = jest.fn()
         if (init) init(mock[name], name)
         stubs.push(mock[name])
       }
@@ -24,7 +25,7 @@ export function mockify<T = object>(obj: T, init?: MockInit, objSource = obj): M
 
   mockifyPrototype(obj)
 
-  mock.resetHistory = () => stubs.forEach(s => s.resetHistory())
+  mock.mockClear = () => stubs.forEach(s => s.mockClear())
   return mock
 }
 
@@ -49,8 +50,30 @@ export function mockifyClasses<T = Record<string, Function>>(obj: T, init?: Mock
   return mock
 }
 
+export function mockClear(obj: object): void {
+  each(obj as any, o => {
+    if (o.mockClear) o.mockClear()
+  })
+}
+
 export function mockReset(obj: object): void {
   each(obj as any, o => {
-    if (o.resetHistory) o.resetHistory()
+    if (o.mockReset) o.mockReset()
   })
+}
+
+export function mockYield(...returns: any[]) {
+  // tslint:disable-next-line:only-arrow-functions
+  return function() {
+    const fn = arguments[arguments.length - 1]
+    if (typeof fn === 'function') fn(...returns)
+  }
+}
+
+export function mockResolve(value?: any) {
+  return async () => value
+}
+
+export function mockReject(value?: any) {
+  return async () => { throw value }
 }

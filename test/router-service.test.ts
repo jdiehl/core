@@ -14,7 +14,7 @@ const sPost = jest.fn()
 const sPut = jest.fn()
 const sDel = jest.fn()
 const sCustom = jest.fn()
-const sCustomMapping = jest.fn()
+const sCustomMapping = jest.fn().mockReturnValue([])
 
 @Router({ prefix: '/test', redirect: { '/a': '/b' } })
 class Service extends CoreService {
@@ -74,13 +74,15 @@ test('get() should prefix the routes', async () => {
 test('get() should redirect', async () => {
   const options = { url: `${host}/test/a`, followRedirect: false, resolveWithFullResponse: true }
   await expect(get(options)).rejects
-.toMatchObject({ statusCode: 301, message: '301 - "Redirecting to <a href=\\"/b\\">/b</a>."' })
+  .toMatchObject({ statusCode: 301, message: '301 - "Redirecting to <a href=\\"/b\\">/b</a>."' })
 })
 
 test('should create a get route', async () => {
+  const context = { req: expect.anything(), res: expect.anything(), params: expect.anything() }
   const res = await get(`${host}/test/get`)
   expect(res).toBe('get-ok')
   expect(sGet).toHaveBeenCalledTimes(1)
+  expect(sGet).toHaveBeenCalledWith(expect.objectContaining(context))
 })
 
 test('should create a get route with parameters', async () => {

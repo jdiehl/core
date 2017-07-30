@@ -28,15 +28,16 @@ export function Route(method: RouteMethod, path: string, paramMapping?: string[]
     const router = createRouter(target)
     router[method](path, async context => {
 
-      // map request parameters to method parameters
-      let mapping: string[]
-      if (typeof paramMapping === 'function') {
-        mapping = paramMapping(context)
+      let params: any[]
+      if (paramMapping) {
+        // map request parameters to method parameters
+        let mapping = typeof paramMapping === 'function' ? paramMapping(context) : paramMapping
+        if (!(mapping instanceof Array)) mapping = [mapping]
+        params = mapping.map(key => getKeyPath(context, key))
       } else {
-        mapping = paramMapping || []
+        // OR: pass on the context
+        params = [context]
       }
-      if (!(mapping instanceof Array)) mapping = [mapping]
-      const params = mapping.map(key => getKeyPath(context, key))
 
       // process before
       if (target.before) {
@@ -44,7 +45,8 @@ export function Route(method: RouteMethod, path: string, paramMapping?: string[]
       }
 
       // execute method
-      let res = target[propertyKey].apply(target, params)
+      console.log(target)
+      let res = target[propertyKey](...params)
       if (res instanceof Promise) res = await res
 
       // process after

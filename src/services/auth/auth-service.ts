@@ -2,7 +2,7 @@ import * as Koa from 'koa'
 
 import { ICoreContext } from '../../core-interface'
 import { CoreService } from '../../core-service'
-import { Router } from '../router/router-decorators'
+import { Get, Post, Router } from '../router/router-decorators'
 import { IUser } from '../user/user-interface'
 import { ErrorUnauthorized } from '../user/user-service'
 import { IAuthToken } from './auth-interface'
@@ -14,6 +14,9 @@ export class AuthService<Profile = {}> extends CoreService {
 
   async init() {
     if (this.config.auth && this.config.auth.prefix) this.router!.prefix(this.config.auth.prefix)
+
+    // TODO: Replace this with @Get / @Post
+    // Currently, this is not correctly set.
     this.router!.get('/', async context => await this.userRoute(context))
     this.router!.post('/', async context => await this.updateRoute(context))
     this.router!.post('/login', async context => await this.loginRoute(context))
@@ -34,30 +37,35 @@ export class AuthService<Profile = {}> extends CoreService {
 
   // routes
 
-  protected async userRoute(context: ICoreContext) {
+  // @Get('/')
+  async userRoute(context: ICoreContext) {
     if (!context.user) throw new ErrorUnauthorized()
     context.body = context.user
   }
 
-  protected async updateRoute(context: ICoreContext) {
+  // @Post('/')
+  async updateRoute(context: ICoreContext) {
     if (!context.user) throw new ErrorUnauthorized()
-    await this.services.user.update(context.user._id, context.request.body)
+    await this.services.user.update(context.user._id.toString(), context.request.body)
     context.status = 200
   }
 
-  protected async loginRoute(context: ICoreContext) {
+  // @Post('/login')
+  async loginRoute(context: ICoreContext) {
     const { email, password } = context.request.body
     const user = await this.services.user.authenticate(email, password) as any
     context.session.user = await this.services.user.serialize(user)
     context.body = user
   }
 
-  protected async logoutRoute(context: ICoreContext) {
+  // @Post('/logout')
+  async logoutRoute(context: ICoreContext) {
     delete context.session.user
     context.status = 200
   }
 
-  protected async signupRoute(context: ICoreContext) {
+  // @Post('/signup')
+  async signupRoute(context: ICoreContext) {
     const { email, password } = context.request.body
     const role = 'user'
     const verified = !(this.config.auth && this.config.auth.verifyEmail)
@@ -72,7 +80,8 @@ export class AuthService<Profile = {}> extends CoreService {
     context.body = user
   }
 
-  protected async verifyRoute(context: ICoreContext) {
+  // @Get('/verify/:token')
+  async verifyRoute(context: ICoreContext) {
     const { token } = context.params
     const info = await this.services.token.use<IAuthToken>(token)
     if (!info || info.type !== 'signup') throw new ErrorUnauthorized()

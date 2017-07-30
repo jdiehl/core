@@ -2,8 +2,8 @@ import * as Koa from 'koa'
 import * as Router from 'koa-router'
 import { ConnectionOptions } from 'tls'
 
-import { IUser } from './services/auth/auth-interface'
 import { EmailSendService } from './services/email/email-interface'
+import { IUser } from './services/user/user-interface'
 
 import {
   AuthService,
@@ -14,7 +14,8 @@ import {
   StatsService,
   TemplateService,
   TokenService,
-  UserService
+  UserService,
+  ValidationService
 } from './services'
 
 export interface ICoreConfig {
@@ -89,5 +90,6 @@ export interface ICoreServices {
   stats: StatsService
   template: TemplateService
   token: TokenService,
-  user: UserService
+  user: UserService,
+  validation: ValidationService
 }

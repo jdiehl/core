@@ -8,6 +8,7 @@ export { StatsService } from './stats/stats-service'
 export { TemplateService } from './template/template-service'
 export { TokenService } from './token/token-service'
 export { UserService } from './user/user-service'
+export { ValidationService } from './validation/validation-service'
 
 export {
   IDbCollection,
@@ -23,3 +24,4 @@ export { IUser } from './user/user-interface'
 export { EmailSendService, IEmailAttachment, IEmailSendOptions, IEmailSendResult } from './email/email-interface'
 export { IRouterOptions } from './router/router-interface'
 export { Delete, Get, Post, Put, Router } from './router/router-decorators'
+export { IValidationSpec, Validator, ValidatorType } from './validation/validation-interface'

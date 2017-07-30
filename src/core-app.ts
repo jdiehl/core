@@ -20,7 +20,8 @@ import {
   StatsService,
   TemplateService,
   TokenService,
-  UserService
+  UserService,
+  ValidationService
 } from './services'
 
 export const coreServices = {
@@ -33,7 +34,8 @@ export const coreServices = {
   stats: StatsService,
   template: TemplateService,
   token: TokenService,
-  user: UserService
+  user: UserService,
+  validation: ValidationService
 }
 
 export function errorReporter(config: ICoreConfig): Koa.Middleware {

@@ -65,7 +65,7 @@ export class CacheService extends CoreService {
   }
 
   async destroy(): Promise<void> {
-    await this.client.destroy()
+    if (this.client) await this.client.destroy()
   }
 
   install(server: Koa): void {

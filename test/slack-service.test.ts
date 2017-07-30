@@ -1,39 +1,30 @@
-import { expect } from 'chai'
-import * as request from 'request-promise-native'
-import { SinonStub, stub } from 'sinon'
+jest.mock('request-promise-native')
 
 import { SlackService } from '../'
 import { mock } from './util'
 
-describe('slack', () => {
-  const { services, resetHistory } = mock()
-  let slack: SlackService
-  const requestPost = request.post
-  const json: SinonStub = stub().resolves()
-  const post: SinonStub = stub().returns({ json })
+const config = { from: 'me', host: 'host', port: 1234, pool: {} }
+const { app, services } = mock({ slack: 'my/key' }, 'slack')
+const slack = services.slack as any as SlackService
+let request: any
 
-  before(() => {
-    (request as any).post = post
-  })
+beforeAll(async () => {
+  request = require('request-promise-native')
+  await app.init()
+})
 
-  beforeEach(async () => {
-    resetHistory()
-    post.resetHistory()
-    slack = new SlackService({ slack: 'my/key' } as any, services as any)
-  })
+afterAll(async () => {
+  await app.destroy()
+})
 
-  after(() => {
-    (request as any).post = requestPost
-  })
+afterEach(() => {
+  request.__reset()
+})
 
-  it('should call the slack backend to post a notification', async () => {
-    const attachments = [{ a: 1 }]
-    const text = 'something'
-    await slack.post(text, attachments)
-    expect(post.callCount).to.equal(1)
-    expect(post.args[0]).to.deep.equal(['https://hooks.slack.com/services/my/key'])
-    expect(json.callCount).to.equal(1)
-    expect(json.args[0]).to.deep.equal([{ attachments, text }])
-  })
-
+test('should call the slack backend to post a notification', async () => {
+  await slack.post('something', [{ a: 1 }])
+  expect(request.post).toHaveBeenCalledTimes(1)
+  expect(request.post).toHaveBeenCalledWith('https://hooks.slack.com/services/my/key')
+  expect(request.__cursor.json).toHaveBeenCalledTimes(1)
+  expect(request.__cursor.json).toHaveBeenCalledWith({ attachments: [{ a: 1 }], text: 'something' })
 })

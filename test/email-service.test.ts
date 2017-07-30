@@ -1,77 +1,36 @@
-import { expect } from 'chai'
-import * as nodemailer from 'nodemailer'
-import { stub } from 'sinon'
+jest.mock('nodemailer')
 
 import { EmailService } from '../'
 import { mock } from './util'
 
-const LiveTest = {
-  from: 'from@example.com',
-  pass: 'xxx',
-  service: 'Zoho',
-  to: 'to@example.com'
-}
+const config = { from: 'me', host: 'host', port: 1234, pool: {} }
+const { app, services } = mock({ email: config }, 'email')
+const email = services.email as any as EmailService
+let nodemailer: any
 
-describe('email', () => {
-  const { services, resetHistory } = mock()
-  let email: EmailService
-  const nodemailerCreateTransport = nodemailer.createTransport
-  const sendMail = stub().resolves('ok')
-  const createTransport = stub().returns({ sendMail })
+beforeAll(async () => {
+  nodemailer = require('nodemailer')
+  await app.init()
+})
 
-  describe.skip('live', () => {
+afterAll(async () => {
+  await app.destroy()
+})
 
-    beforeEach(async () => {
-      resetHistory()
-      email = new EmailService({ email: {
-        auth: { user: LiveTest.from, pass: LiveTest.pass },
-        from: LiveTest.from,
-        logger: true,
-        service: LiveTest.service
-      } } as any, services as any)
-      await email.init()
-    })
+afterEach(() => {
+  nodemailer.__reset()
+})
 
-    it('should send an email', async () => {
-      const res = await email.send({ to: LiveTest.to, subject: 'Test Email', text: 'No text' })
-      expect(res.accepted).to.deep.equal([LiveTest.to])
-      expect(res.rejected).to.deep.equal([])
-    }).timeout(10000)
+test('should call createTransport', async () => {
+  const options = { host: 'host', port: 1234, pool: { pool: true } }
+  expect(nodemailer.createTransport).toHaveBeenCalledTimes(1)
+  expect(nodemailer.createTransport).toHaveBeenCalledWith(options, { from: 'me' })
+})
 
-  })
-
-  describe('mock', () => {
-
-    before(() => {
-      (nodemailer as any).createTransport = createTransport
-    })
-
-    beforeEach(async () => {
-      resetHistory()
-      sendMail.resetHistory()
-      createTransport.resetHistory()
-      const config = { email: { from: 'me', host: 'host', port: 1234, pool: {} } }
-      email = new EmailService(config as any, services as any)
-      await email.init()
-    })
-
-    after(() => {
-      (nodemailer as any).createTransport = nodemailerCreateTransport
-    })
-
-    it('should call createTransport', async () => {
-      expect(createTransport.callCount).to.equal(1)
-      const options = { host: 'host', port: 1234, pool: { pool: true } }
-      expect(createTransport.args[0]).to.deep.equal([options, { from: 'me' }])
-    })
-
-    it('send() should call sendMail', async () => {
-      const res = await email.send({ to: 'you', subject: 'hello', text: 'world' })
-      expect(res).to.equal('ok')
-      expect(sendMail.callCount).to.equal(1)
-      expect(sendMail.args[0]).to.deep.equal([{ to: 'you', subject: 'hello', text: 'world' }])
-    })
-
-  })
-
+test('send() should call sendMail', async () => {
+  const options = { to: 'you', subject: 'hello', text: 'world' }
+  const res = await email.send(options)
+  expect(res).toBe('send-ok')
+  expect(nodemailer.__transport.sendMail).toHaveBeenCalledTimes(1)
+  expect(nodemailer.__transport.sendMail).toHaveBeenCalledWith(options)
 })

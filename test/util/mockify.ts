@@ -44,7 +44,6 @@ export function mockifyMany<T = Record<string, object>>(
 export function mockifyClasses<T = Record<string, Function>>(obj: T, init?: MockInit): MockifiedObjects<T> {
   const mock: any = {}
   each(obj as any, (ClassObject, name) => {
-    console.log(name)
     mock[name] = mockify(ClassObject.prototype, init)
   })
   return mock

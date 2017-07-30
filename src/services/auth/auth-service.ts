@@ -1,5 +1,4 @@
 import * as Koa from 'koa'
-import { crypto } from 'mz'
 
 import { ICoreContext } from '../../core-interface'
 import { CoreService } from '../../core-service'

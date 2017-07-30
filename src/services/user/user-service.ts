@@ -40,7 +40,6 @@ export class UserService<Profile = {}> extends CoreModel<IUserInternal<Profile>,
   // require admin user for all methods
   async before(context: ICoreContext, key: keyof UserService, params: any): Promise<void> {
     if (!context.user || context.user.role !== 'admin') {
-      console.log(401)
       throw new ErrorUnauthorized()
     }
   }

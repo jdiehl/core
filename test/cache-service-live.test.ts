@@ -1,7 +1,7 @@
+jest.unmock('redis')
+
 import { wait } from '@-)/utils'
 import { mock } from './util'
-
-jest.unmock('redis')
 
 function runLiveTests(config: string) {
   const { app, services, reset } = mock({ cache: config }, 'cache')
@@ -88,4 +88,4 @@ function runLiveTests(config: string) {
 }
 
 describe('mem:', () => runLiveTests('mem://'))
-describe('redis:localhost', () => runLiveTests('redis://127.0.0.1:6379/3'))
+describe.skip('redis:localhost', () => runLiveTests('redis://127.0.0.1:6379/3'))

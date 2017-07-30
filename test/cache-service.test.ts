@@ -1,7 +1,7 @@
+jest.mock('redis')
+
 import { CacheService } from '../'
 import { mock, mockYield } from './util'
-
-jest.mock('redis')
 
 const { app, services, reset } = mock({ cache: 'redis://host:1234/13'}, 'cache')
 const cache = services.cache as any as CacheService

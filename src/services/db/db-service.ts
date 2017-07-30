@@ -30,7 +30,7 @@ export class DbService extends CoreService {
   }
 
   async destroy() {
-    await this.client.destroy()
+    if (this.client) await this.client.destroy()
   }
 
   // private

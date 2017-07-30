@@ -1,23 +1,18 @@
-import { expect } from 'chai'
-import { stub } from 'sinon'
-
 import { CoreModel } from '../'
 import { mock } from './util'
 
 describe('core-model', () => {
-  const { cursor, collection, services, resetHistory } = mock()
-  const afterFindOne = stub().returnsArg(0)
-  const afterFind = stub().returnsArg(0)
-  const afterInsert = stub().returnsArg(0)
-  const afterUpdate = stub()
-  const afterDelete = stub()
-  const beforeFindOne = stub()
-  const beforeFind = stub().returnsArg(0)
-  const beforeInsert = stub().returnsArg(0)
-  const beforeUpdate = stub().returnsArg(1)
-  const beforeDelete = stub()
-  const transform = stub().returnsArg(0)
-  let model: CoreModel
+  const afterFindOne = jest.fn().mockImplementation(x => x)
+  const afterFind = jest.fn().mockImplementation(x => x)
+  const afterInsert = jest.fn().mockImplementation(x => x)
+  const afterUpdate = jest.fn()
+  const afterDelete = jest.fn()
+  const beforeFindOne = jest.fn()
+  const beforeFind = jest.fn().mockImplementation(x => x)
+  const beforeInsert = jest.fn().mockImplementation(x => x)
+  const beforeUpdate = jest.fn().mockImplementation((x, y) => y)
+  const beforeDelete = jest.fn()
+  const transform = jest.fn().mockImplementation(x => x)
 
   class TestModel extends CoreModel {
     collectionName: 'test'
@@ -34,144 +29,151 @@ describe('core-model', () => {
     async transform(obj: any) { return transform(obj) }
   }
 
+  const { app, cursor, collection, services, reset } = mock({}, [], { model: TestModel })
+  const model = (services as any).model as CoreModel
+
+  beforeAll(async () => {
+    await app.init()
+  })
+
+  afterAll(async () => {
+    await app.destroy()
+  })
+
   beforeEach(async () => {
-    resetHistory()
-    afterFindOne.resetHistory()
-    afterFind.resetHistory()
-    afterInsert.resetHistory()
-    afterUpdate.resetHistory()
-    afterDelete.resetHistory()
-    beforeFindOne.resetHistory()
-    beforeFind.resetHistory()
-    beforeInsert.resetHistory()
-    beforeUpdate.resetHistory()
-    beforeDelete.resetHistory()
-    transform.resetHistory()
-    model = new TestModel({} as any, services as any)
-    await model.init()
+    reset()
+    afterFindOne.mockClear()
+    afterFind.mockClear()
+    afterInsert.mockClear()
+    afterUpdate.mockClear()
+    afterDelete.mockClear()
+    beforeFindOne.mockClear()
+    beforeFind.mockClear()
+    beforeInsert.mockClear()
+    beforeUpdate.mockClear()
+    beforeDelete.mockClear()
+    transform.mockClear()
   })
 
   it('findOne() should call beforeFindOne', async () => {
     await model.findOne('id')
-    expect(beforeFindOne.callCount).to.equal(1)
-    expect(beforeFindOne.args[0]).to.deep.equal(['id'])
+    expect(beforeFindOne).toHaveBeenCalledTimes(1)
+    expect(beforeFindOne).toHaveBeenCalledWith('id')
   })
 
   it('findOne() should call afterFindOne', async () => {
     await model.findOne('id')
-    expect(afterFindOne.callCount).to.equal(1)
-    expect(afterFindOne.args[0]).to.deep.equal([{ _id: 'id1' }])
+    expect(afterFindOne).toHaveBeenCalledTimes(1)
+    expect(afterFindOne).toHaveBeenCalledWith({ _id: 'id1' })
   })
 
   it('findOne() should call transform', async () => {
     await model.findOne('id')
-    expect(transform.callCount).to.equal(1)
-    expect(transform.args[0]).to.deep.equal([{ _id: 'id1' }])
+    expect(transform).toHaveBeenCalledTimes(1)
+    expect(transform).toHaveBeenCalledWith({ _id: 'id1' })
   })
 
   it('findOne() should fetch a record', async () => {
     const res = await model.findOne('id')
-    expect(res).to.deep.equal({ _id: 'id1' })
-    expect(collection.findOne.callCount).to.equal(1)
-    expect(collection.findOne.args[0]).to.deep.equal([{ _id: 'id' }])
+    expect(res).toEqual({ _id: 'id1' })
+    expect(collection.findOne).toHaveBeenCalledTimes(1)
+    expect(collection.findOne).toHaveBeenCalledWith({ _id: 'id' })
   })
 
   it('find() should call beforeFind', async () => {
-    const a = {}
-    const b = {}
+    const a = { foo: 'bar' }
+    const b = { skip: 3 }
     await model.find(a, b)
-    expect(beforeFind.callCount).to.equal(1)
-    expect(beforeFind.args[0]).to.have.length(2)
-    expect(beforeFind.args[0][0]).to.equal(a)
-    expect(beforeFind.args[0][1]).to.equal(b)
+    expect(beforeFind).toHaveBeenCalledTimes(1)
+    expect(beforeFind).toHaveBeenLastCalledWith(a, b)
   })
 
   it('find() should call afterFind', async () => {
     await model.find()
-    expect(afterFind.callCount).to.equal(1)
-    expect(afterFind.args[0]).to.deep.equal([[{ _id: 'id1' }, { _id: 'id2' }]])
+    expect(afterFind).toHaveBeenCalledTimes(1)
+    expect(afterFind).toHaveBeenCalledWith([{ _id: 'id1' }, { _id: 'id2' }])
   })
 
   it('find() should call transform', async () => {
     await model.find()
-    expect(transform.callCount).to.equal(2)
-    expect(transform.args[0]).to.deep.equal([{ _id: 'id1' }])
-    expect(transform.args[1]).to.deep.equal([{ _id: 'id2' }])
+    expect(transform).toHaveBeenCalledTimes(2)
+    expect(transform.mock.calls[0]).toEqual([{ _id: 'id1' }])
+    expect(transform.mock.calls[1]).toEqual([{ _id: 'id2' }])
   })
 
   it('findOne() should fetch records', async () => {
     await model.find({ query: 'this' }, { sort: { name: 1 }, skip: 2, limit: 3, project: { key: 'no' } })
-    expect(collection.find.callCount).to.equal(1)
-    expect(collection.find.args[0]).to.deep.equal([{ query: 'this' }])
-    expect(cursor.sort.callCount).to.equal(1)
-    expect(cursor.sort.args[0]).to.deep.equal([{ name: 1 }])
-    expect(cursor.skip.callCount).to.equal(1)
-    expect(cursor.skip.args[0]).to.deep.equal([2])
-    expect(cursor.limit.callCount).to.equal(1)
-    expect(cursor.limit.args[0]).to.deep.equal([3])
-    expect(cursor.project.callCount).to.equal(1)
-    expect(cursor.project.args[0]).to.deep.equal([{ key: 'no' }])
+    expect(collection.find).toHaveBeenCalledTimes(1)
+    expect(collection.find).toHaveBeenCalledWith({ query: 'this' })
+    expect(cursor.sort).toHaveBeenCalledTimes(1)
+    expect(cursor.sort).toHaveBeenCalledWith({ name: 1 })
+    expect(cursor.skip).toHaveBeenCalledTimes(1)
+    expect(cursor.skip).toHaveBeenCalledWith(2)
+    expect(cursor.limit).toHaveBeenCalledTimes(1)
+    expect(cursor.limit).toHaveBeenCalledWith(3)
+    expect(cursor.project).toHaveBeenCalledTimes(1)
+    expect(cursor.project).toHaveBeenCalledWith({ key: 'no' })
   })
 
   it('insert() should call beforeInsert', async () => {
     await model.insert({ a: 1 })
-    expect(beforeInsert.callCount).to.equal(1)
-    expect(beforeInsert.args[0]).to.deep.equal([{ a: 1 }])
+    expect(beforeInsert).toHaveBeenCalledTimes(1)
+    expect(beforeInsert).toHaveBeenCalledWith({ a: 1 })
   })
 
   it('insert() should call afterInsert', async () => {
     await model.insert({ a: 1 })
-    expect(afterInsert.callCount).to.equal(1)
-    expect(afterInsert.args[0]).to.deep.equal([{ _id: 'id1', a: 1 }])
+    expect(afterInsert).toHaveBeenCalledTimes(1)
+    expect(afterInsert).toHaveBeenCalledWith({ _id: 'id1', a: 1 })
   })
 
   it('insert() should call transform', async () => {
     await model.insert({ a: 1 })
-    expect(transform.callCount).to.equal(1)
-    expect(transform.args[0]).to.deep.equal([{ _id: 'id1', a: 1 }])
+    expect(transform).toHaveBeenCalledTimes(1)
+    expect(transform).toHaveBeenCalledWith({ _id: 'id1', a: 1 })
   })
 
   it('insert() should insert a record', async () => {
     const res = await model.insert({ name: 'susan' })
-    expect(res).to.deep.equal({ _id: 'id1', name: 'susan' })
-    expect(collection.insertOne.callCount).to.equal(1)
-    expect(collection.insertOne.args[0]).to.deep.equal([{ name: 'susan' }])
+    expect(res).toEqual({ _id: 'id1', name: 'susan' })
+    expect(collection.insertOne).toHaveBeenCalledTimes(1)
+    expect(collection.insertOne).toHaveBeenCalledWith({ name: 'susan' })
   })
 
   it('update() should call beforeUpdate', async () => {
     await model.update('id', { b: 2 })
-    expect(beforeUpdate.callCount).to.equal(1)
-    expect(beforeUpdate.args[0]).to.deep.equal(['id', { b: 2 }])
+    expect(beforeUpdate).toHaveBeenCalledTimes(1)
+    expect(beforeUpdate).toHaveBeenCalledWith('id', { b: 2 })
   })
 
   it('update() should call afterUpdate', async () => {
     await model.update('id', { b: 2 })
-    expect(afterUpdate.callCount).to.equal(1)
-    expect(afterUpdate.args[0]).to.deep.equal(['id', { b: 2 }])
+    expect(afterUpdate).toHaveBeenCalledTimes(1)
+    expect(afterUpdate).toHaveBeenCalledWith('id', { b: 2 })
   })
 
   it('update() should update a record', async () => {
     await model.update('id', { x: 1 })
-    expect(collection.updateOne.callCount).to.equal(1)
-    expect(collection.updateOne.args[0]).to.deep.equal([{ _id: 'id' }, { $set: { x: 1 } }])
+    expect(collection.updateOne).toHaveBeenCalledTimes(1)
+    expect(collection.updateOne).toHaveBeenCalledWith({ _id: 'id' }, { $set: { x: 1 } })
   })
 
   it('delete() should call beforeDelete', async () => {
     await model.delete('id')
-    expect(beforeDelete.callCount).to.equal(1)
-    expect(beforeDelete.args[0]).to.deep.equal(['id'])
+    expect(beforeDelete).toHaveBeenCalledTimes(1)
+    expect(beforeDelete).toHaveBeenCalledWith('id')
   })
 
   it('delete() should call afterDelete', async () => {
     await model.delete('id')
-    expect(afterDelete.callCount).to.equal(1)
-    expect(afterDelete.args[0]).to.deep.equal(['id'])
+    expect(afterDelete).toHaveBeenCalledTimes(1)
+    expect(afterDelete).toHaveBeenCalledWith('id')
   })
 
   it('delete() should delete a record', async () => {
     await model.delete('id')
-    expect(collection.deleteOne.callCount).to.equal(1)
-    expect(collection.deleteOne.args[0]).to.deep.equal([{ _id: 'id' }])
+    expect(collection.deleteOne).toHaveBeenCalledTimes(1)
+    expect(collection.deleteOne).toHaveBeenCalledWith({ _id: 'id' })
   })
 
 })

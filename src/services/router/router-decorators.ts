@@ -46,7 +46,7 @@ export function Route(method: RouteMethod, path: string, paramMapping?: string[]
 
       // execute method
       let res = target[propertyKey](...params)
-      if (res instanceof Promise) res = await res
+      if (res && (res as any).then) res = await res
 
       // process after
       if (target.after) {

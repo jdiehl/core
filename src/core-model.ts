@@ -13,10 +13,10 @@ export interface ICoreModelFindOptions {
 }
 
 export abstract class CoreModel<
-  C extends ICoreConfig = ICoreConfig,
-  S extends ICoreServices = ICoreServices,
   Int extends IDbObject = any,
-  Ext extends IDbObject = Int
+  Ext extends IDbObject = Int,
+  C extends ICoreConfig = ICoreConfig,
+  S extends ICoreServices = ICoreServices
 > extends CoreService<C, S> {
   protected abstract collectionName: string
   protected collection: IDbCollection

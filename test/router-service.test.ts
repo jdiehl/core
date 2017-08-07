@@ -51,7 +51,7 @@ beforeEach(() => {
   sPut.mockReturnValue('put-ok').mockClear()
   sDel.mockReturnValue('del-ok').mockClear()
   sCustom.mockReturnValue('custom-ok').mockClear()
-  sCustomMapping.mockReturnValue(['query.a', 'query.b']).mockClear()
+  sCustomMapping.mockReturnValue(['foo', 'bar']).mockClear()
 })
 
 test('should create a router', () => {
@@ -117,7 +117,7 @@ test('should create a get route with custom paramMapping', async () => {
   const res = await get(`${host}/test/custom?a=1&b=2`)
   expect(res).toBe('custom-ok')
   expect(sCustom).toHaveBeenCalledTimes(1)
-  expect(sCustom).toHaveBeenLastCalledWith('1', '2')
+  expect(sCustom).toHaveBeenLastCalledWith('foo', 'bar')
   expect(sCustomMapping).toHaveBeenCalledTimes(1)
   expect(sCustomMapping).toHaveBeenCalledWith(expect.any(Object))
 })

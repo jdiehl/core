@@ -13,16 +13,18 @@ export class AuthService<Profile = {}> extends CoreService {
   // CoreService
 
   async init() {
-    if (this.config.auth && this.config.auth.prefix) this.router!.prefix(this.config.auth.prefix)
+    const { auth } = this.config
+    const prefix = auth && auth.prefix ? auth.prefix : 'auth'
+    this.router!.prefix(prefix)
 
     // TODO: Replace this with @Get / @Post
     // Currently, this is not correctly set.
-    this.router!.get('/', async context => await this.userRoute(context))
-    this.router!.post('/', async context => await this.updateRoute(context))
-    this.router!.post('/login', async context => await this.loginRoute(context))
-    this.router!.post('/logout', async context => await this.logoutRoute(context))
-    this.router!.post('/signup', async context => await this.signupRoute(context))
-    this.router!.get('/verify/:token', async context => await this.verifyRoute(context))
+    Get('/')(this, 'userRoute')
+    Post('/')(this, 'updateRoute')
+    Post('/login')(this, 'loginRoute')
+    Post('/logout')(this, 'logoutRoute')
+    Post('/signup')(this, 'signupRoute')
+    Get('/verify/:token')(this, 'verifyRoute')
   }
 
   install(server: Koa) {

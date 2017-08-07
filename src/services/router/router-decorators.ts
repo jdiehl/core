@@ -29,11 +29,12 @@ export function Route(method: RouteMethod, path: string, paramMapping?: string[]
     router[method](path, async context => {
 
       let params: any[]
-      if (paramMapping) {
+      if (typeof paramMapping === 'function') {
+        params = paramMapping(context)
+      } else if (paramMapping) {
         // map request parameters to method parameters
-        let mapping = typeof paramMapping === 'function' ? paramMapping(context) : paramMapping
-        if (!(mapping instanceof Array)) mapping = [mapping]
-        params = mapping.map(key => getKeyPath(context, key))
+        if (!(paramMapping instanceof Array)) paramMapping = [paramMapping]
+        params = paramMapping.map(key => getKeyPath(context, key))
       } else {
         // OR: pass on the context
         params = [context]

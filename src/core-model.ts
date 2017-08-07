@@ -1,6 +1,6 @@
 import { clone, extend, mapAsync } from '@-)/utils'
 
-import { ICoreContext } from './core-interface'
+import { ICoreConfig, ICoreContext, ICoreServices } from './core-interface'
 import { CoreService } from './core-service'
 import { IDbCollection, IDbObject } from './services/db/db-interface'
 import { Delete, Get, Post, Put } from './services/router/router-decorators'
@@ -12,7 +12,12 @@ export interface ICoreModelFindOptions {
   project?: object
 }
 
-export abstract class CoreModel<Int extends IDbObject = any, Ext extends IDbObject = Int> extends CoreService {
+export abstract class CoreModel<
+  C extends ICoreConfig = ICoreConfig,
+  S extends ICoreServices = ICoreServices,
+  Int extends IDbObject = any,
+  Ext extends IDbObject = Int
+> extends CoreService<C, S> {
   protected abstract collectionName: string
   protected collection: IDbCollection
 

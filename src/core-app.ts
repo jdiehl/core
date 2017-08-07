@@ -119,12 +119,12 @@ export class CoreApp<C extends ICoreConfig = ICoreConfig, S extends ICoreService
   protected async initServices(): Promise<void> {
 
     // beforeInit
-    await eachAsync<CoreService>(this.services, service => {
+    await eachAsync<CoreService>(this.services, async service => {
       if (service.beforeInit) return service.beforeInit()
     })
 
     // init
-    await eachAsync<CoreService>(this.services, (service, name) => {
+    await eachAsync<CoreService>(this.services, async (service, name) => {
       if (service.init) return service.init()
     })
 

@@ -1,6 +1,6 @@
 {
   "name": "@-)/core",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Server Core",
   "main": "dist/index.js",
   "repository": {
@@ -19,14 +19,14 @@
   "author": "Jonathan Diehl",
   "license": "ISC",
   "dependencies": {
-    "@-)/utils": "^1.0.7",
+    "@-)/utils": "^1.0.8",
     "koa": "^2.3.0",
     "koa-bodyparser": "^4.2.0",
     "koa-cache-control": "^2.0.0",
     "koa-logger": "^3.0.1",
     "koa-router": "^7.2.1",
     "koa-session-minimal": "^3.0.4",
-    "markdown-it": "^8.3.1",
+    "markdown-it": "^8.3.2",
     "mongo": "^0.1.0",
     "mustache": "^2.3.0",
     "mz": "^2.6.0",
@@ -36,7 +36,7 @@
     "request-promise-native": "^1.0.4"
   },
   "devDependencies": {
-    "@types/jest": "^20.0.5",
+    "@types/jest": "^20.0.6",
     "@types/koa": "^2.0.39",
     "@types/koa-bodyparser": "^3.0.23",
     "@types/koa-cache-control": "^2.0.0",
@@ -44,24 +44,32 @@
     "@types/koa-router": "^7.0.22",
     "@types/koa-session-minimal": "^3.0.4",
     "@types/markdown-it": "^0.0.2",
-    "@types/mongodb": "^2.2.8",
+    "@types/mongodb": "^2.2.9",
     "@types/mustache": "^0.8.29",
     "@types/mz": "^0.0.31",
-    "@types/node": "^8.0.17",
-    "@types/nodemailer": "^1.3.33",
+    "@types/node": "^8.0.19",
+    "@types/nodemailer": "^3.1.1",
     "@types/redis": "^2.6.0",
-    "@types/request": "^0.0.44",
+    "@types/request": "^2.0.0",
     "@types/request-promise-native": "^1.0.5",
     "jest": "^20.0.4",
-    "ts-jest": "^20.0.7",
+    "ts-jest": "^20.0.10",
     "ts-node": "^3.3.0",
     "tslint": "^5.4.3",
     "typescript": "^2.4.2"
   },
   "jest": {
-    "moduleFileExtensions": ["ts", "tsx", "js", "json", "jsx"],
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "json",
+      "jsx"
+    ],
     "testEnvironment": "node",
     "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(tsx?|jsx?)$",
-    "transform": { "^.+\\.tsx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js" }
+    "transform": {
+      "^.+\\.tsx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    }
   }
 }

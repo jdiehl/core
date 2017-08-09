@@ -7,6 +7,7 @@ export interface IStats extends IDbObject {
   path: string
   userId?: string
   params: Record<string, string>
+  query: Record<string, string>
   body: any
   header?: Record<string, string>
 }

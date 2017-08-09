@@ -13,14 +13,14 @@ export class StatsService extends CoreService {
     if (!this.config.stats) throw new Error('Missing stats configuration')
 
     // extract values
-    const { user, method, path, params } = context
+    const { user, method, path, params, query } = context
     let { body } = context.request
 
     // mask password
     if (body && body.password) body = extend(body, { password: '######' })
 
     // create stats doc
-    const doc: Partial<IStats> = { date, time, method, path, params, body }
+    const doc: Partial<IStats> = { date, time, method, path, params, query, body }
 
     // add user id
     if (user) doc.userId = user._id.toString()

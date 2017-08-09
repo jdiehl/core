@@ -74,6 +74,7 @@ export class CacheService extends CoreService {
       const cachedBody = await this.get(key)
       if (cachedBody) {
         context.body = cachedBody
+        // TODO: this prevents stats from working
       } else {
         await next()
         this.set(key, context.body)

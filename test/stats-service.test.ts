@@ -69,8 +69,17 @@ test('store() should store params', async () => {
   expect(collection.insertOne).toHaveBeenCalledWith(doc)
 })
 
+test('store() should store a query', async () => {
+  const context = mockContext('GET', '/test/4', {}, { sort: 1 })
+  const date = new Date()
+  const time = 24
+  const doc = mockStatsDoc(context, date, time)
+  await stats.store(context, date, time)
+  expect(collection.insertOne).toHaveBeenCalledWith(doc)
+})
+
 test('store() should store the user', async () => {
-  const context = mockContext('PUT', '/test1', {}, { foo: 'bar' }, { _id: 'user' })
+  const context = mockContext('PUT', '/test1', {}, {}, { foo: 'bar' }, { _id: 'user' })
   const date = new Date()
   const time = 42
   const doc = mockStatsDoc(context, date, time)
@@ -79,7 +88,7 @@ test('store() should store the user', async () => {
 })
 
 test('store() should mask passwords', async () => {
-  const context = mockContext('POST', '/test2', {}, { email: 'a@b.c', password: 'hello' })
+  const context = mockContext('POST', '/test2', {}, {}, { email: 'a@b.c', password: 'hello' })
   const date = new Date()
   const time = 42
   const doc = mockStatsDoc(context, date, time)
@@ -88,7 +97,7 @@ test('store() should mask passwords', async () => {
 })
 
 test('store() should include a header field', async () => {
-  const context = mockContext('GET', '/', {}, undefined, undefined, { bar: 'myHeader '})
+  const context = mockContext('GET', '/', {}, undefined, undefined, undefined, { bar: 'myHeader '})
   const date = new Date()
   const time = 42
   const doc = mockStatsDoc(context, date, time)
@@ -100,21 +109,23 @@ function mockContext(
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
   path: string = '/',
   params: any = {},
+  query: any = {},
   body?: any,
   user?: any,
   header: Record<string, string> = {}
 ): any {
-  return { method, path, params, request: { body }, user, header }
+  return { method, path, params, query, request: { body }, user, header }
 }
 
 function mockStatsDoc(context: any, date: Date, time: number): any {
   return {
-    body: context.body,
+    body: context.request.body,
     date,
     header: context.header,
     method: context.method,
     params: context.params,
     path: context.path,
+    query: context.query,
     time,
     userId: context.user ? context.user._id : undefined
   }

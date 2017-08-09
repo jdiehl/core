@@ -6,7 +6,7 @@ import { CoreService } from '../../core-service'
 import { IRouterOptions } from './router-interface'
 
 export type RouteMethod = 'get' | 'post' | 'put' | 'delete'
-export type RouteMappingFunction = (context: KoaRouter.IRouterContext) => string[]
+export type RouteMappingFunction = (context: KoaRouter.IRouterContext) => any[]
 
 function createRouter(target: CoreService): KoaRouter {
   if (!target.router) target.router = new KoaRouter()

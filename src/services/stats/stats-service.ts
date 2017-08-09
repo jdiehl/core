@@ -14,7 +14,7 @@ export class StatsService extends CoreService {
 
     // extract values
     const { user, method, path, params } = context
-    let { body } = context
+    let { body } = context.request
 
     // mask password
     if (body && body.password) body = extend(body, { password: '######' })

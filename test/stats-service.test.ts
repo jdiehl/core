@@ -104,7 +104,7 @@ function mockContext(
   user?: any,
   header: Record<string, string> = {}
 ): any {
-  return { method, path, params, body, user, header }
+  return { method, path, params, request: { body }, user, header }
 }
 
 function mockStatsDoc(context: any, date: Date, time: number): any {

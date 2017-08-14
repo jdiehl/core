@@ -42,14 +42,13 @@ export class AuthService<Profile = {}> extends CoreService {
   // @Get('/')
   async userRoute(context: ICoreContext) {
     if (!context.user) throw new ErrorUnauthorized()
-    context.body = context.user
+    return context.user
   }
 
   // @Post('/')
   async updateRoute(context: ICoreContext) {
     if (!context.user) throw new ErrorUnauthorized()
     await this.services.user.update(context.user._id.toString(), context.request.body)
-    context.status = 200
   }
 
   // @Post('/login')
@@ -57,13 +56,12 @@ export class AuthService<Profile = {}> extends CoreService {
     const { email, password } = context.request.body
     const user = await this.services.user.authenticate(email, password) as any
     context.session.user = await this.services.user.serialize(user)
-    context.body = user
+    return user
   }
 
   // @Post('/logout')
   async logoutRoute(context: ICoreContext) {
     delete context.session.user
-    context.status = 200
   }
 
   // @Post('/signup')
@@ -79,7 +77,7 @@ export class AuthService<Profile = {}> extends CoreService {
       const subject = 'Please confirm your email address'
       this.services.email.sendTemplate('signup', { user, token }, { subject, to: user.email })
     }
-    context.body = user
+    return user
   }
 
   // @Get('/verify/:token')
@@ -88,7 +86,6 @@ export class AuthService<Profile = {}> extends CoreService {
     const info = await this.services.token.use<IAuthToken>(token)
     if (!info || info.type !== 'signup') throw new ErrorUnauthorized()
     await this.services.user.verify(info.user)
-    context.status = 200
   }
 
 }

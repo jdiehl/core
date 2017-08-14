@@ -63,7 +63,6 @@ test('POST /auth/login should reject an invalid authentication', async () => {
 
 test('GET /auth/verify/key should call use() and verify()', async () => {
   const res = await get(`${host}/auth/verify/key`)
-  expect(res).toBe('OK')
   expect(services.token.use).toHaveBeenCalledTimes(1)
   expect(services.token.use).toHaveBeenCalledWith('key')
   expect(services.user.verify).toHaveBeenCalledTimes(1)

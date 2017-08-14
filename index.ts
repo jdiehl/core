@@ -5,3 +5,4 @@ export { CoreService } from './src/core-service'
 export { CoreModel } from './src/core-model'
 
 export * from './src/services'
+export * from './src/errors'

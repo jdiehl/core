@@ -70,6 +70,7 @@ export class CacheService extends CoreService {
 
   install(server: Koa): void {
     server.use(async (context: ICoreContext, next: () => void) => {
+      if (context.request.method !== 'GET') return next()
       const key = `${context.request.path}?${context.request.querystring}`
       const cachedBody = await this.get(key)
       if (cachedBody) {

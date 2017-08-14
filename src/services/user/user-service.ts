@@ -2,12 +2,8 @@ import { crypto } from 'mz'
 
 import { ICoreContext } from '../../core-interface'
 import { CoreModel } from '../../core-model'
+import { ErrorUnauthorized } from '../../errors'
 import { IUser, IUserInternal } from './user-interface'
-
-export class ErrorUnauthorized extends Error {
-  status = 401
-  message = 'Unauthorized'
-}
 
 export class UserService<Profile = {}> extends CoreModel<IUserInternal<Profile>, IUser<Profile>> {
   protected collectionName: string

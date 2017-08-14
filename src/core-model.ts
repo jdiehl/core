@@ -2,6 +2,7 @@ import { clone, extend, mapAsync } from '@-)/utils'
 
 import { ICoreConfig, ICoreContext, ICoreServices } from './core-interface'
 import { CoreService } from './core-service'
+import { ErrorNotFound } from './errors'
 import { IDbCollection, IDbObject } from './services/db/db-interface'
 import { Delete, Get, Post, Put } from './services/router/router-decorators'
 
@@ -40,6 +41,7 @@ export abstract class CoreModel<
     if (this.beforeFindOne) await this.beforeFindOne(id)
     const objectID = this.services.db.objectID(id)
     let object = await this.collection.findOne({ _id: objectID })
+    if (!object) throw new ErrorNotFound()
     if (this.afterFindOne) object = await this.afterFindOne(object)
     if (this.transform) object = await this.transform(object)
     return object

@@ -2,9 +2,9 @@ import * as Koa from 'koa'
 
 import { ICoreContext } from '../../core-interface'
 import { CoreService } from '../../core-service'
+import { ErrorUnauthorized } from '../../errors'
 import { Get, Post, Router } from '../router/router-decorators'
 import { IUser } from '../user/user-interface'
-import { ErrorUnauthorized } from '../user/user-service'
 import { IAuthToken } from './auth-interface'
 
 @Router()

@@ -71,15 +71,16 @@ export class CacheService extends CoreService {
   install(server: Koa): void {
     server.use(async (context: ICoreContext, next: () => void) => {
       if (context.request.method !== 'GET') return next()
-      const key = `${context.request.path}?${context.request.querystring}`
-      const cachedBody = await this.get(key)
-      if (cachedBody) {
-        context.body = cachedBody
-        // TODO: this prevents stats from working
-      } else {
-        await next()
-        this.set(key, context.body)
-      }
+      // TODO: Cache is disabled for now
+      await next()
+      // const key = `${context.request.path}?${context.request.querystring}`
+      // const cachedBody = await this.get(key)
+      // if (cachedBody) {
+      //   context.body = cachedBody
+      // } else {
+      //   await next()
+      //   this.set(key, context.body)
+      // }
     })
   }
 

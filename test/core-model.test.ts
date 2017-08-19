@@ -15,7 +15,8 @@ describe('core-model', () => {
   const transform = jest.fn().mockImplementation(x => x)
 
   class TestModel extends CoreModel {
-    collectionName: 'test'
+    collectionName = 'test'
+    spec = { name: 'string' } as any
     async afterFindOne(...args: any[]) { return afterFindOne(...args) }
     async afterFind(...args: any[]) { return afterFind(...args) }
     async afterInsert(...args: any[]) { return afterInsert(...args) }
@@ -140,6 +141,12 @@ describe('core-model', () => {
     expect(collection.insertOne).toHaveBeenCalledWith({ name: 'susan' })
   })
 
+  test('insert() should call validate', async () => {
+    await model.insert({ name: 'test' })
+    expect(services.validation.validate).toHaveBeenCalledTimes(1)
+    expect(services.validation.validate).toHaveBeenCalledWith({ name: 'string' }, { name: 'test' }, false)
+  })
+
   it('update() should call beforeUpdate', async () => {
     await model.update('id', { b: 2 })
     expect(beforeUpdate).toHaveBeenCalledTimes(1)
@@ -156,6 +163,19 @@ describe('core-model', () => {
     await model.update('id', { x: 1 })
     expect(collection.updateOne).toHaveBeenCalledTimes(1)
     expect(collection.updateOne).toHaveBeenCalledWith({ _id: 'id' }, { $set: { x: 1 } })
+  })
+
+  test('update() should call validate', async () => {
+    await model.update('id', { name: 'new' })
+    expect(services.validation.validate).toHaveBeenCalledTimes(1)
+    expect(services.validation.validate).toHaveBeenCalledWith({ name: 'string' }, { name: 'new' }, true)
+  })
+
+  test('insert() and update() should reject invalid objects', async () => {
+    services.validation.validate.mockReturnValue(false)
+    await expect(model.insert({ name: 'test' })).rejects.toMatchObject({ message: 'Invalid object' })
+    await expect(model.update('id', { name: 'test' })).rejects.toMatchObject({ message: 'Invalid object' })
+    services.validation.validate.mockReturnValue(true)
   })
 
   it('delete() should call beforeDelete', async () => {

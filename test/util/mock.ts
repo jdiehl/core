@@ -49,11 +49,17 @@ function mockCollection(cursor: MockCursor): MockCollection {
   return collection as MockCollection
 }
 
-function mockServices(collection: MockCollection): MockServices {
-  const services = mockifyClasses<ICoreServices>(coreServices as any, s => s.mockImplementation(mockResolve()))
-  services.db.collection.mockReturnValue(collection)
-  services.db.objectID.mockImplementation(x => x)
-  return services as MockServices
+function mockServices(app: CoreApp, collection: MockCollection, preserve: string[]): MockServices {
+  const services = mockifyMany(app.services, name => preserve.indexOf(name) < 0,
+    m => m.mockImplementation(mockResolve()))
+  if (preserve.indexOf('db') < 0) {
+    services.db.collection.mockReturnValue(collection)
+    services.db.objectID.mockImplementation(x => x)
+  }
+  if (preserve.indexOf('validation') < 0) {
+    services.validation.validate.mockReturnValue(true)
+  }
+  return services
 }
 
 export function mock(
@@ -67,12 +73,7 @@ export function mock(
   const cursor = mockCursor()
   const collection = mockCollection(cursor)
   const app = new CoreApp(config as any, customServices)
-  const services = mockifyMany(app.services, name => preserve.indexOf(name) < 0,
-    m => m.mockImplementation(mockResolve()))
-  if (preserve.indexOf('db') < 0) {
-    services.db.collection.mockReturnValue(collection)
-    services.db.objectID.mockImplementation(x => x)
-  }
+  const services = mockServices(app, collection, preserve)
   const reset = () => {
     mockClear(cursor)
     mockClear(collection)

@@ -8,7 +8,7 @@
     "url": "https://github.com/jdiehl/core.git"
   },
   "scripts": {
-    "test": "tslint *.ts src/**.ts test/**.ts; jest; jest",
+    "test": "tslint *.ts src/**.ts test/**.ts; jest",
     "test:redis": "docker run -d -p 6379:6379 --name redis redis:alpine",
     "test:mongo": "docker run -d -p 27017:27017 --name redis mongo",
     "watch": "jest --watch --testPathPattern",

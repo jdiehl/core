@@ -6,7 +6,7 @@ import { ErrorUnauthorized } from '../../errors'
 import { IUser, IUserInternal } from './user-interface'
 
 export class UserService<Profile = {}> extends CoreModel<IUserInternal<Profile>, IUser<Profile>> {
-  protected collectionName: string
+  collectionName: string
 
   async authenticate(email: string, password: string): Promise<IUser<Profile>> {
     const user = await this.collection.findOne({ email })

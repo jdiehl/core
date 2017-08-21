@@ -110,7 +110,7 @@ export class CoreApp<C extends ICoreConfig = ICoreConfig, S extends ICoreService
     if (this.config.keys) this.server.keys = this.config.keys
     if (!this.config.quiet) this.server.use(logger())
     this.server.use(errorReporter(this.config))
-    this.server.use(cacheControl({ noCache: true }))
+    // this.server.use(cacheControl({ noCache: true }))
     this.server.use(bodyParser())
     this.server.use(session({ store: this.services.cache.sessionStore }))
   }

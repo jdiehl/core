@@ -85,9 +85,20 @@ export abstract class CoreModel<
     this.collection = this.services.db.collection<Int>(this.collectionName)
 
     // Routes must be created here to allow subclassing
-    Get('/', ['query'])(this, 'find')
-    Get('/:id', ['params.id'])(this, 'findOne')
     Post('/', ['request.body'])(this, 'insert')
+    this.router!.get('/', async (context) => {
+      // TODO: compute last-modified
+      const modified = new Date() as any
+      if (context.header['if-modified-since']) {
+        const cache = new Date(context.header['if-modified-since'])
+        if (modified <= cache) return context.status = 304
+      }
+      context.set('last-modified', modified.toGMTString())
+      context.set('cache-control', `max-age=0`)
+      context.body = await this.find(context.query)
+    })
+    // Get('/', ['query'])(this, 'find')
+    Get('/:id', ['params.id'])(this, 'findOne')
     Put('/:id', ['params.id', 'request.body'])(this, 'update')
     Delete('/:id', ['params.id'])(this, 'delete')
     this.router!.prefix(this.routerPrefix)
@@ -109,16 +120,16 @@ export abstract class CoreModel<
 
   // Hooks
 
-  protected async afterFindOne ?(object: Int): Promise<Int>
-  protected async afterFind ?(objects: Int[], query?: object, options?: ICoreModelFindOptions): Promise<Int[]>
-  protected async afterInsert ?(object: Int): Promise<Int>
-  protected async afterUpdate ?(id: string, values: object): Promise<void>
-  protected async afterDelete ?(id: string): Promise<void>
-  protected async beforeFindOne ?(id: string): Promise<void>
-  protected async beforeFind ?(query ?: object, options ?: ICoreModelFindOptions): Promise < object >
-  protected async beforeInsert ?(values: object): Promise<object>
-  protected async beforeUpdate ?(id: string, values: object): Promise<object>
-  protected async beforeDelete ?(id: string): Promise<void>
-  protected async transform ?(object: Int): Promise<Ext>
+  protected async afterFindOne?(object: Int): Promise<Int>
+  protected async afterFind?(objects: Int[], query?: object, options?: ICoreModelFindOptions): Promise<Int[]>
+  protected async afterInsert?(object: Int): Promise<Int>
+  protected async afterUpdate?(id: string, values: object): Promise<void>
+  protected async afterDelete?(id: string): Promise<void>
+  protected async beforeFindOne?(id: string): Promise<void>
+  protected async beforeFind?(query ?: object, options ?: ICoreModelFindOptions): Promise < object >
+  protected async beforeInsert?(values: object): Promise<object>
+  protected async beforeUpdate?(id: string, values: object): Promise<object>
+  protected async beforeDelete?(id: string): Promise<void>
+  protected async transform?(object: Int): Promise<Ext>
 
 }

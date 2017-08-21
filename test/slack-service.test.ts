@@ -1,10 +1,10 @@
 jest.mock('request-promise-native')
 
-import { SlackService } from '../'
+import { ISlackConfig, SlackService } from '../'
 import { mock } from './util'
 
-const config = { from: 'me', host: 'host', port: 1234, pool: {} }
-const { app, services } = mock({ slack: 'my/key' }, 'slack')
+const config: ISlackConfig = { hook: 'my/key' }
+const { app, services } = mock({ slack: config }, 'slack')
 const slack = services.slack as any as SlackService
 let request: any
 

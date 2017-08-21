@@ -1,5 +1,10 @@
 import { IDbObject } from '../db/db-interface'
 
+export interface IStatsConfig {
+  collection: string
+  includeHeader?: string[]
+}
+
 export interface IStats extends IDbObject {
   date: Date
   time: number

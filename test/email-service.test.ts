@@ -1,9 +1,9 @@
 jest.mock('nodemailer')
 
-import { EmailService } from '../'
+import { EmailService, IEmailConfig } from '../'
 import { mock } from './util'
 
-const config = { from: 'me', host: 'host', port: 1234, pool: {} }
+const config: IEmailConfig = { from: 'me', host: 'host', port: 1234, pool: {} }
 const { app, services } = mock({ email: config }, 'email')
 const email = services.email as any as EmailService
 let nodemailer: any

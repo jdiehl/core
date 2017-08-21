@@ -1,9 +1,9 @@
 jest.unmock('mz')
 
-import { TemplateService } from '../'
+import { ITemplateConfig, TemplateService } from '../'
 import { IMock, mock } from './util'
 
-const config = { templates: {
+const config: ITemplateConfig = { templates: {
   markdown: 'test/resources/markdown.md',
   mustache: 'test/resources/mustache.mst'
 } }

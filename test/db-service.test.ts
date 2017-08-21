@@ -1,9 +1,10 @@
 jest.mock('mongodb')
 
-import { DbService, IDbCollection } from '../'
+import { DbService, IDbCollection, IDbConfig } from '../'
 import { mock } from './util'
 
-const { app, services } = mock({ db: 'mongodb://host/db' }, 'db')
+const config = { server: 'mongodb://host/db'}
+const { app, services } = mock({ db: config }, 'db')
 const db = services.db as any as DbService
 let col: IDbCollection
 let mongo: any

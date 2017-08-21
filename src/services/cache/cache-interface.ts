@@ -1,5 +1,9 @@
 import { Url } from 'url'
 
+export interface ICacheConfig {
+  server: string
+}
+
 export interface ICacheClient {
   init(config: string): Promise<void>
   destroy(): Promise<void>

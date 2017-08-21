@@ -1,10 +1,10 @@
 jest.unmock('mz')
 
-import { TokenService } from '../'
+import { ITokenConfig, TokenService } from '../'
 import { mock, mockResolve } from './util'
 
-const config = { user: 'xxx', admin: 'yyy' }
-const { app, services, reset } = mock({ tokens: config }, 'token')
+const config: ITokenConfig = { tokens: { user: 'xxx', admin: 'yyy' } }
+const { app, services, reset } = mock({ token: config }, 'token')
 const token = services.token as any as TokenService
 
 const next = jest.fn()

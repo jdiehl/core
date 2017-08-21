@@ -1,7 +1,7 @@
-import { StatsService } from '../'
+import { IStatsConfig, StatsService } from '../'
 import { IMock, mock, MockCollection, mockResolve } from './util'
 
-const config = { collection: 'test', includeHeader: ['bar'] }
+const config: IStatsConfig = { collection: 'test', includeHeader: ['bar'] }
 let m: IMock
 let collection: MockCollection
 let stats: StatsService
@@ -46,7 +46,8 @@ test('should not call stats.store() from the middleware on an error', async () =
   stats.store = store
   stats.install({ use } as any)
   const middleware = use.mock.calls[0][0]
-  await expect(middleware({}, async () => { throw new Error() })).rejects.toBeDefined
+  const error = new Error()
+  await expect(middleware({}, async () => { throw error })).rejects.toEqual(error)
   expect(store).toHaveBeenCalledTimes(0)
 })
 

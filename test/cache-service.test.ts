@@ -1,9 +1,10 @@
 jest.mock('redis')
 
-import { CacheService } from '../'
+import { CacheService, ICacheConfig } from '../'
 import { mock, mockYield } from './util'
 
-const { app, services, reset } = mock({ cache: 'redis://host:1234/13'}, 'cache')
+const config: ICacheConfig = { server: 'redis://host:1234/13'}
+const { app, services, reset } = mock({ cache: config }, 'cache')
 const cache = services.cache as any as CacheService
 let redis: any
 let client: any

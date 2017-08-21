@@ -1,10 +1,11 @@
 jest.unmock('mongodb')
 
-import { DbService, IDbCollection } from '../'
+import { DbService, IDbCollection, IDbConfig} from '../'
 import { mock } from './util'
 
 describe.skip('mongo:localhost', () => {
-  const { app, services, reset } = mock({ db: 'mongodb://127.0.0.1/test' }, 'db')
+  const config: IDbConfig = { server: 'mongodb://127.0.0.1/test' }
+  const { app, services, reset } = mock({ db: config }, 'db')
   const db = services.db as any as DbService
   let col: IDbCollection
 

@@ -11,7 +11,7 @@ export class DbClientMongodb implements IDbClient {
   }
 
   async destroy() {
-    await this.client.close()
+    if (this.client) await this.client.close()
   }
 
   collection<T>(name: string): IDbCollection<T> {

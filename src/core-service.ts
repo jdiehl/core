@@ -3,9 +3,9 @@ import * as Router from 'koa-router'
 
 import { ICoreConfig, ICoreContext, ICoreServices } from './core-interface'
 
-export abstract class CoreService<C extends ICoreConfig = ICoreConfig, S extends ICoreServices = ICoreServices> {
+export abstract class CoreService {
   router?: Router
-  constructor(public config: C, public services: S) {}
+  constructor(public config: ICoreConfig, public services: ICoreServices) {}
   async beforeInit?(): Promise<void>
   async init?(): Promise<void>
   install?(server: Koa): void

@@ -22,11 +22,12 @@ export class DbService extends CoreService {
   // CoreService
 
   async beforeInit() {
-    if (!this.config.db) return
-    const dbUrl = url.parse(this.config.db)
+    const { db } = this.config
+    if (!db || !db.server) return
+    const dbUrl = url.parse(db.server)
     if (!dbUrl) return
     this.client = this.createClient(dbUrl)
-    await this.client.init(this.config.db)
+    await this.client.init(db.server)
   }
 
   async destroy() {

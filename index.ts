@@ -1,8 +1,6 @@
-export { CoreApp } from './src/core-app'
-
-export { ICoreConfig, ICoreContext, ICoreServices } from './src/core-interface'
-export { CoreService } from './src/core-service'
-export { CoreModel } from './src/core-model'
-
-export * from './src/services'
+export * from './src/core-app'
+export * from './src/core-interface'
+export * from './src/core-model'
+export * from './src/core-service'
 export * from './src/errors'
+export * from './src/services'

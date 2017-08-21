@@ -58,30 +58,15 @@ export class CacheService extends CoreService {
   // CoreService
 
   async beforeInit(): Promise<void> {
-    const config = this.config.cache || 'mem://'
-    const cacheUrl = url.parse(config)
+    const { cache } = this.config
+    const server = cache && cache.server ? cache.server : 'mem://'
+    const cacheUrl = url.parse(server)
     this.client = this.createClient(cacheUrl)
-    await this.client.init(config)
+    await this.client.init(server)
   }
 
   async destroy(): Promise<void> {
     if (this.client) await this.client.destroy()
-  }
-
-  install(server: Koa): void {
-    server.use(async (context: ICoreContext, next: () => void) => {
-      if (context.request.method !== 'GET') return next()
-      // TODO: Cache is disabled for now
-      await next()
-      // const key = `${context.request.path}?${context.request.querystring}`
-      // const cachedBody = await this.get(key)
-      // if (cachedBody) {
-      //   context.body = cachedBody
-      // } else {
-      //   await next()
-      //   this.set(key, context.body)
-      // }
-    })
   }
 
   // protected

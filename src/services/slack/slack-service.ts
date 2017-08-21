@@ -6,9 +6,10 @@ import { CoreService } from '../../core-service'
 export class SlackService extends CoreService {
 
   async post(text: string, attachments: any[]): Promise<void> {
-    if (!this.config.slack) throw new Error('Missing slack configuration')
+    const { slack } = this.config
+    if (!slack || !slack.hook) throw new Error('Missing slack configuration')
     const data = { attachments, text }
-    const url = 'https://hooks.slack.com/services/' + this.config.slack
+    const url = 'https://hooks.slack.com/services/' + slack.hook
     await post(url).json(data)
   }
 

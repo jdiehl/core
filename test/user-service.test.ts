@@ -2,11 +2,11 @@ jest.unmock('mz')
 
 import { crypto } from 'mz'
 
-import { IUser, UserService } from '../'
+import { IUser, IUserConfig, UserService } from '../'
 import { IUserInternal } from '../src/services/user/user-interface'
 import { mock, mockResolve } from './util'
 
-const config = { secret: 'mysecret', iterations: 1 }
+const config: IUserConfig = { secret: 'mysecret', iterations: 1 }
 const { app, cursor, collection, services, reset } = mock({ user: config }, 'user')
 const user = services.user as any as UserService
 

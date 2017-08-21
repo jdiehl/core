@@ -2,11 +2,11 @@ jest.unmock('request-promise-native')
 
 import { Server } from 'net'
 import * as request from 'request-promise-native'
-import { AuthService } from '../'
+import { AuthService, IAuthConfig } from '../'
 import { mock, mockReject, mockResolve } from './util'
 
 const { del, get, post, put } = request.defaults({ json: true, jar: true })
-const config = { prefix: '/auth', verifyEmail: true }
+const config: IAuthConfig = { prefix: '/auth', verifyEmail: true }
 const { app, collection, services, reset } = mock({ auth: config }, 'auth')
 const auth: AuthService = services.auth as any
 let host: string

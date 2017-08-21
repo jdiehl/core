@@ -1,3 +1,7 @@
+export interface IDbConfig {
+  server: string
+}
+
 import { Url } from 'url'
 
 export interface IDbObjectID {

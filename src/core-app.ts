@@ -10,33 +10,7 @@ import { each, eachAsync, extend } from '@-)/utils'
 import { ICoreConfig, ICoreServices } from './core-interface'
 import { CoreService } from './core-service'
 
-import {
-  AuthService,
-  CacheService,
-  DbService,
-  EmailService,
-  RouterService,
-  SlackService,
-  StatsService,
-  TemplateService,
-  TokenService,
-  UserService,
-  ValidationService
-} from './services'
-
-export const coreServices = {
-  auth: AuthService,
-  cache: CacheService,
-  db: DbService,
-  email: EmailService,
-  router: RouterService,
-  slack: SlackService,
-  stats: StatsService,
-  template: TemplateService,
-  token: TokenService,
-  user: UserService,
-  validation: ValidationService
-}
+import { coreServices } from './services'
 
 export function errorReporter(config: ICoreConfig): Koa.Middleware {
   return async (context: Koa.Context, next: Function) => {
@@ -54,22 +28,22 @@ export function errorReporter(config: ICoreConfig): Koa.Middleware {
   }
 }
 
-export class CoreApp<C extends ICoreConfig = ICoreConfig, S extends ICoreServices = ICoreServices> {
+export class CoreApp {
   instance: Server
   server: Koa
-  services: S
+  services: ICoreServices
 
   get port(): number {
     return this.instance.address().port
   }
 
   // constructor
-  constructor(public config: C, public customServices?: Record<string, CoreService>) {
-    const services: any = {}
+  constructor(public config: ICoreConfig, public customServices?: Record<string, CoreService>) {
+    const s: any = {}
     each<any>(extend(coreServices, this.customServices), (TheService, name) => {
-      services[name] = new TheService(this.config, services)
+      s[name] = new TheService(this.config, s)
     })
-    this.services = services
+    this.services = s
   }
 
   // initialize everything

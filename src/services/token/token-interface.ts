@@ -1,3 +1,7 @@
+export interface ITokenConfig {
+  tokens?: Record<string, string>
+}
+
 export interface ITokenOptions {
   useCount?: number
   validFor?: string

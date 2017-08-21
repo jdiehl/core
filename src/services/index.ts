@@ -1,27 +1,36 @@
-export { AuthService } from './auth/auth-service'
-export { CacheService } from './cache/cache-service'
-export { DbService } from './db/db-service'
-export { EmailService } from './email/email-service'
-export { RouterService } from './router/router-service'
-export { SlackService } from './slack/slack-service'
-export { StatsService } from './stats/stats-service'
-export { TemplateService } from './template/template-service'
-export { TokenService } from './token/token-service'
-export { UserService } from './user/user-service'
-export { ValidationService } from './validation/validation-service'
+export * from './auth/auth-service'
+export * from './auth/auth-interface'
+export * from './cache/cache-service'
+export * from './cache/cache-interface'
+export * from './db/db-service'
+export * from './db/db-interface'
+export * from './email/email-service'
+export * from './email/email-interface'
+export * from './router/router-service'
+export * from './router/router-interface'
+export * from './slack/slack-service'
+export * from './slack/slack-interface'
+export * from './stats/stats-service'
+export * from './stats/stats-interface'
+export * from './template/template-service'
+export * from './template/template-interface'
+export * from './token/token-service'
+export * from './token/token-interface'
+export * from './user/user-service'
+export * from './user/user-interface'
+export * from './validation/validation-service'
+export * from './validation/validation-interface'
 
-export {
-  IDbCollection,
-  IDbObjectID,
-  IDbDeleteResult,
-  IDbInsertResult,
-  IDbInsertOneResult,
-  IDbUpdateResult,
-  IDbIndexOptions,
-  IDbUpdateOptions
-} from './db/db-interface'
-export { IUser } from './user/user-interface'
-export { EmailSendService, IEmailAttachment, IEmailSendOptions, IEmailSendResult } from './email/email-interface'
-export { IRouterOptions } from './router/router-interface'
-export { Delete, Get, Post, Put, Router } from './router/router-decorators'
-export { IValidationSpec, Validator, ValidatorType } from './validation/validation-interface'
+export const coreServices = {
+  auth: exports.AuthService,
+  cache: exports.CacheService,
+  db: exports.DbService,
+  email: exports.EmailService,
+  router: exports.RouterService,
+  slack: exports.SlackService,
+  stats: exports.StatsService,
+  template: exports.TemplateService,
+  token: exports.TokenService,
+  user: exports.UserService,
+  validation: exports.ValidationService
+}

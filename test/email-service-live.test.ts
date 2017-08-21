@@ -1,17 +1,17 @@
 jest.unmock('nodemailer')
 
-import { EmailService } from '../'
+import { EmailSendService, EmailService, IEmailConfig } from '../'
 import { mock } from './util'
 
 const LiveTest = {
   from: 'from@example.com',
   pass: 'xxx',
-  service: 'Zoho',
+  service: 'Zoho' as EmailSendService,
   to: 'to@example.com'
 }
 
 describe.skip('email:live', () => {
-  const config = {
+  const config: IEmailConfig = {
     auth: { user: LiveTest.from, pass: LiveTest.pass },
     from: LiveTest.from,
     service: LiveTest.service

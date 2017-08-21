@@ -1,7 +1,6 @@
 import { ValidationService } from '../'
 import { mock } from './util'
 
-const config = { from: 'me', host: 'host', port: 1234, pool: {} }
 const { app, services } = mock({}, 'validation')
 const validation = services.validation as any as ValidationService
 

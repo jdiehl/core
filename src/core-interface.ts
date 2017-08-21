@@ -1,96 +1,44 @@
 import * as Koa from 'koa'
-import * as Router from 'koa-router'
-import { ConnectionOptions } from 'tls'
 
+import * as services from './services'
 import './types'
 
-import { EmailSendService } from './services/email/email-interface'
-import { IUser } from './services/user/user-interface'
-
-import {
-  AuthService,
-  CacheService,
-  DbService,
-  EmailService,
-  SlackService,
-  StatsService,
-  TemplateService,
-  TokenService,
-  UserService,
-  ValidationService
-} from './services'
-
+// TODO: Simplify
 export interface ICoreConfig {
-  auth?: {
-    prefix?: string
-    verifyEmail?: boolean
-  }
-  cache?: string
-  db?: string
-  email?: {
-    service?: EmailSendService
-    port?: number
-    host?: string
-    secure?: boolean
-    auth?: {
-      user: string
-      pass: string
-    }
-    authMethod?: string
-    tls?: ConnectionOptions
-    pool?: {
-      maxConnections?: boolean
-      maxMessages?: boolean
-      rateDelta?: boolean
-      rateLimit?: boolean
-    } | false
-    proxy?: string
-    from?: string
-  },
+  auth?: services.IAuthConfig
+  cache?: services.ICacheConfig
+  db?: services.IDbConfig
+  email?: services.IEmailConfig,
   keys?: string[]
   port?: number
   prefix?: string
   quiet?: boolean
-  tokens?: { [domain: string]: string }
-  router?: {
-    prefix?: string
-    requireToken?: string
-  }
+  token?: services.ITokenConfig
+  router?: services.IRouterConfig,
   session?: {
     key?: string
     maxAge?: number
   }
-  slack?: string
-  stats?: {
-    collection: string
-    includeHeader?: string[]
-  },
-  template?: {
-    templates?: Record<string, string>
-  },
-  user: {
-    secret: string
-    collection?: string
-    encoding?: string
-    digest?: string
-    iterations?: number
-    keylen?: number
-    saltlen?: number
-  }
+  slack?: services.ISlackConfig
+  stats?: services.IStatsConfig,
+  template?: services.ITemplateConfig,
+  user?: services.IUserConfig,
+  validation?: services.IValidationConfig
 }
 
 export interface ICoreContext extends Koa.Context {
 }
 
 export interface ICoreServices {
-  auth: AuthService
-  cache: CacheService
-  db: DbService
-  email: EmailService
-  slack: SlackService
-  stats: StatsService
-  template: TemplateService
-  token: TokenService,
-  user: UserService,
-  validation: ValidationService
+  auth: services.AuthService
+  cache: services.CacheService
+  db: services.DbService
+  email: services.EmailService
+  router: services.RouterService
+  slack: services.SlackService
+  stats: services.StatsService
+  template: services.TemplateService
+  token: services.TokenService
+  user: services.UserService
+  validation: services.ValidationService
 }

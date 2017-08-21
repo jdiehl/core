@@ -5,7 +5,7 @@ import { CoreModel } from '../../core-model'
 import { ErrorUnauthorized } from '../../errors'
 import { IUser, IUserInternal } from './user-interface'
 
-export class UserService<Profile = {}> extends CoreModel<IUserInternal<Profile>, IUser<Profile>> {
+export class UserService<Profile = {}> extends CoreModel<IUser<Profile>> {
   collectionName: string
 
   async authenticate(email: string, password: string): Promise<IUser<Profile>> {
@@ -48,8 +48,17 @@ export class UserService<Profile = {}> extends CoreModel<IUserInternal<Profile>,
 
   // CoreModel
 
-  protected async beforeUpdate(id: string, obj: any): Promise<any> {
-    const { password, email, role, verified, profile } = obj
+  async insert(values: object): Promise<IUser<Profile>> {
+    const { password, email, role, verified, profile } = values as any
+    const salt = await this.makeSalt()
+    const hash = await this.makeHash(salt, this.config.user!.secret, password)
+    const user: any = { email, salt, hash, role }
+    if (profile) user.profile = profile
+    return super.insert(user)
+  }
+
+  async update(id: string, values: object): Promise<void> {
+    const { password, email, role, verified, profile } = values as any
     const user: Partial<IUserInternal> = {}
     if (password) {
       user.salt = await this.makeSalt()
@@ -59,19 +68,10 @@ export class UserService<Profile = {}> extends CoreModel<IUserInternal<Profile>,
     if (role) user.role = role
     if (verified !== undefined) user.verified = verified
     if (profile !== undefined) user.profile = profile
-    return user
+    return super.update(id, user)
   }
 
-  protected async beforeInsert(obj: any): Promise<any> {
-    const { password, email, role, verified, profile } = obj
-    const salt = await this.makeSalt()
-    const hash = await this.makeHash(salt, this.config.user!.secret, password)
-    const user: any = { email, salt, hash, role }
-    if (profile) user.profile = profile
-    return user
-  }
-
-  protected async transform(userInternal: IUserInternal<Profile>): Promise<IUser<Profile>> {
+  protected transform(userInternal: IUserInternal<Profile>): IUser<Profile> {
     const { _id, email, profile, role } = userInternal
     const user: IUser = { _id, email, role }
     if (profile) user.profile = profile

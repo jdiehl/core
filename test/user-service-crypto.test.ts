@@ -1,12 +1,12 @@
 jest.mock('mz')
 
-import { IUser, UserService } from '../'
+import { IUser, IUserConfig, UserService } from '../'
 import { IUserInternal } from '../src/services/user/user-interface'
 import { mock, mockResolve } from './util'
 
 let mz: any
 
-const config = { secret: 'mysecret' }
+const config: IUserConfig = { secret: 'mysecret' }
 const { app, collection, services } = mock({ user: config }, 'user')
 const user = services.user as any as UserService
 
@@ -25,7 +25,7 @@ beforeEach(() => {
 })
 
 test('authenticate() should call pbkdf2', async () => {
-  await expect(user.authenticate('u1@b.c', 'foo')).rejects.toBeDefined
+  await expect(user.authenticate('u1@b.c', 'foo')).rejects.toMatchObject({ status: 401 })
   expect(mz.crypto.pbkdf2).toHaveBeenCalledTimes(1)
   expect(mz.crypto.pbkdf2).toHaveBeenCalledWith('mysecret,foo', 'salt', 10000, 512, 'sha512')
 })

@@ -1,9 +1,11 @@
 jest.unmock('redis')
 
 import { wait } from '@-)/utils'
+
+import { ICacheConfig } from '../'
 import { mock } from './util'
 
-function runLiveTests(config: string) {
+function runLiveTests(config: ICacheConfig) {
   const { app, services, reset } = mock({ cache: config }, 'cache')
   const cache = services.cache
 
@@ -87,5 +89,5 @@ function runLiveTests(config: string) {
   })
 }
 
-describe('mem:', () => runLiveTests('mem://'))
-describe.skip('redis:localhost', () => runLiveTests('redis://127.0.0.1:6379/3'))
+describe('mem:', () => runLiveTests({ server: 'mem://' }))
+describe.skip('redis:localhost', () => runLiveTests({ server: 'redis://127.0.0.1:6379/3' }))

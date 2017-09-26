@@ -1,6 +1,6 @@
 {
   "name": "@didie/core",
-  "version": "1.0.4",
+  "version": "1.0.5-pre",
   "description": "Server Core",
   "main": "dist/index.js",
   "repository": {

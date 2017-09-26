@@ -1,4 +1,4 @@
-import { eachAsync } from '@-)/utils'
+import { eachAsync } from '@didie/utils'
 import * as MarkdownIt from 'markdown-it'
 import { parse, render } from 'mustache'
 import { fs } from 'mz'

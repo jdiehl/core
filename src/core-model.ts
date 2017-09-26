@@ -1,4 +1,4 @@
-import { clone } from '@-)/utils'
+import { clone } from '@didie/utils'
 
 import { ICoreConfig, ICoreContext, ICoreServices } from './core-interface'
 import { CoreService } from './core-service'

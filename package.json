@@ -20,7 +20,7 @@
   "author": "Jonathan Diehl",
   "license": "ISC",
   "dependencies": {
-    "@-)/utils": "^1.0.8",
+    "@didie/utils": "^1.0.8",
     "koa": "^2.3.0",
     "koa-bodyparser": "^4.2.0",
     "koa-cache-control": "^2.0.0",
@@ -37,14 +37,14 @@
     "request-promise-native": "^1.0.4"
   },
   "devDependencies": {
-    "@types/jest": "^20.0.7",
+    "@types/jest": "^20.0.0",
     "@types/koa": "^2.0.39",
     "@types/koa-bodyparser": "^3.0.23",
     "@types/koa-cache-control": "^2.0.0",
     "@types/koa-logger": "^2.0.2",
     "@types/koa-router": "^7.0.22",
     "@types/koa-session-minimal": "^3.0.4",
-    "@types/markdown-it": "^0.0.2",
+    "@types/markdown-it": "^0.0.4",
     "@types/mongodb": "^2.2.10",
     "@types/mustache": "^0.8.29",
     "@types/mz": "^0.0.31",
@@ -53,9 +53,9 @@
     "@types/redis": "^2.6.0",
     "@types/request": "^2.0.1",
     "@types/request-promise-native": "^1.0.5",
-    "jest": "^20.0.4",
-    "npm-bump": "0.0.20",
-    "ts-jest": "^20.0.10",
+    "jest": "^20.0.0",
+    "npm-bump": "0.0.23",
+    "ts-jest": "^20.0.0",
     "ts-node": "^3.3.0",
     "tslint": "^5.6.0",
     "typescript": "^2.5.1"

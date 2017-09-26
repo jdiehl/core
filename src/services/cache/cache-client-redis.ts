@@ -1,4 +1,4 @@
-import { map, parseJSON, promise } from '@-)/utils'
+import { map, parseJSON, promise } from '@didie/utils'
 import { createClient, RedisClient } from 'redis'
 import { Url } from 'url'
 

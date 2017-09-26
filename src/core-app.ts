@@ -6,7 +6,7 @@ import * as Router from 'koa-router'
 import * as session from 'koa-session-minimal'
 import { Server } from 'net'
 
-import { each, eachAsync, extend } from '@-)/utils'
+import { each, eachAsync, extend } from '@didie/utils'
 import { ICoreConfig, ICoreServices } from './core-interface'
 import { CoreService } from './core-service'
 

@@ -1,4 +1,4 @@
-import { clone } from '@-)/utils'
+import { clone } from '@didie/utils'
 import { Url } from 'url'
 
 import { ICacheClient } from './cache-interface'

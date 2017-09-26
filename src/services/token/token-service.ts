@@ -1,4 +1,4 @@
-import { stringToDuration } from '@-)/utils'
+import { stringToDuration } from '@didie/utils'
 import { Middleware, Request } from 'koa'
 import { crypto } from 'mz'
 

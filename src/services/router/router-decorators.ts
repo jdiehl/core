@@ -1,4 +1,4 @@
-import { each, getKeyPath } from '@-)/utils'
+import { each, getKeyPath } from '@didie/utils'
 import { Request, Response } from 'koa'
 import * as KoaRouter from 'koa-router'
 

@@ -1,4 +1,4 @@
-import { each } from '@-)/utils'
+import { each } from '@didie/utils'
 
 export type MockifiedObjects<T> = { [P in keyof T]: MockifiedObject<T[P]> } & { resetHistory: () => void }
 export type MockifiedObject<T> = { [K in keyof T]: jest.Mock<any> }

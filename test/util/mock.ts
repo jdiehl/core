@@ -1,4 +1,4 @@
-import { each, makeIndex } from '@-)/utils'
+import { each, makeIndex } from '@didie/utils'
 import { ObjectID } from 'mongodb'
 import { CoreApp, CoreService, ICoreConfig, ICoreServices } from '../../'
 import { coreServices } from '../../src/core-app'

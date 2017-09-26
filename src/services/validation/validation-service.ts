@@ -1,4 +1,4 @@
-import { each, equals } from '@-)/utils'
+import { each, equals } from '@didie/utils'
 
 import { CoreService } from '../../core-service'
 import { IValidationSpec, Validator, ValidatorType } from './validation-interface'

@@ -1,6 +1,6 @@
 jest.unmock('redis')
 
-import { wait } from '@-)/utils'
+import { wait } from '@didie/utils'
 
 import { ICacheConfig } from '../'
 import { mock } from './util'

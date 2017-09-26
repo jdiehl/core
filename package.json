@@ -1,5 +1,5 @@
 {
-  "name": "@-)/core",
+  "name": "@didie/core",
   "version": "1.0.3",
   "description": "Server Core",
   "main": "dist/index.js",

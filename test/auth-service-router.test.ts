@@ -1,11 +1,12 @@
 jest.unmock('request-promise-native')
 
 import { Server } from 'net'
-import * as request from 'request-promise-native'
-import { AuthService, IAuthConfig } from '../'
+import { defaults as makeRequest } from 'request-promise-native'
+import { AuthService, ErrorNotFound, ErrorUnauthorized, IAuthConfig } from '../src'
 import { mock, mockReject, mockResolve } from './util'
 
-const { del, get, post, put } = request.defaults({ json: true, jar: true })
+const requestWithResponse = makeRequest({ json: true, jar: true, resolveWithFullResponse: true, simple: false })
+const { del, get, post, put } = makeRequest({ json: true, jar: true })
 const config: IAuthConfig = { prefix: '/auth', verifyEmail: true }
 const { app, collection, services, reset } = mock({ auth: config }, 'auth')
 const auth: AuthService = services.auth as any
@@ -34,12 +35,18 @@ beforeEach(async () => {
 })
 
 test('GET / should not be found', async () => {
-  await expect(get(`${host}`)).rejects.toMatchObject({ statusCode: 404 })
+  const res = await requestWithResponse.get(`${host}`)
+  expect(res.statusCode).toBe(404)
 })
 
-test('Manipulations without authentication should be rejected', async () => {
-  await expect(get(`${host}/auth`)).rejects.toMatchObject({ statusCode: 401 })
-  await expect(post(`${host}/auth`).json({})).rejects.toMatchObject({ statusCode: 401 })
+test('GET /auth should be unauthorized', async () => {
+  const res = await requestWithResponse.get(`${host}/auth`)
+  expect(res.statusCode).toBe(401)
+})
+
+test('POST /auth should be unauthorized', async () => {
+  const res = await requestWithResponse.post(`${host}/auth`, { json: {} })
+  expect(res.statusCode).toBe(401)
 })
 
 test('POST /auth/login should call authenticate()', async () => {
@@ -57,7 +64,8 @@ test('POST /auth/login should set the session', async () => {
 test('POST /auth/login should reject an invalid authentication', async () => {
   services.user.authenticate.mockImplementation(mockReject())
   const user = { email: 'u1@b.c', password: 'secret' }
-  await expect(post(`${host}/auth/login`).json(user)).rejects.toMatchObject({ statusCode: 500 })
+  const res = await requestWithResponse.post(`${host}/auth/login`, { json: user })
+  expect(res.statusCode).toBe(500)
   services.user.authenticate.mockReset()
 })
 
@@ -71,7 +79,8 @@ test('GET /auth/verify/key should call use() and verify()', async () => {
 
 test('GET /auth/verify/key should fail', async () => {
   services.token.use.mockImplementation(mockResolve())
-  await expect(get(`${host}/auth/verify/key`)).rejects.toMatchObject({ statusCode: 401 })
+  const res = await requestWithResponse.get(`${host}/auth/verify/key`)
+  expect(res.statusCode).toBe(401)
 })
 
 test('POST /auth/signup should call insert()', async () => {
@@ -117,7 +126,8 @@ describe('authenticated', () => {
 
   test('POST /auth/logout should log out the user', async () => {
     await post(`${host}/auth/logout`)
-    await expect(get(`${host}/auth`)).rejects.toMatchObject({ statusCode: 401 })
+    const res = await requestWithResponse.get(`${host}/auth`)
+    expect(res.statusCode).toBe(401)
   })
 
 })

@@ -1,6 +1,6 @@
 jest.unmock('mz')
 
-import { ITemplateConfig, TemplateService } from '../'
+import { ITemplateConfig, TemplateService } from '../src'
 import { IMock, mock } from './util'
 
 const config: ITemplateConfig = { templates: {

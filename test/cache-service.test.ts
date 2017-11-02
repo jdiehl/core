@@ -1,6 +1,6 @@
 jest.mock('redis')
 
-import { CacheService, ICacheConfig } from '../'
+import { CacheService, ICacheConfig } from '../src'
 import { mock, mockYield } from './util'
 
 const config: ICacheConfig = { server: 'redis://host:1234/13'}

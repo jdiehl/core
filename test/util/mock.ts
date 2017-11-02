@@ -1,7 +1,6 @@
 import { each, makeIndex } from '@didie/utils'
 import { ObjectID } from 'mongodb'
-import { CoreApp, CoreService, ICoreConfig, ICoreServices } from '../../'
-import { coreServices } from '../../src/core-app'
+import { CoreApp, CoreService, coreServices, ICoreConfig, ICoreServices } from '../../src'
 import { IDbCollection, IDbCursor } from '../../src/services/db/db-interface'
 import { mockClear, MockifiedObject, MockifiedObjects,
   mockify, mockifyClasses, mockifyMany, mockResolve } from './mockify'

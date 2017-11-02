@@ -22,3 +22,13 @@ export class ErrorNotFound extends ErrorInternal {
   status = 404
   message = 'Not Found'
 }
+
+export class ErrorInvalidToken extends ErrorInternal {
+  status = 403
+  message = 'Invalid Token'
+}
+
+export class ErrorConfigMissing extends ErrorInternal {
+  status = 500
+  message = 'Configuration Missing'
+}

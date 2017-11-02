@@ -1,4 +1,4 @@
-import { IStatsConfig, StatsService } from '../'
+import { IStatsConfig, StatsService } from '../src'
 import { IMock, mock, MockCollection, mockResolve } from './util'
 
 const config: IStatsConfig = { collection: 'test', includeHeader: ['bar'] }

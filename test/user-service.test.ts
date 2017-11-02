@@ -2,7 +2,7 @@ jest.unmock('mz')
 
 import { crypto } from 'mz'
 
-import { IUser, IUserConfig, UserService } from '../'
+import { ErrorUnauthorized, IUser, IUserConfig, UserService } from '../src'
 import { IUserInternal } from '../src/services/user/user-interface'
 import { mock, mockResolve } from './util'
 
@@ -81,12 +81,12 @@ test('authenticate() should find the requested user', async () => {
 })
 
 test('authenticate() should reject a wrong password', async () => {
-  await expect(user.authenticate('u1@b.c', 'wrong')).rejects.toMatchObject({ status: 401 })
+  await expect(user.authenticate('u1@b.c', 'wrong')).rejects.toBeInstanceOf(ErrorUnauthorized)
 })
 
 test('authenticate() should reject an unverified user', async () => {
   collection.findOne.mockImplementation(mockResolve({}))
-  await expect(user.authenticate('u3@b.c', 'secret')).rejects.toMatchObject({ status: 401 })
+  await expect(user.authenticate('u3@b.c', 'secret')).rejects.toBeInstanceOf(ErrorUnauthorized)
 })
 
 test('insert() should create a new user', async () => {

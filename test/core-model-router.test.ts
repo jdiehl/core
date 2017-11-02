@@ -1,9 +1,12 @@
 jest.unmock('request-promise-native')
 
-import { del, get, post, put } from 'request-promise-native'
+import { defaults as makeRequest } from 'request-promise-native'
 
-import { CoreModel } from '../'
+import { CoreModel } from '../src'
 import { mock } from './util'
+
+const requestWithResponse = makeRequest({ json: true, resolveWithFullResponse: true, simple: false })
+const { del, get, post, put } = makeRequest({ json: true })
 
 describe('core-model-router', () => {
   const sFindOne = jest.fn().mockReturnValue('find-one-ok')
@@ -44,7 +47,8 @@ describe('core-model-router', () => {
   })
 
   it('GET / should not call find', async () => {
-    await expect(get(`${host}`)).rejects.toMatchObject({ statusCode: 404 })
+    const res = await requestWithResponse.get(`${host}`)
+    expect(res.statusCode).toBe(404)
   })
 
   it('GET /model? should call find', async () => {

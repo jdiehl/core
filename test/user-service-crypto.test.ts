@@ -1,6 +1,6 @@
 jest.mock('mz')
 
-import { IUser, IUserConfig, UserService } from '../'
+import { ErrorUnauthorized, IUser, IUserConfig, UserService } from '../src'
 import { IUserInternal } from '../src/services/user/user-interface'
 import { mock, mockResolve } from './util'
 
@@ -25,7 +25,7 @@ beforeEach(() => {
 })
 
 test('authenticate() should call pbkdf2', async () => {
-  await expect(user.authenticate('u1@b.c', 'foo')).rejects.toMatchObject({ status: 401 })
+  await expect(user.authenticate('u1@b.c', 'foo')).rejects.toBeInstanceOf(ErrorUnauthorized)
   expect(mz.crypto.pbkdf2).toHaveBeenCalledTimes(1)
   expect(mz.crypto.pbkdf2).toHaveBeenCalledWith('mysecret,foo', 'salt', 10000, 512, 'sha512')
 })

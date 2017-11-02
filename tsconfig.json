@@ -2,16 +2,18 @@
   "compilerOptions": {
     "target": "es2017",
     "outDir": "dist",
+    "rootDir": "src",
     "module": "commonjs",
     "moduleResolution": "node",
+    "alwaysStrict": true,
     "experimentalDecorators": true,
     "declaration": true,
-    "alwaysStrict": true,
     "noImplicitAny": true,
     "strict": true,
     "inlineSourceMap": true
   },
   "include": [
-    "index.ts"
+    "index.ts",
+    "src/**.ts"
   ]
 }

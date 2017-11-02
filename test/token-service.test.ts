@@ -1,6 +1,6 @@
 jest.unmock('mz')
 
-import { ITokenConfig, TokenService } from '../'
+import { ErrorInvalidToken, ITokenConfig, TokenService } from '../src'
 import { mock, mockResolve } from './util'
 
 const config: ITokenConfig = { tokens: { user: 'xxx', admin: 'yyy' } }
@@ -8,7 +8,6 @@ const { app, services, reset } = mock({ token: config }, 'token')
 const token = services.token as any as TokenService
 
 const next = jest.fn()
-const reject = jest.fn()
 
 beforeAll(async () => {
   await app.init()
@@ -22,37 +21,31 @@ beforeEach(() => {
   reset()
   services.cache.get.mockImplementation(mockResolve({ reference: 'ok' }))
   next.mockReset()
-  reject.mockReset()
 })
 
-test('should allow the correct user token', () => {
-  token.require('user')(mockContext('xxx'), next)
+test('should allow the correct user token', async () => {
+  await token.require('user')(mockContext('xxx'), next)
   expect(next).toHaveBeenCalledTimes(1)
-  expect(reject).toHaveBeenCalledTimes(0)
 })
 
-test('should allow the correct admin token', () => {
-  token.require('admin')(mockContext('yyy'), next)
+test('should allow the correct admin token', async () => {
+  await token.require('admin')(mockContext('yyy'), next)
   expect(next).toHaveBeenCalledTimes(1)
-  expect(reject).toHaveBeenCalledTimes(0)
 })
 
-test('should reject an invalid token', () => {
-  token.require('user')(mockContext('yyy'), next)
+test('should reject an invalid token', async () => {
+  await expect(token.require('user')(mockContext('yyy'), next)).rejects.toBeInstanceOf(ErrorInvalidToken)
   expect(next).toHaveBeenCalledTimes(0)
-  expect(reject).toHaveBeenCalledTimes(1)
 })
 
-test('should allow the user token if both are allowed', () => {
-  token.require(['user', 'admin'])(mockContext('xxx'), next)
+test('should allow the user token if both are allowed', async () => {
+  await token.require(['user', 'admin'])(mockContext('xxx'), next)
   expect(next).toHaveBeenCalledTimes(1)
-  expect(reject).toHaveBeenCalledTimes(0)
 })
 
-test('should allow the admin token if both are allowed', () => {
-  token.require(['user', 'admin'])(mockContext('yyy'), next)
+test('should allow the admin token if both are allowed', async () => {
+  await token.require(['user', 'admin'])(mockContext('yyy'), next)
   expect(next).toHaveBeenCalledTimes(1)
-  expect(reject).toHaveBeenCalledTimes(0)
 })
 
 test('create() should create a random token', async () => {
@@ -90,17 +83,16 @@ test('use() should update the use counter', async () => {
 
 test('use() should reject an expired use counter', async () => {
   services.cache.get.mockImplementation(mockResolve({ reference: 'expired', usesLeft: 0 }))
-  await expect(token.use('key')).rejects.toMatchObject({ message: 'Invalid Token' })
+  await expect(token.use('key')).rejects.toBeInstanceOf(ErrorInvalidToken)
 })
 
 test('use() should reject an expired date', async () => {
   services.cache.get.mockImplementation(mockResolve({ reference: 'expired', validUntil: new Date().getTime() - 1000 }))
-  await expect(token.use('key')).rejects.toMatchObject({ message: 'Invalid Token' })
+  await expect(token.use('key')).rejects.toBeInstanceOf(ErrorInvalidToken)
 })
 
 function mockContext(t: string): any {
   return {
-    request: { header: { 'authentication-token': t } },
-    throw: reject
+    request: { header: { 'authentication-token': t } }
   }
 }

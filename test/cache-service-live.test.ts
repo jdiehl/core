@@ -2,7 +2,7 @@ jest.unmock('redis')
 
 import { wait } from '@didie/utils'
 
-import { ICacheConfig } from '../'
+import { ICacheConfig } from '../src'
 import { mock } from './util'
 
 function runLiveTests(config: ICacheConfig) {

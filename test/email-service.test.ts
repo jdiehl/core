@@ -1,6 +1,6 @@
 jest.mock('nodemailer')
 
-import { EmailService, IEmailConfig } from '../'
+import { EmailService, IEmailConfig } from '../src'
 import { mock } from './util'
 
 const config: IEmailConfig = { from: 'me', host: 'host', port: 1234, pool: {} }

@@ -1,4 +1,4 @@
-import { CoreModel } from '../'
+import { CoreModel, ErrorBadRequest } from '../src'
 import { mock } from './util'
 
 describe('core-model', () => {
@@ -93,8 +93,8 @@ describe('core-model', () => {
 
   test('insert() and update() should reject invalid objects', async () => {
     services.validation.validate.mockReturnValue(false)
-    await expect(model.insert({ name: 'test' })).rejects.toMatchObject({ status: 400 })
-    await expect(model.update('id', { name: 'test' })).rejects.toMatchObject({ status: 400 })
+    await expect(model.insert({ name: 'test' })).rejects.toBeInstanceOf(ErrorBadRequest)
+    await expect(model.update('id', { name: 'test' })).rejects.toBeInstanceOf(ErrorBadRequest)
     services.validation.validate.mockReturnValue(true)
   })
 

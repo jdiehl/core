@@ -1,6 +1,6 @@
 jest.unmock('nodemailer')
 
-import { EmailSendService, EmailService, IEmailConfig } from '../'
+import { EmailSendService, EmailService, IEmailConfig } from '../src'
 import { mock } from './util'
 
 const LiveTest = {

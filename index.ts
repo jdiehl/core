@@ -1,6 +1,0 @@
-export * from './src/core-app'
-export * from './src/core-interface'
-export * from './src/core-model'
-export * from './src/core-service'
-export * from './src/errors'
-export * from './src/services'

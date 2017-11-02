@@ -1,6 +1,6 @@
 jest.unmock('mongodb')
 
-import { DbService, IDbCollection, IDbConfig} from '../'
+import { DbService, IDbCollection, IDbConfig} from '../src'
 import { mock } from './util'
 
 describe.skip('mongo:localhost', () => {

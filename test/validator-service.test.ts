@@ -1,4 +1,4 @@
-import { ValidationService } from '../'
+import { ValidationService } from '../src'
 import { mock } from './util'
 
 const { app, services } = mock({}, 'validation')

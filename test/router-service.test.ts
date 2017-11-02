@@ -1,10 +1,13 @@
 jest.unmock('request-promise-native')
 
 import * as KoaRouter from 'koa-router'
-import { del, get, post, put } from 'request-promise-native'
+import { defaults as makeRequest } from 'request-promise-native'
 
-import { CoreService, Delete, Get, Post, Put, Router } from '../'
+import { CoreService, Delete, Get, Post, Put, Router } from '../src'
 import { mock, mockReject } from './util'
+
+const requestWithResponse = makeRequest({ json: true, resolveWithFullResponse: true, simple: false })
+const { del, get, post, put } = makeRequest({ json: true })
 
 const sBefore = jest.fn()
 const sAfter = jest.fn()
@@ -59,7 +62,8 @@ test('should create a router', () => {
 })
 
 test('get() should not call a method', async () => {
-  await expect(get(host)).rejects.toMatchObject({ statusCode: 404 })
+  const res = await requestWithResponse.get(host)
+  expect(res.statusCode).toBe(404)
   expect(sGet).toHaveBeenCalledTimes(0)
   expect(sGetMore).toHaveBeenCalledTimes(0)
   expect(sPost).toHaveBeenCalledTimes(0)
@@ -68,13 +72,14 @@ test('get() should not call a method', async () => {
 })
 
 test('get() should prefix the routes', async () => {
-  await expect(get(`${host}/get`)).rejects.toMatchObject({ statusCode: 404 })
+  const res = await requestWithResponse.get(`${host}/get`)
+  expect(res.statusCode).toBe(404)
 })
 
 test('get() should redirect', async () => {
-  const options = { url: `${host}/test/a`, followRedirect: false, resolveWithFullResponse: true }
-  await expect(get(options)).rejects
-  .toMatchObject({ statusCode: 301, message: '301 - "Redirecting to <a href=\\"/b\\">/b</a>."' })
+  const res = await requestWithResponse.get(`${host}/test/a`, { followRedirect: false })
+  expect(res.statusCode).toBe(301)
+  expect(res.headers.location).toBe('/b')
 })
 
 test('should create a get route', async () => {
@@ -130,7 +135,8 @@ test('should call before', async () => {
 
 test('should stop if before is rejected', async () => {
   sBefore.mockImplementation(mockReject({ status: 401, message: 'Unauthorized' }))
-  await expect(get(`${host}/test/get`)).rejects.toMatchObject({ statusCode: 401 })
+  const res = await requestWithResponse.get(`${host}/test/get`)
+  expect(res.statusCode).toBe(401)
   expect(sGet).toHaveBeenCalledTimes(0)
 })
 

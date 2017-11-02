@@ -4,12 +4,13 @@ import { crypto } from 'mz'
 
 import { ICoreContext } from '../../core-interface'
 import { CoreService } from '../../core-service'
+import { ErrorConfigMissing, ErrorInvalidToken } from '../../errors'
 import { ITokenInfo, ITokenOptions } from './token-interface'
 
 export class TokenService extends CoreService {
 
   require(domain: string | string[]): Middleware {
-    if (!this.config.token || !this.config.token.tokens) throw new Error('Missing token configuration')
+    if (!this.config.token || !this.config.token.tokens) throw new ErrorConfigMissing()
     if (typeof domain === 'string') domain = [domain]
     return async (context: ICoreContext, next: () => void) => {
       const token = context.request.header['authentication-token']
@@ -17,7 +18,7 @@ export class TokenService extends CoreService {
         const check = this.config.token!.tokens![d]
         if (check && check === token) return next()
       }
-      context.throw(403, 'Invalid Token')
+      throw new ErrorInvalidToken()
     }
   }
 
@@ -36,15 +37,15 @@ export class TokenService extends CoreService {
   async use<T = any>(token: string): Promise<T> {
     const key = `token:${token}`
     const res = await this.services.cache.get(key) as ITokenInfo
-    if (!res) throw new Error('Invalid Token')
+    if (!res) throw new ErrorInvalidToken()
     if (res.validUntil !== undefined && res.validUntil < new Date().getTime()) {
       await this.services.cache.del(key)
-      throw new Error('Invalid Token')
+      throw new ErrorInvalidToken()
     }
     if (res.usesLeft !== undefined) {
       if (res.usesLeft <= 0) {
         await this.services.cache.del(key)
-        throw new Error('Invalid Token')
+        throw new ErrorInvalidToken()
       }
       res.usesLeft--
       await this.services.cache.set(key, res)

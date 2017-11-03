@@ -41,7 +41,8 @@ export class UserService<Profile = {}> extends CoreModel<IUser<Profile>> {
   }
 
   async init() {
-    this.collectionName = this.config.user && this.config.user.collection || 'user'
+    if (!this.config.user) return
+    this.collectionName = this.config.user.collection || 'user'
     await super.init()
     this.collection.createIndex(['email'], { unique: true })
   }

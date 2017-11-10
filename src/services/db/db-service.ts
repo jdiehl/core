@@ -8,14 +8,17 @@ export class DbService extends CoreService {
   private client: IDbClient
 
   collection<T>(name: string): IDbCollection<T> {
+    if (!this.client) throw new Error('Missing Database Configuration')
     return this.client.collection<T>(name)
   }
 
   async drop(name: string): Promise<boolean> {
+    if (!this.client) throw new Error('Missing Database Configuration')
     return this.client.drop(name)
   }
 
   objectID(id: string): IDbObjectID {
+    if (!this.client) throw new Error('Missing Database Configuration')
     return this.client.objectID(id)
   }
 

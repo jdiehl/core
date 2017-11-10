@@ -9,6 +9,7 @@ const EmailRegexp = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+
 export class ValidationService extends CoreService {
   protected validators: Record<string, Validator> = {
     any: v => true,
+    boolean: v => typeof v === 'boolean',
     email: v => EmailRegexp.test(v),
     number: v => typeof v === 'number',
     string: v => typeof v === 'string'

@@ -16,7 +16,15 @@ export class ValidationService extends CoreService {
   }
 
   validate(spec: IValidationSpec, obj: any, allowPartial: boolean = false): boolean {
-    if (!allowPartial && !equals(Object.keys(spec), Object.keys(obj))) return false
+    if (!allowPartial) {
+      const specKeys = Object.keys(spec)
+      const objKeys = Object.keys(obj)
+      for (const key of specKeys) {
+        if (obj[key] === undefined) return false
+      }
+      if (specKeys.length !== objKeys.length) return false
+    }
+
     return each(obj, (value, key) => {
       const type = spec[key]
       if (!type) return false

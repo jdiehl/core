@@ -1,3 +1,4 @@
+import { Readable } from 'stream'
 import { ConnectionOptions } from 'tls'
 
 // tslint:disable-next-line:max-line-length
@@ -25,7 +26,7 @@ export interface IEmailConfig {
 }
 
 export interface IEmailAttachment {
-  content: string | Buffer | NodeJS.ReadableStream
+  content: string | Buffer | Readable
   filename: string
   path: string
 }
@@ -34,8 +35,8 @@ export interface IEmailSendOptions {
   from?: string
   to: string | string[],
   subject: string,
-  text?: string | Buffer | NodeJS.ReadableStream,
-  html?: string | Buffer | NodeJS.ReadableStream,
+  text?: string | Buffer | Readable,
+  html?: string | Buffer | Readable,
   attachments?: IEmailAttachment[]
 }
 

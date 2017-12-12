@@ -4,6 +4,12 @@
   "description": "Server Core",
   "main": "index.js",
   "types": "index.d.js",
+  "files": [
+    "src/**/*.d.ts",
+    "src/**/*.js",
+    "index.d.ts",
+    "index.js"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/jdiehl/core.git"

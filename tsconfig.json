@@ -1,8 +1,6 @@
 {
   "compilerOptions": {
     "target": "es2017",
-    "outDir": "dist",
-    "rootDir": "src",
     "module": "commonjs",
     "moduleResolution": "node",
     "alwaysStrict": true,
@@ -13,6 +11,7 @@
     "inlineSourceMap": true
   },
   "include": [
+    "index.ts",
     "src/**.ts"
   ]
 }

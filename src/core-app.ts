@@ -1,9 +1,7 @@
 import { each, eachAsync, extend } from '@didie/utils'
-import * as Router from 'koa-router'
 
 import { ICoreConfig, ICoreServices } from './core-interface'
 import { CoreService } from './core-service'
-
 import { coreServices } from './services'
 
 export class CoreApp {

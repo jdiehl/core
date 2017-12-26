@@ -8,6 +8,7 @@ export abstract class CoreService {
   constructor(public config: ICoreConfig, public services: ICoreServices) {}
   async beforeInit?(): Promise<void>
   async init?(): Promise<void>
+  async startup?(): Promise<void>
   install?(server: Koa): void
   async destroy?(): Promise<void>
 

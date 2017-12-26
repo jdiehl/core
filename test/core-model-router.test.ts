@@ -24,13 +24,13 @@ describe('core-model-router', () => {
     async delete(...args: any[]) { return sDelete(...args) }
   }
 
-  const { app, collection, services, reset } = mock({}, [], { model: Model })
+  const config = { router: { models: ['model'] } }
+  const { app, collection, services, reset } = mock(config, ['router', 'server'], { model: Model })
   let host: string
 
   beforeAll(async () => {
     await app.init()
-    await app.listen()
-    host = `http://127.0.0.1:${app.instance.address().port}`
+    host = `http://127.0.0.1:${app.port}`
   })
 
   afterAll(async () => {

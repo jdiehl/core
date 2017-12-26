@@ -8,15 +8,14 @@ import { mock, mockReject, mockResolve } from './util'
 const requestWithResponse = makeRequest({ json: true, jar: true, resolveWithFullResponse: true, simple: false })
 const { del, get, post, put } = makeRequest({ json: true, jar: true })
 const config: IAuthConfig = { prefix: '/auth', verifyEmail: true }
-const { app, collection, services, reset } = mock({ auth: config }, 'auth')
+const { app, collection, services, reset } = mock({ auth: config }, ['auth', 'server'])
 const auth: AuthService = services.auth as any
 let host: string
 const u1 = { _id: 'id', email: 'u1@test', profile: {} }
 
 beforeAll(async () => {
   await app.init()
-  await app.listen()
-  host = `http://127.0.0.1:${app.instance.address().port}`
+  host = `http://127.0.0.1:${app.port}`
 })
 
 afterAll(async () => {

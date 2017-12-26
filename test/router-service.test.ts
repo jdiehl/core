@@ -31,14 +31,13 @@ class Service extends CoreService {
   @Get('/custom', sCustomMapping) async custom(...args: any[]) { return sCustom.apply(null, args) }
 }
 
-const { app, collection, services, reset } = mock({}, [], { service: Service })
+const { app, collection, services, reset } = mock({}, ['router', 'server'], { service: Service })
 const service: Service = (app.services as any).service
 let host: string
 
 beforeAll(async () => {
   await app.init()
-  await app.listen()
-  host = `http://127.0.0.1:${app.instance.address().port}`
+  host = `http://127.0.0.1:${app.port}`
 })
 
 afterAll(async () => {

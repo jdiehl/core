@@ -1,8 +1,8 @@
 export interface IRouterConfig {
-  prefix?: string
+  models: string[]
 }
 
 export interface IRouterOptions {
-  prefix?: string,
+  prefix?: string
   redirect?: Record<string, string>
 }

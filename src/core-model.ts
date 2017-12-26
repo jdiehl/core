@@ -4,7 +4,6 @@ import { ICoreConfig, ICoreContext, ICoreServices } from './core-interface'
 import { CoreService } from './core-service'
 import { ErrorBadRequest, ErrorNotFound } from './errors'
 import { IDbCollection, IDbObject } from './services/db/db-interface'
-import { Delete, Get, Post, Put } from './services/router/router-decorators'
 import { IValidationSpec } from './services/validation/validation-interface'
 
 export interface ICoreModelFindOptions {
@@ -68,25 +67,6 @@ export abstract class CoreModel<Model extends IDbObject = any> extends CoreServi
 
   async init() {
     this.collection = this.services.db.collection<Model>(this.collectionName)
-
-    // Routes must be created here to allow subclassing
-    Post('/', ['request.body'])(this, 'insert')
-    this.router!.get('/', async (context) => {
-      // TODO: compute last-modified
-      const modified = new Date() as any
-      if (context.header['if-modified-since']) {
-        const cache = new Date(context.header['if-modified-since'])
-        if (modified <= cache) return context.status = 304
-      }
-      context.set('last-modified', modified.toGMTString())
-      context.set('cache-control', `max-age=0`)
-      context.body = await this.find(context.query)
-    })
-    // Get('/', ['query'])(this, 'find')
-    Get('/:id', ['params.id'])(this, 'findOne')
-    Put('/:id', ['params.id', 'request.body'])(this, 'update')
-    Delete('/:id', ['params.id'])(this, 'delete')
-    this.router!.prefix(this.routerPrefix)
   }
 
   // Validation
@@ -95,12 +75,6 @@ export abstract class CoreModel<Model extends IDbObject = any> extends CoreServi
     if (values._id) return false
     if (this.spec) return this.services.validation.validate(this.spec, values, allowPartial)
     return true
-  }
-
-  // Router configuration
-
-  protected get routerPrefix(): string {
-    return `/${this.collectionName}`
   }
 
   // Transform

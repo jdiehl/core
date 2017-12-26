@@ -25,10 +25,8 @@ export class AuthService<Profile = {}> extends CoreService {
     Post('/logout')(this, 'logoutRoute')
     Post('/signup')(this, 'signupRoute')
     Get('/verify/:token')(this, 'verifyRoute')
-  }
 
-  install(server: Koa) {
-    server.use(async (context: ICoreContext, next: () => Promise<any>) => {
+    this.services.server.use(async (context: ICoreContext, next: () => Promise<any>) => {
       if (context.session.user) {
         const user = await this.services.user.unserialize(context.session.user)
         user ? context.user = user : delete context.session.user

@@ -12,7 +12,7 @@ export class ServerService extends CoreService {
   instance: Server
   server: Koa
 
-  async init() {
+  async beforeInit() {
     this.server = new Koa()
     if (this.config.keys) this.server.keys = this.config.keys
     if (!this.config.quiet) this.server.use(logger())
@@ -44,7 +44,7 @@ export class ServerService extends CoreService {
   }
 
   use(middleware: any) {
-    this.server.use(middleware)
+    if (this.server) this.server.use(middleware)
   }
 
 }

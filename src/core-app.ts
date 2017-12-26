@@ -35,17 +35,6 @@ export class CoreApp {
       if (service.init) return service.init()
     })
 
-    // install
-    if (this.services.server.server) {
-      const router = new Router({ prefix: this.config.prefix })
-      each<CoreService>(this.services, service => {
-        if (service.install) service.install(this.services.server.server)
-        if (service.router) router.use(service.router.routes(), service.router.allowedMethods())
-      })
-      this.services.server.use(router.routes())
-      this.services.server.use(router.allowedMethods())
-    }
-
     // startup
     await eachAsync<CoreService>(this.services, async (service, name) => {
       if (service.startup) return service.startup()

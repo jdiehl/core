@@ -42,10 +42,8 @@ export class StatsService extends CoreService {
   async init() {
     if (!this.config.stats) return
     this.stats = this.services.db.collection<IStats>(this.config.stats.collection || 'stats')
-  }
 
-  install(server: Koa): void {
-    if (this.config.stats) server.use(async (context: ICoreContext, next: () => void) => {
+    this.services.server.use(async (context: ICoreContext, next: () => void) => {
       const start = new Date()
       await next()
       const time = new Date().getTime() - start.getTime()

@@ -1,3 +1,6 @@
+import { each } from '@didie/utils'
+import * as Router from 'koa-router'
+
 import { CoreModel } from '../../core-model'
 import { CoreService } from '../../core-service'
 import { Delete, Get, Post, Put } from './router-decorators'
@@ -14,6 +17,19 @@ export class RouterService extends CoreService {
     for (const prefix of models) {
       const model = (this.services as any)[prefix]
       this.createRouter(model, prefix)
+    }
+
+  }
+
+  async startup() {
+    // install routers
+    if (this.services.server.server) {
+      const router = new Router({ prefix: this.config.prefix })
+      each<CoreService>(this.services, service => {
+        if (service.router) router.use(service.router.routes(), service.router.allowedMethods())
+      })
+      this.services.server.use(router.routes())
+      this.services.server.use(router.allowedMethods())
     }
   }
 

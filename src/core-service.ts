@@ -9,7 +9,6 @@ export abstract class CoreService {
   async beforeInit?(): Promise<void>
   async init?(): Promise<void>
   async startup?(): Promise<void>
-  install?(server: Koa): void
   async destroy?(): Promise<void>
 
   async before?(context: ICoreContext, key: string, params: any): Promise<void>

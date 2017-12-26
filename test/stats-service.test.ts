@@ -23,32 +23,24 @@ test('should request a collection', async () => {
 })
 
 test('should install a middleware', async () => {
-  const use = jest.fn()
-  stats.install({ use } as any)
-  expect(use).toHaveBeenCalledTimes(1)
+  expect(m.services.server.use).toHaveBeenCalledTimes(1)
 })
 
 test('should call stats.store() from the middleware', async () => {
-  let middleware: any
-  const use = (f: any) => middleware = f
-  const store = jest.fn(mockResolve())
-  stats.store = store
-  stats.install({ use } as any)
   const context = {}
+  const middleware = m.services.server.use.mock.calls[0][0]
+  stats.store = jest.fn(mockResolve())
   await middleware(context, async () => {})
-  expect(store).toHaveBeenCalledTimes(1)
-  expect(store).toHaveBeenCalledWith(context, expect.any(Date), expect.any(Number))
+  expect(stats.store).toHaveBeenCalledTimes(1)
+  expect(stats.store).toHaveBeenCalledWith(context, expect.any(Date), expect.any(Number))
 })
 
 test('should not call stats.store() from the middleware on an error', async () => {
-  const use = jest.fn()
-  const store = jest.fn(mockResolve())
-  stats.store = store
-  stats.install({ use } as any)
-  const middleware = use.mock.calls[0][0]
+  const middleware = m.services.server.use.mock.calls[0][0]
+  stats.store = jest.fn(mockResolve())
   const error = new Error()
   await expect(middleware({}, async () => { throw error })).rejects.toEqual(error)
-  expect(store).toHaveBeenCalledTimes(0)
+  expect(stats.store).toHaveBeenCalledTimes(0)
 })
 
 test('store() should insert a document', async () => {

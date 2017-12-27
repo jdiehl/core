@@ -16,22 +16,28 @@ export class ValidationService extends CoreService {
   }
 
   validate(spec: IValidationSpec, obj: any, allowPartial: boolean = false): boolean {
-    if (!allowPartial) {
-      const specKeys = Object.keys(spec)
-      const objKeys = Object.keys(obj)
-      for (const key of specKeys) {
-        if (obj[key] === undefined) return false
-      }
-      if (specKeys.length !== objKeys.length) return false
-    }
+    return this.validator(spec)(obj, allowPartial)
+  }
 
-    return each(obj, (value, key) => {
-      const type = spec[key]
-      if (!type) return false
-      const validator = typeof type === 'function' ? type : this.validators[type]
-      if (!validator) return false
-      return validator(value)
-    })
+  validator(spec: IValidationSpec): Validator {
+    return (obj: any, allowPartial: boolean = false) => {
+      if (!allowPartial) {
+        const specKeys = Object.keys(spec)
+        const objKeys = Object.keys(obj)
+        for (const key of specKeys) {
+          if (obj[key] === undefined) return false
+        }
+        if (specKeys.length !== objKeys.length) return false
+      }
+
+      return each(obj, (value, key) => {
+        const type = spec[key]
+        if (!type) return false
+        const validator = typeof type === 'function' ? type : this.validators[type]
+        if (!validator) return false
+        return validator(value)
+      })
+    }
   }
 
 }

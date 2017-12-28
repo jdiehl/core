@@ -6,6 +6,7 @@ export * from './db/db-service'
 export * from './db/db-interface'
 export * from './email/email-service'
 export * from './email/email-interface'
+export * from './model/model-service'
 export * from './router/router-service'
 export * from './router/router-interface'
 export * from './server/server-service'
@@ -27,6 +28,7 @@ export const coreServices = {
   cache: exports.CacheService,
   db: exports.DbService,
   email: exports.EmailService,
+  model: exports.ModelService,
   router: exports.RouterService,
   server: exports.ServerService,
   slack: exports.SlackService,

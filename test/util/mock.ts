@@ -56,7 +56,9 @@ function mockServices(app: CoreApp, collection: MockCollection, preserve: string
     services.db.objectID.mockImplementation(x => x)
   }
   if (preserve.indexOf('validation') < 0) {
+    const validator = jest.fn().mockReturnValue(true)
     services.validation.validate.mockReturnValue(true)
+    services.validation.validator.mockReturnValue(validator)
   }
   return services
 }

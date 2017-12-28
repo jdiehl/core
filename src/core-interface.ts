@@ -34,6 +34,7 @@ export interface ICoreServices {
   cache: services.CacheService
   db: services.DbService
   email: services.EmailService
+  model: services.ModelService
   router: services.RouterService
   server: services.ServerService
   slack: services.SlackService

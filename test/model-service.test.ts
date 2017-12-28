@@ -1,20 +1,16 @@
-import { CoreModel, ErrorBadRequest } from '../src'
+import { ErrorBadRequest, Model } from '../src'
 import { mock } from './util'
 
-describe('core-model', () => {
-  const transform = jest.fn().mockImplementation(x => x)
-
-  class TestModel extends CoreModel {
-    collectionName = 'test'
-    spec = { name: 'string' } as any
-    transform(obj: any) { return transform(obj) }
-  }
-
-  const { app, cursor, collection, services, reset } = mock({}, [], { model: TestModel })
-  const model = (services as any).model as CoreModel
+describe('model-service', () => {
+  const { app, cursor, collection, services, reset } = mock({}, ['model'])
+  const modelService = services.model
+  const validator = services.validation.validator()
+  services.validation.validator.mockClear()
+  let model: Model
 
   beforeAll(async () => {
     await app.init()
+    model = modelService.add('test', { name: 'string' })
   })
 
   afterAll(async () => {
@@ -23,13 +19,14 @@ describe('core-model', () => {
 
   beforeEach(async () => {
     reset()
-    transform.mockClear()
+    validator.mockClear()
   })
 
-  it('findOne() should call transform', async () => {
-    await model.findOne('id')
-    expect(transform).toHaveBeenCalledTimes(1)
-    expect(transform).toHaveBeenCalledWith({ _id: 'id1' })
+  test('add() should create a validator', async () => {
+    const spec = { name: 'string' }
+    modelService.add('test2', spec)
+    expect(services.validation.validator).toHaveBeenCalledTimes(1)
+    expect(services.validation.validator).toHaveBeenCalledWith(spec)
   })
 
   it('findOne() should fetch a record', async () => {
@@ -37,13 +34,6 @@ describe('core-model', () => {
     expect(res).toEqual({ _id: 'id1' })
     expect(collection.findOne).toHaveBeenCalledTimes(1)
     expect(collection.findOne).toHaveBeenCalledWith({ _id: 'id' })
-  })
-
-  it('find() should call transform', async () => {
-    await model.find()
-    expect(transform).toHaveBeenCalledTimes(2)
-    expect(transform.mock.calls[0]).toEqual([{ _id: 'id1' }])
-    expect(transform.mock.calls[1]).toEqual([{ _id: 'id2' }])
   })
 
   it('findOne() should fetch records', async () => {
@@ -60,12 +50,6 @@ describe('core-model', () => {
     expect(cursor.project).toHaveBeenCalledWith({ key: 'no' })
   })
 
-  it('insert() should call transform', async () => {
-    await model.insert({ a: 1 })
-    expect(transform).toHaveBeenCalledTimes(1)
-    expect(transform).toHaveBeenCalledWith({ _id: 'id1', a: 1 })
-  })
-
   it('insert() should insert a record', async () => {
     const res = await model.insert({ name: 'susan' })
     expect(res).toEqual({ _id: 'id1', name: 'susan' })
@@ -73,29 +57,29 @@ describe('core-model', () => {
     expect(collection.insertOne).toHaveBeenCalledWith({ name: 'susan' })
   })
 
-  test('insert() should call validate', async () => {
-    await model.insert({ name: 'test' })
-    expect(services.validation.validate).toHaveBeenCalledTimes(1)
-    expect(services.validation.validate).toHaveBeenCalledWith({ name: 'string' }, { name: 'test' }, false)
+  test('insert() should call the validator', async () => {
+    const res = await model.insert({ name: 'test' })
+    expect(validator).toHaveBeenCalledTimes(1)
+    expect(validator).toHaveBeenCalledWith({ name: 'test' }, false)
   })
 
-  it('update() should update a record', async () => {
+  test('update() should update a record', async () => {
     await model.update('id', { x: 1 })
     expect(collection.updateOne).toHaveBeenCalledTimes(1)
     expect(collection.updateOne).toHaveBeenCalledWith({ _id: 'id' }, { $set: { x: 1 } })
   })
 
-  test('update() should call validate', async () => {
+  test('update() should call the validator', async () => {
     await model.update('id', { name: 'new' })
-    expect(services.validation.validate).toHaveBeenCalledTimes(1)
-    expect(services.validation.validate).toHaveBeenCalledWith({ name: 'string' }, { name: 'new' }, true)
+    expect(validator).toHaveBeenCalledTimes(1)
+    expect(validator).toHaveBeenCalledWith({ name: 'new' }, true)
   })
 
   test('insert() and update() should reject invalid objects', async () => {
-    services.validation.validate.mockReturnValue(false)
+    validator.mockReturnValue(false)
     await expect(model.insert({ name: 'test' })).rejects.toBeInstanceOf(ErrorBadRequest)
     await expect(model.update('id', { name: 'test' })).rejects.toBeInstanceOf(ErrorBadRequest)
-    services.validation.validate.mockReturnValue(true)
+    validator.mockReturnValue(true)
   })
 
   it('delete() should delete a record', async () => {

@@ -1,5 +1,4 @@
 import { extend } from '@didie/utils'
-import * as Koa from 'koa'
 
 import { ICoreContext } from '../../core-interface'
 import { CoreService } from '../../core-service'

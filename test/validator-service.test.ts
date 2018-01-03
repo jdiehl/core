@@ -13,59 +13,60 @@ afterAll(async () => {
 })
 
 test('should validate a number', async () => {
-  expect(validation.validate({ a: 'number' }, { a: 1 })).toBe(true)
-  expect(validation.validate({ a: 'number' }, { a: '1' })).toBe(false)
-  expect(validation.validate({ a: 'number' }, { a: {} })).toBe(false)
+  expect(validation.validate({ a: 'number' }, { a: 1 }, 'insert')).toBe(true)
+  expect(validation.validate({ a: 'number' }, { a: '1' }, 'insert')).toBe(false)
+  expect(validation.validate({ a: 'number' }, { a: {} }, 'insert')).toBe(false)
 })
 
 test('should validate a string', async () => {
-  expect(validation.validate({ b: 'string' }, { b: 2 })).toBe(false)
-  expect(validation.validate({ b: 'string' }, { b: '2' })).toBe(true)
-  expect(validation.validate({ b: 'string' }, { b: {} })).toBe(false)
+  expect(validation.validate({ b: 'string' }, { b: 2 }, 'insert')).toBe(false)
+  expect(validation.validate({ b: 'string' }, { b: '2' }, 'insert')).toBe(true)
+  expect(validation.validate({ b: 'string' }, { b: {} }, 'insert')).toBe(false)
 })
 
 test('should validate an email', async () => {
-  expect(validation.validate({ b: 'email' }, { b: 2 })).toBe(false)
-  expect(validation.validate({ b: 'email' }, { b: '2' })).toBe(false)
-  expect(validation.validate({ b: 'email' }, { b: {} })).toBe(false)
-  expect(validation.validate({ b: 'email' }, { b: 'test@example.com' })).toBe(true)
-  expect(validation.validate({ b: 'email' }, { b: 'something-much.harder_11@lala-nana.foo.bar.space' })).toBe(true)
-  expect(validation.validate({ b: 'email' }, { b: 'a@invalid' })).toBe(false)
+  expect(validation.validate({ b: 'email' }, { b: 2 }, 'insert')).toBe(false)
+  expect(validation.validate({ b: 'email' }, { b: '2' }, 'insert')).toBe(false)
+  expect(validation.validate({ b: 'email' }, { b: {} }, 'insert')).toBe(false)
+  expect(validation.validate({ b: 'email' }, { b: 'test@example.com' }, 'insert')).toBe(true)
+  const email = 'something-much.harder_11@lala-nana.foo.bar.space'
+  expect(validation.validate({ b: 'email' }, { b: email }, 'insert')).toBe(true)
+  expect(validation.validate({ b: 'email' }, { b: 'a@invalid' }, 'insert')).toBe(false)
 })
 
 test('should not validate incomplete objects', async () => {
-  expect(validation.validate({ a: 'number' }, {})).toBe(false)
-  expect(validation.validate({ a: 'string' }, {})).toBe(false)
-  expect(validation.validate({ a: 'email' }, {})).toBe(false)
-  expect(validation.validate({ a: 'any' }, {})).toBe(false)
-  expect(validation.validate({ a: 'any', b: 'any' }, { a: 1 })).toBe(false)
-  expect(validation.validate({ a: 'any', b: 'any' }, { b: '2' })).toBe(false)
+  expect(validation.validate({ a: 'number' }, {}, 'insert')).toBe(false)
+  expect(validation.validate({ a: 'string' }, {}, 'insert')).toBe(false)
+  expect(validation.validate({ a: 'email' }, {}, 'insert')).toBe(false)
+  expect(validation.validate({ a: 'any' }, {}, 'insert')).toBe(false)
+  expect(validation.validate({ a: 'any', b: 'any' }, { a: 1 }, 'insert')).toBe(false)
+  expect(validation.validate({ a: 'any', b: 'any' }, { b: '2' }, 'insert')).toBe(false)
 })
 
 test('should validate incomplete objects if partials are allowed', async () => {
-  expect(validation.validate({ a: 'number' }, {}, true)).toBe(true)
-  expect(validation.validate({ a: 'string' }, {}, true)).toBe(true)
-  expect(validation.validate({ a: 'email' }, {}, true)).toBe(true)
-  expect(validation.validate({ a: 'any' }, {}, true)).toBe(true)
-  expect(validation.validate({ a: 'any', b: 'any' }, { a: 1 }, true)).toBe(true)
-  expect(validation.validate({ a: 'any', b: 'any' }, { b: '2' }, true)).toBe(true)
+  expect(validation.validate({ a: 'number' }, {}, 'update')).toBe(true)
+  expect(validation.validate({ a: 'string' }, {}, 'update')).toBe(true)
+  expect(validation.validate({ a: 'email' }, {}, 'update')).toBe(true)
+  expect(validation.validate({ a: 'any' }, {}, 'update')).toBe(true)
+  expect(validation.validate({ a: 'any', b: 'any' }, { a: 1 }, 'update')).toBe(true)
+  expect(validation.validate({ a: 'any', b: 'any' }, { b: '2' }, 'update')).toBe(true)
 })
 
 test('should not validate extranuous keys', async () => {
-  expect(validation.validate({}, { a: 1})).toBe(false)
-  expect(validation.validate({ a: 'string' }, { a: '1', b: 2 })).toBe(false)
-  expect(validation.validate({ a: 'email', b: 'number' }, { a: 'a@b.c', b: 2, c: {} })).toBe(false)
-  expect(validation.validate({ b: 'any' }, { a: 1, b: {} })).toBe(false)
+  expect(validation.validate({}, { a: 1}, 'insert')).toBe(false)
+  expect(validation.validate({ a: 'string' }, { a: '1', b: 2 }, 'insert')).toBe(false)
+  expect(validation.validate({ a: 'email', b: 'number' }, { a: 'a@b.c', b: 2, c: {} }, 'insert')).toBe(false)
+  expect(validation.validate({ b: 'any' }, { a: 1, b: {} }, 'insert')).toBe(false)
 })
 
 test('should validate a custom validator', async () => {
   const validator = jest.fn().mockReturnValue(true)
-  expect(validation.validate({ foo: validator }, { foo: 'bar' })).toBe(true)
+  expect(validation.validate({ foo: validator }, { foo: 'bar' }, 'insert')).toBe(true)
   expect(validator).toHaveBeenCalledTimes(1)
   expect(validator).toHaveBeenCalledWith('bar')
 })
 
 test('should not validate a failing validator', async () => {
   const validator = jest.fn().mockReturnValue(false)
-  expect(validation.validate({ a: validator }, { a: '1' })).toBe(false)
+  expect(validation.validate({ a: validator }, { a: '1' }, 'insert')).toBe(false)
 })

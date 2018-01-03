@@ -5,7 +5,7 @@ import { CoreService } from '../../core-service'
 import { ErrorBadRequest, ErrorNotFound } from '../../errors'
 import { IDbCollection, IDbIndexOptions, IDbObject } from '../db/db-interface'
 import { DbService } from '../db/db-service'
-import { IValidationSpec, Validator } from '../validation/validation-interface'
+import { IValidationSpec, ValidationMode, Validator } from '../validation/validation-interface'
 
 export interface ICoreModelFindOptions {
   sort?: object
@@ -53,7 +53,7 @@ export class Model<M extends IDbObject = any> {
   }
 
   async insert(values: object): Promise<M> {
-    if (!this.validate(values, false)) throw new ErrorBadRequest()
+    if (!this.validate(values, 'insert')) throw new ErrorBadRequest()
     if (this.transformParams) values = await this.transformParams(values)
     const res = await this.collection.insertOne(values)
     if (res.insertedCount !== 1) throw new Error('Could not insert object')
@@ -64,7 +64,7 @@ export class Model<M extends IDbObject = any> {
   }
 
   async update(id: string, values: object): Promise<void> {
-    if (!this.validate(values, true)) throw new ErrorBadRequest()
+    if (!this.validate(values, 'update')) throw new ErrorBadRequest()
     if (this.transformParams) values = await this.transformParams(values)
     const objectID = this.services.db.objectID(id)
     const res = await this.collection.updateOne({ _id: objectID }, { $set: values })
@@ -79,9 +79,9 @@ export class Model<M extends IDbObject = any> {
 
   // Validation
 
-  protected validate(values: any, allowPartial: boolean) {
+  protected validate(values: any, mode: ValidationMode) {
     if (values._id) return false
-    if (this.validator) return this.validator(values, allowPartial)
+    if (this.validator) return this.validator(values, mode)
     return true
   }
 

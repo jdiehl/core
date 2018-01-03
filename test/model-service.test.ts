@@ -60,7 +60,7 @@ describe('model-service', () => {
   test('insert() should call the validator', async () => {
     const res = await model.insert({ name: 'test' })
     expect(validator).toHaveBeenCalledTimes(1)
-    expect(validator).toHaveBeenCalledWith({ name: 'test' }, false)
+    expect(validator).toHaveBeenCalledWith({ name: 'test' }, 'insert')
   })
 
   test('update() should update a record', async () => {
@@ -72,7 +72,7 @@ describe('model-service', () => {
   test('update() should call the validator', async () => {
     await model.update('id', { name: 'new' })
     expect(validator).toHaveBeenCalledTimes(1)
-    expect(validator).toHaveBeenCalledWith({ name: 'new' }, true)
+    expect(validator).toHaveBeenCalledWith({ name: 'new' }, 'update')
   })
 
   test('insert() and update() should reject invalid objects', async () => {

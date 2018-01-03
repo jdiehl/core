@@ -2,28 +2,29 @@ jest.unmock('mz')
 
 import { crypto } from 'mz'
 
-import { ErrorUnauthorized, IUser, IUserConfig, UserService } from '../src'
-import { IUserInternal } from '../src/services/user/user-interface'
+import { AuthService, ErrorUnauthorized, IAuthConfig, IUser, User } from '../src'
 import { mock, mockResolve } from './util'
 
-const config: IUserConfig = { secret: 'mysecret', iterations: 1 }
-const { app, cursor, collection, services, reset } = mock({ user: config }, 'user')
-const user = services.user as any as UserService
+const config: IAuthConfig = { secret: 'mysecret', iterations: 1 }
+const { app, cursor, collection, services, reset } = mock({ auth: config }, ['auth', 'model'])
+const auth = services.auth as any as AuthService
+let user: User
 
-let u1: IUserInternal
-let u2: IUserInternal
+let u1: IUser
+let u2: IUser
 
 beforeAll(async () => {
-  u1 = await mockUser('id1', 'u1@b.c', 'secret', { name: 'Peter' })
-  u2 = await mockUser('id2', 'u2@b.c', 'unknown', { name: 'Susan' }, 'admin')
   await app.init()
+  user = (auth as any).user
 })
 
 afterAll(async () => {
   await app.destroy()
 })
 
-beforeEach(() => {
+beforeEach(async () => {
+  u1 = await mockUser('id1', 'u1@b.c', 'secret', { name: 'Peter' })
+  u2 = await mockUser('id2', 'u2@b.c', 'unknown', { name: 'Susan' })
   cursor.toArray.mockImplementation(mockResolve([u1, u2]))
   collection.findOne.mockImplementation(mockResolve(u1))
 })
@@ -34,34 +35,34 @@ afterEach(() => {
 
 test('should create a unique index on email', () => {
   expect(collection.createIndex).toHaveBeenCalledTimes(1)
-  expect(collection.createIndex).toHaveBeenCalledWith(['email'], { unique: true })
+  expect(collection.createIndex).toHaveBeenCalledWith('email', { unique: true })
 })
 
 test('find() should find and sanitize users', async () => {
   const users = await user.find()
   expect(users).toEqual([
-    { _id: 'id1', email: 'u1@b.c', profile: { name: 'Peter' }, role: 'user' },
-    { _id: 'id2', email: 'u2@b.c', profile: { name: 'Susan' }, role: 'admin' }
+    { _id: 'id1', email: 'u1@b.c', profile: { name: 'Peter' }, verified: true },
+    { _id: 'id2', email: 'u2@b.c', profile: { name: 'Susan' }, verified: true }
   ])
   expect(collection.find).toHaveBeenCalledTimes(1)
 })
 
 test('findOne() should find and sanitize a user', async () => {
   const u = await user.findOne('id')
-  expect(u).toEqual({ _id: 'id1', email: 'u1@b.c', profile: { name: 'Peter' }, role: 'user' })
+  expect(u).toEqual({ _id: 'id1', email: 'u1@b.c', profile: { name: 'Peter' }, verified: true })
   expect(collection.findOne).toHaveBeenCalledTimes(1)
   expect(collection.findOne).toHaveBeenCalledWith({ _id: 'id' })
 })
 
 test('update() should update a user', async () => {
-  const update = { verified: true, role: 'admin', profile: { foo: 'bar' } }
+  const update = { verified: true, profile: { foo: 'bar' } }
   await user.update('id1', update)
   expect(collection.updateOne).toHaveBeenCalledTimes(1)
   expect(collection.updateOne).toHaveBeenCalledWith({ _id: 'id1' }, { $set: update })
 })
 
 test('update() should not update the salt', async () => {
-  await user.update('id1', { salt: 'nono' })
+  await user.update('id1', { salt: 'nono' } as any)
   expect(collection.updateOne).toHaveBeenCalledWith({ _id: 'id1' }, { $set: {} })
 })
 
@@ -77,7 +78,7 @@ test('authenticate() should find the requested user', async () => {
   const res = await user.authenticate('u1@b.c', 'secret')
   expect(collection.findOne).toHaveBeenCalledTimes(1)
   expect(collection.findOne).toHaveBeenCalledWith({ email: 'u1@b.c' })
-  expect(res).toEqual({ _id: 'id1', email: 'u1@b.c', profile: { name: 'Peter' }, role: 'user' })
+  expect(res).toEqual({ _id: 'id1', email: 'u1@b.c', profile: { name: 'Peter' }, verified: true })
 })
 
 test('authenticate() should reject a wrong password', async () => {
@@ -85,19 +86,18 @@ test('authenticate() should reject a wrong password', async () => {
 })
 
 test('authenticate() should reject an unverified user', async () => {
-  collection.findOne.mockImplementation(mockResolve({}))
+  collection.findOne.mockImplementation(mockResolve())
   await expect(user.authenticate('u3@b.c', 'secret')).rejects.toBeInstanceOf(ErrorUnauthorized)
 })
 
 test('insert() should create a new user', async () => {
-  const res = await user.insert({ email: 'u3@b.c', password: 'hello', role: 'user', profile: { name: 'Fred' } })
-  expect(res).toEqual({ _id: 'id1', email: 'u3@b.c', profile: { name: 'Fred' }, role: 'user' })
+  const res = await user.insert({ email: 'u3@b.c', password: 'hello', profile: { name: 'Fred' } })
+  expect(res).toEqual({ _id: 'id1', email: 'u3@b.c', profile: { name: 'Fred' } })
   expect(collection.insertOne).toHaveBeenCalledTimes(1)
   expect(collection.insertOne).toHaveBeenCalledWith({
     email: 'u3@b.c',
     hash: expect.any(String),
     profile: { name: 'Fred' },
-    role: 'user',
     salt: expect.any(String)
   })
 })
@@ -113,10 +113,9 @@ async function mockUser(
   email: string,
   password: string,
   profile: any,
-  role = 'user',
   verified = true
-): Promise<IUserInternal> {
+): Promise<any> {
   const salt = (await crypto.randomBytes(512)).toString('base64')
   const hash = (await crypto.pbkdf2(`mysecret,${password}`, salt, 1, 512, 'sha512')).toString('base64')
-  return { _id: id, email, hash, profile, role, salt, verified }
+  return { _id: id, email, hash, profile, salt, verified }
 }

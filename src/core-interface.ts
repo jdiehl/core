@@ -22,7 +22,6 @@ export interface ICoreConfig {
   slack?: services.ISlackConfig
   stats?: services.IStatsConfig,
   template?: services.ITemplateConfig,
-  user?: services.IUserConfig,
   validation?: services.IValidationConfig
 }
 
@@ -41,6 +40,5 @@ export interface ICoreServices {
   stats: services.StatsService
   template: services.TemplateService
   token: services.TokenService
-  user: services.UserService
   validation: services.ValidationService
 }

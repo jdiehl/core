@@ -1,9 +1,9 @@
-import { clone } from '@didie/utils'
+import { clone, mapAsync } from '@didie/utils'
 
 import { ICoreConfig, ICoreContext, ICoreServices } from '../../core-interface'
 import { CoreService } from '../../core-service'
 import { ErrorBadRequest, ErrorNotFound } from '../../errors'
-import { IDbCollection, IDbObject } from '../db/db-interface'
+import { IDbCollection, IDbIndexOptions, IDbObject } from '../db/db-interface'
 import { DbService } from '../db/db-service'
 import { IValidationSpec, Validator } from '../validation/validation-interface'
 
@@ -15,10 +15,20 @@ export interface ICoreModelFindOptions {
 }
 
 export class Model<M extends IDbObject = any> {
-  collection: IDbCollection
+  transform: (object: any) => Promise<M>
+  transformParams: (params: Partial<M>) => Promise<any>
 
-  constructor(public db: DbService, public name: string, public validator?: Validator) {
-    this.collection = this.db.collection(name)
+  protected collection: IDbCollection
+
+  constructor(protected services: ICoreServices, protected name: string, protected validator?: Validator) {
+    this.collection = this.services.db.collection(name)
+    this.init()
+  }
+
+  init() {}
+
+  createIndex(fieldOrSpec: string | any, options?: IDbIndexOptions) {
+    this.collection.createIndex(fieldOrSpec, options)
   }
 
   async find(query?: object, options?: ICoreModelFindOptions): Promise<M[]> {
@@ -30,20 +40,21 @@ export class Model<M extends IDbObject = any> {
       if (options.project) cursor.project(options.project)
     }
     let objects = await cursor.toArray()
-    if (this.transform) objects = objects.map(o => this.transform!(o))
+    if (this.transform) objects = await mapAsync(objects, async o => await this.transform!(o))
     return objects
   }
 
-  async findOne(id: string): Promise<Model> {
-    const objectID = this.db.objectID(id)
+  async findOne(id: string): Promise<M> {
+    const objectID = this.services.db.objectID(id)
     let object = await this.collection.findOne({ _id: objectID })
     if (!object) throw new ErrorNotFound()
     if (this.transform) object = await this.transform(object)
     return object
   }
 
-  async insert(values: object): Promise<Model> {
+  async insert(values: object): Promise<M> {
     if (!this.validate(values, false)) throw new ErrorBadRequest()
+    if (this.transformParams) values = await this.transformParams(values)
     const res = await this.collection.insertOne(values)
     if (res.insertedCount !== 1) throw new Error('Could not insert object')
     let object = clone(values) as any
@@ -54,13 +65,14 @@ export class Model<M extends IDbObject = any> {
 
   async update(id: string, values: object): Promise<void> {
     if (!this.validate(values, true)) throw new ErrorBadRequest()
-    const objectID = this.db.objectID(id)
+    if (this.transformParams) values = await this.transformParams(values)
+    const objectID = this.services.db.objectID(id)
     const res = await this.collection.updateOne({ _id: objectID }, { $set: values })
     if (res.modifiedCount !== 1) throw new ErrorNotFound()
   }
 
   async delete(id: string): Promise<void> {
-    const objectID = this.db.objectID(id)
+    const objectID = this.services.db.objectID(id)
     const res = await this.collection.deleteOne({ _id: objectID })
     if (res.deletedCount !== 1) throw new ErrorNotFound()
   }
@@ -71,12 +83,6 @@ export class Model<M extends IDbObject = any> {
     if (values._id) return false
     if (this.validator) return this.validator(values, allowPartial)
     return true
-  }
-
-  // Transform
-
-  protected transform?(object: Model): any {
-    return object
   }
 
 }

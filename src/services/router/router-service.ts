@@ -19,7 +19,7 @@ export class RouterService extends CoreService {
       for (const name of models) {
         const model = this.services.model.models[name]
         if (!model) throw new Error(`Model ${name} not found.`)
-        this.modelRouter(name, model)
+        this.addModel(name, model)
       }
     }
   }
@@ -36,14 +36,14 @@ export class RouterService extends CoreService {
     }
   }
 
-  router(prefix: string): Router {
+  add(prefix: string): Router {
     const router = new Router({ prefix })
     this.routers.push(router)
     return router
   }
 
-  modelRouter(prefix: string, model: Model): Router {
-    const router = this.router(prefix)
+  addModel(prefix: string, model: Model): Router {
+    const router = this.add(prefix)
 
     router.get('/', async context => {
       // TODO: compute last-modified

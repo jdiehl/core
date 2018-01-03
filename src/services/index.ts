@@ -18,8 +18,6 @@ export * from './template/template-service'
 export * from './template/template-interface'
 export * from './token/token-service'
 export * from './token/token-interface'
-export * from './user/user-service'
-export * from './user/user-interface'
 export * from './validation/validation-service'
 export * from './validation/validation-interface'
 
@@ -35,6 +33,5 @@ export const coreServices = {
   stats: exports.StatsService,
   template: exports.TemplateService,
   token: exports.TokenService,
-  user: exports.UserService,
   validation: exports.ValidationService
 }

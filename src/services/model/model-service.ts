@@ -8,9 +8,9 @@ export * from './model'
 export class ModelService extends CoreService {
   readonly models: { [key: string]: Model } = {}
 
-  add(name: string, spec: IValidationSpec): Model {
-    const validator = this.services.validation.validator(spec)
-    const model = new Model(this.services.db, name, validator)
+  add<M = Model>(name: string, spec?: IValidationSpec, CustomModel: any = Model): M {
+    const validator = spec ? this.services.validation.validator(spec) : undefined
+    const model = new CustomModel(this.services, name, validator)
     this.models[name] = model
     return model
   }

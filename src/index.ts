@@ -1,6 +1,5 @@
 export * from './core-app'
 export * from './core-interface'
-export * from './core-model'
 export * from './core-service'
 export * from './errors'
 export * from './services'

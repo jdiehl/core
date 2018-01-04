@@ -11,6 +11,9 @@ export class RouterService extends CoreService {
   private routers: Router[] = []
 
   async init() {
+  }
+
+  async startup() {
     if (!this.config.router) return
     const { models } = this.config.router
 
@@ -22,9 +25,7 @@ export class RouterService extends CoreService {
         this.addModel(name, model)
       }
     }
-  }
 
-  async startup() {
     // install routers
     if (this.services.server.server) {
       const router = new Router({ prefix: this.config.prefix })

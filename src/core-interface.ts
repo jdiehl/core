@@ -8,20 +8,21 @@ export interface ICoreConfig {
   auth?: services.IAuthConfig
   cache?: services.ICacheConfig
   db?: services.IDbConfig
-  email?: services.IEmailConfig,
+  email?: services.IEmailConfig
+  graphql?: services.IGraphQLConfig
   keys?: string[]
   port?: number
   prefix?: string
   quiet?: boolean
   token?: services.ITokenConfig
-  router?: services.IRouterConfig,
+  router?: services.IRouterConfig
   session?: {
     key?: string
     maxAge?: number
   }
   slack?: services.ISlackConfig
-  stats?: services.IStatsConfig,
-  template?: services.ITemplateConfig,
+  stats?: services.IStatsConfig
+  template?: services.ITemplateConfig
   validation?: services.IValidationConfig
 }
 
@@ -33,6 +34,7 @@ export interface ICoreServices {
   cache: services.CacheService
   db: services.DbService
   email: services.EmailService
+  graphql: services.GraphQLService
   model: services.ModelService
   router: services.RouterService
   server: services.ServerService

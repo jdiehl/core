@@ -19,8 +19,10 @@ export class Model<M extends IDbObject = any> {
   transformParams: (params: Partial<M>) => Promise<any>
 
   protected collection: IDbCollection
+  protected validator?: Validator
 
-  constructor(protected services: ICoreServices, protected name: string, protected validator?: Validator) {
+  constructor(protected services: ICoreServices, readonly name: string, readonly spec?: IValidationSpec) {
+    this.validator = spec ? this.services.validation.validator(spec) : undefined
     this.collection = this.services.db.collection(name)
     this.init()
   }

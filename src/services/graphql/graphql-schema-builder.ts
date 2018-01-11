@@ -1,6 +1,6 @@
 import { each } from '@didie/utils'
-import { GraphQLBoolean, GraphQLFieldConfigMap,  GraphQLInt, GraphQLList, GraphQLObjectType,
-GraphQLSchema, GraphQLString, GraphQLVoid } from 'graphql'
+import { GraphQLBoolean, GraphQLFieldConfigMap,  GraphQLInt, GraphQLList, GraphQLNonNull,
+GraphQLObjectType, GraphQLSchema, GraphQLString, } from 'graphql'
 
 import { Model } from '../model/model'
 
@@ -21,10 +21,17 @@ export class GraphQLSchemaBuilder {
     })
     this.types.push(type)
 
-    // query
-    this.queries[name] = {
-      resolve: async () => await model.find(),
+    // find
+    this.queries[`${name}s`] = {
+      resolve: async () => model.find(),
       type: new GraphQLList(type)
+    }
+
+    // findOne
+    this.queries[name] = {
+      args: { _id: { type: new GraphQLNonNull(GraphQLString) } },
+      resolve: async (root, { _id }) => await model.findOne(_id),
+      type
     }
 
     // insert
@@ -46,7 +53,7 @@ export class GraphQLSchemaBuilder {
 
     // delete
     this.mutations[`delete${Name}`] = {
-      args: { _id: { type: GraphQLString } },
+      args: { _id: { type: new GraphQLNonNull(GraphQLString) } },
       resolve: async (root, { _id }) => {
         await model.delete(_id)
         return true
@@ -79,9 +86,11 @@ export class GraphQLSchemaBuilder {
   // generate the graphql fields for a given model
   private fieldsFromModel(model: Model, mode: 'all' | 'insert' | 'update' = 'all') {
     const fields: any = {}
-    if (mode !== 'insert') fields._id = { type: GraphQLString }
+    if (mode !== 'insert') fields._id = { type: new GraphQLNonNull(GraphQLString) }
     each(model.spec, (value, key) => {
-      fields[key] = { type: this.typeFromSpec(value) }
+      let type: any = this.typeFromSpec(value)
+      if (mode !== 'update') type = new GraphQLNonNull(type)
+      fields[key] = { type }
     })
     return fields
   }

@@ -8,7 +8,7 @@ import { IRouterOptions } from './router-interface'
 export type RouteMethod = 'get' | 'post' | 'put' | 'delete'
 export type RouteMappingFunction = (context: KoaRouter.IRouterContext) => any[]
 
-function createRouter(target: CoreService): KoaRouter {
+function createRouter(target: any): KoaRouter {
   if (!target.router) target.router = new KoaRouter()
   return target.router
 }

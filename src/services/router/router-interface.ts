@@ -1,5 +1,5 @@
 export interface IRouterConfig {
-  models: string[]
+  models?: string[]
 }
 
 export interface IRouterOptions {

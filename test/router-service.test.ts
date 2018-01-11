@@ -17,7 +17,7 @@ class Service extends CoreService {
   }
 }
 
-const { app, model, reset } = mock({}, ['router', 'server'], { service: Service })
+const { app, model, reset } = mock({ router: {} }, ['router', 'server'], { service: Service })
 const service: Service = (app.services as any).service
 let host: string
 

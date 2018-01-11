@@ -76,7 +76,8 @@ function mockRouter(): MockRouter {
   return router as MockRouter
 }
 
-function mockServices(app: CoreApp, collection: MockCollection, model: MockModel, router: MockRouter, preserve: string[]): MockServices {
+function mockServices(app: CoreApp, collection: MockCollection, model: MockModel,
+                      router: MockRouter, preserve: string[]): MockServices {
   const services = mockifyMany(app.services, name => preserve.indexOf(name) < 0,
     m => m.mockImplementation(mockResolve()))
   if (preserve.indexOf('db') < 0) {

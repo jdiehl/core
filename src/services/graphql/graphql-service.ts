@@ -31,7 +31,7 @@ export class GraphQLService extends CoreService {
 
     // build model interfaces from config
     for (const name of models) {
-      this.addModel(this.services.model.models[name])
+      this.addModel(this.services.model.get(name))
     }
 
     // build the schema

@@ -55,7 +55,7 @@ function mockCollection(cursor: MockCursor): MockCollection {
 }
 
 function mockModel(): MockModel {
-  const model: Partial<MockModel> = {}
+  const model: Partial<MockModel> = { name: 'model' } as any
   model.find = jest.fn(mockResolve([{ _id: 'id1' }, { _id: 'id2' }]))
   model.findOne = jest.fn(mockResolve({ _id: 'id1' }))
   model.insert = jest.fn(mockResolve({ _id: 'id1' }))
@@ -91,6 +91,7 @@ function mockServices(app: CoreApp, collection: MockCollection, model: MockModel
   }
   if (preserve.indexOf('model') < 0) {
     services.model.add.mockReturnValue(model)
+    services.model.get.mockReturnValue(model)
   }
   if (preserve.indexOf('router') < 0) {
     services.router.add.mockReturnValue(router)

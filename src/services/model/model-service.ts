@@ -6,11 +6,15 @@ import { Model } from './model'
 export * from './model'
 
 export class ModelService extends CoreService {
-  readonly models: { [key: string]: Model } = {}
+  private models: { [key: string]: Model } = {}
 
   add<M = Model>(name: string, spec?: IValidationSpec, CustomModel: any = Model): M {
     const model = new CustomModel(this.services, name, spec)
     this.models[name] = model
     return model
+  }
+
+  get<M = Model>(name: string): M {
+    return (this.models as any)[name] as M
   }
 }

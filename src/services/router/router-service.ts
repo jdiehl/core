@@ -20,7 +20,7 @@ export class RouterService extends CoreService {
     if (models) {
       if (!this.services.model) throw new Error('Model service is missing.')
       for (const name of models) {
-        const model = this.services.model.models[name]
+        const model = this.services.model.get(name)
         if (!model) throw new Error(`Model ${name} not found.`)
         this.addModel(name, model)
       }

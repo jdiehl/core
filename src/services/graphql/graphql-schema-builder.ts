@@ -1,5 +1,5 @@
 import { each } from '@didie/utils'
-import { GraphQLBoolean, GraphQLFieldConfigMap,  GraphQLInt, GraphQLList, GraphQLNonNull,
+import { GraphQLBoolean, GraphQLFieldConfig, GraphQLFieldConfigMap,  GraphQLInt, GraphQLList, GraphQLNonNull,
 GraphQLObjectType, GraphQLSchema, GraphQLString, } from 'graphql'
 
 import { Model } from '../model/model'
@@ -8,6 +8,14 @@ export class GraphQLSchemaBuilder {
   private queries: GraphQLFieldConfigMap<any, any> = {}
   private mutations: GraphQLFieldConfigMap<any, any> = {}
   private types: GraphQLObjectType[] = []
+
+  addQuery(name: string, config: GraphQLFieldConfig<any, any>) {
+    this.queries[name] = config
+  }
+
+  addMutation(name: string, config: GraphQLFieldConfig<any, any>) {
+    this.mutations[name] = config
+  }
 
   // add a model to the builder
   addModel(model: Model) {
@@ -22,44 +30,44 @@ export class GraphQLSchemaBuilder {
     this.types.push(type)
 
     // find
-    this.queries[`${name}s`] = {
+    this.addQuery(`${name}s`, {
       resolve: async () => model.find(),
       type: new GraphQLList(type)
-    }
+    })
 
     // findOne
-    this.queries[name] = {
+    this.addQuery(name, {
       args: { _id: { type: new GraphQLNonNull(GraphQLString) } },
       resolve: async (root, { _id }) => await model.findOne(_id),
       type
-    }
+    })
 
     // insert
-    this.mutations[`insert${Name}`] = {
+    this.addMutation(`insert${Name}`, {
       args: this.fieldsFromModel(model, 'insert'),
       resolve: async (root, obj) => await model.insert(obj),
       type
-    }
+    })
 
     // update
-    this.mutations[`update${Name}`] = {
+    this.addMutation(`update${Name}`, {
       args: this.fieldsFromModel(model, 'update'),
       resolve: async (root, { _id, ...obj }) => {
         await model.update(_id, obj)
         return true
       },
       type: GraphQLBoolean
-    }
+    })
 
     // delete
-    this.mutations[`delete${Name}`] = {
+    this.addMutation(`delete${Name}`, {
       args: { _id: { type: new GraphQLNonNull(GraphQLString) } },
       resolve: async (root, { _id }) => {
         await model.delete(_id)
         return true
       },
       type: GraphQLBoolean
-    }
+    })
   }
 
   build() {

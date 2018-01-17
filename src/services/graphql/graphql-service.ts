@@ -2,6 +2,7 @@ import { each } from '@didie/utils'
 import * as Router from 'koa-router'
 const koaGraphql = require('koa-graphql')
 
+import { GraphQLFieldConfig } from 'graphql'
 import { CoreService } from '../../core-service'
 import { Model } from '../model/model'
 import { GraphQLSchemaBuilder } from './graphql-schema-builder'
@@ -19,6 +20,14 @@ export class GraphQLService extends CoreService {
   async init(): Promise<void> {
     if (!this.config.graphql) return
     this.builder = new GraphQLSchemaBuilder()
+  }
+
+  addQuery(name: string, config: GraphQLFieldConfig<any, any>) {
+    this.builder.addQuery(name, config)
+  }
+
+  addMutation(name: string, config: GraphQLFieldConfig<any, any>) {
+    this.builder.addMutation(name, config)
   }
 
   addModel(model: Model) {

@@ -10,6 +10,7 @@ export class ValidationService extends CoreService {
   protected validators: Record<string, Validate> = {
     any: v => true,
     boolean: v => typeof v === 'boolean',
+    date: v => v instanceof Date,
     email: v => EmailRegexp.test(v),
     number: v => typeof v === 'number',
     string: v => typeof v === 'string'

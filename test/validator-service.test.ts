@@ -16,12 +16,21 @@ test('should validate a number', async () => {
   expect(validation.validate({ a: 'number' }, { a: 1 }, 'insert')).toBe(true)
   expect(validation.validate({ a: 'number' }, { a: '1' }, 'insert')).toBe(false)
   expect(validation.validate({ a: 'number' }, { a: {} }, 'insert')).toBe(false)
+  expect(validation.validate({ b: 'string' }, { b: new Date() }, 'insert')).toBe(false)
 })
 
 test('should validate a string', async () => {
   expect(validation.validate({ b: 'string' }, { b: 2 }, 'insert')).toBe(false)
   expect(validation.validate({ b: 'string' }, { b: '2' }, 'insert')).toBe(true)
   expect(validation.validate({ b: 'string' }, { b: {} }, 'insert')).toBe(false)
+  expect(validation.validate({ b: 'string' }, { b: new Date() }, 'insert')).toBe(false)
+})
+
+test('should validate a date', async () => {
+  expect(validation.validate({ b: 'date' }, { b: 2 }, 'insert')).toBe(false)
+  expect(validation.validate({ b: 'date' }, { b: '2' }, 'insert')).toBe(false)
+  expect(validation.validate({ b: 'date' }, { b: {} }, 'insert')).toBe(false)
+  expect(validation.validate({ b: 'date' }, { b: new Date() }, 'insert')).toBe(true)
 })
 
 test('should validate an email', async () => {

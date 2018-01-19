@@ -1,4 +1,4 @@
-import { each } from '@didie/utils'
+import { each, map } from '@didie/utils'
 import { GraphQLBoolean, GraphQLFieldConfig, GraphQLFieldConfigMap,  GraphQLInt, GraphQLList, GraphQLNonNull,
 GraphQLObjectType, GraphQLSchema, GraphQLString, } from 'graphql'
 
@@ -7,7 +7,15 @@ import { Model } from '../model/model'
 export class GraphQLSchemaBuilder {
   private queries: GraphQLFieldConfigMap<any, any> = {}
   private mutations: GraphQLFieldConfigMap<any, any> = {}
-  private types: GraphQLObjectType[] = []
+  private types: { [name: string]: GraphQLObjectType } = {}
+
+  addType(model: Model): GraphQLObjectType {
+    const name = model.name
+    const fields = this.fieldsFromModel(model)
+    const type = new GraphQLObjectType({ name, fields })
+    this.types[name] = type
+    return type
+  }
 
   addQuery(name: string, config: GraphQLFieldConfig<any, any>) {
     this.queries[name] = config
@@ -23,11 +31,7 @@ export class GraphQLSchemaBuilder {
     const Name = name[0].toUpperCase() + name.substr(1)
 
     // type
-    const type = new GraphQLObjectType({
-      fields: this.fieldsFromModel(model),
-      name
-    })
-    this.types.push(type)
+    const type = this.addType(model)
 
     // find
     this.addQuery(`${name}s`, {
@@ -86,7 +90,10 @@ export class GraphQLSchemaBuilder {
     })
 
     // add types
-    if (this.types) options.types = this.types
+    if (this.types) {
+      options.types = []
+      each(this.types, t => options.types.push(t))
+    }
 
     return new GraphQLSchema(options)
   }

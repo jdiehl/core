@@ -22,6 +22,10 @@ export class GraphQLService extends CoreService {
     this.builder = new GraphQLSchemaBuilder()
   }
 
+  addType(model: Model) {
+    this.builder.addType(model)
+  }
+
   addQuery(name: string, config: GraphQLFieldConfig<any, any>) {
     this.builder.addQuery(name, config)
   }

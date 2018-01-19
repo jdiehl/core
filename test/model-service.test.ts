@@ -36,6 +36,14 @@ describe('model-service', () => {
     expect(collection.findOne).toHaveBeenCalledWith({ _id: 'id' })
   })
 
+  it('findOne() should support a query', async () => {
+    const query = { foo: 'bar' }
+    const res = await model.findOne(query)
+    expect(res).toEqual({ _id: 'id1' })
+    expect(collection.findOne).toHaveBeenCalledTimes(1)
+    expect(collection.findOne).toHaveBeenCalledWith(query)
+  })
+
   it('findOne() should fetch records', async () => {
     await model.find({ query: 'this' }, { sort: { name: 1 }, skip: 2, limit: 3, project: { key: 'no' } })
     expect(collection.find).toHaveBeenCalledTimes(1)
@@ -69,6 +77,13 @@ describe('model-service', () => {
     expect(collection.updateOne).toHaveBeenCalledWith({ _id: 'id' }, { $set: { x: 1 } })
   })
 
+  test('update() should support a query', async () => {
+    const query = { foo: 'bar' }
+    await model.update(query, { x: 1 })
+    expect(collection.updateOne).toHaveBeenCalledTimes(1)
+    expect(collection.updateOne).toHaveBeenCalledWith(query, { $set: { x: 1 } })
+  })
+
   test('update() should call the validator', async () => {
     await model.update('id', { name: 'new' })
     expect(validator).toHaveBeenCalledTimes(1)
@@ -86,6 +101,13 @@ describe('model-service', () => {
     await model.delete('id')
     expect(collection.deleteOne).toHaveBeenCalledTimes(1)
     expect(collection.deleteOne).toHaveBeenCalledWith({ _id: 'id' })
+  })
+
+  it('delete() should should support a query', async () => {
+    const query = { foo: 'bar' }
+    await model.delete(query)
+    expect(collection.deleteOne).toHaveBeenCalledTimes(1)
+    expect(collection.deleteOne).toHaveBeenCalledWith(query)
   })
 
 })

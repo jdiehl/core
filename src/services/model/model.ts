@@ -33,7 +33,11 @@ export class Model<M extends IDbObject = any> {
     this.collection.createIndex(fieldOrSpec, options)
   }
 
-  async find(query?: object, options?: ICoreModelFindOptions): Promise<M[]> {
+  objectID(id: string) {
+    return this.services.db.objectID(id)
+  }
+
+  async find(query?: Partial<M>, options?: ICoreModelFindOptions): Promise<M[]> {
     const cursor = this.collection.find(query)
     if (options) {
       if (options.sort) cursor.sort(options.sort)
@@ -46,15 +50,15 @@ export class Model<M extends IDbObject = any> {
     return objects
   }
 
-  async findOne(id: string): Promise<M> {
-    const objectID = this.services.db.objectID(id)
-    let object = await this.collection.findOne({ _id: objectID })
+  async findOne(query: string | Partial<M>): Promise<M> {
+    if (typeof query === 'string') query = { _id: this.objectID(query) } as Partial<M>
+    let object = await this.collection.findOne(query)
     if (!object) throw new ErrorNotFound()
     if (this.transform) object = await this.transform(object)
     return object
   }
 
-  async insert(values: object): Promise<M> {
+  async insert(values: Partial<M>): Promise<M> {
     if (!this.validate(values, 'insert')) throw new ErrorBadRequest()
     if (this.transformParams) values = await this.transformParams(values)
     const res = await this.collection.insertOne(values)
@@ -65,23 +69,23 @@ export class Model<M extends IDbObject = any> {
     return object
   }
 
-  async update(id: string, values: object): Promise<void> {
+  async update(query: string | Partial<M>, values: Partial<M>): Promise<void> {
     if (!this.validate(values, 'update')) throw new ErrorBadRequest()
     if (this.transformParams) values = await this.transformParams(values)
-    const objectID = this.services.db.objectID(id)
-    const res = await this.collection.updateOne({ _id: objectID }, { $set: values })
+    if (typeof query === 'string') query = { _id: this.objectID(query) } as Partial<M>
+    const res = await this.collection.updateOne(query, { $set: values })
     if (res.modifiedCount !== 1) throw new ErrorNotFound()
   }
 
-  async delete(id: string): Promise<void> {
-    const objectID = this.services.db.objectID(id)
-    const res = await this.collection.deleteOne({ _id: objectID })
+  async delete(query: string | Partial<M>): Promise<void> {
+    if (typeof query === 'string') query = { _id: this.objectID(query) } as Partial<M>
+    const res = await this.collection.deleteOne(query)
     if (res.deletedCount !== 1) throw new ErrorNotFound()
   }
 
   // Validation
 
-  protected validate(values: any, mode: ValidationMode) {
+  protected validate(values: Partial<M>, mode: ValidationMode) {
     if (values._id) return false
     if (this.validator) return this.validator(values, mode)
     return true

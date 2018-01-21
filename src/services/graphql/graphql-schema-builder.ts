@@ -3,6 +3,7 @@ import { GraphQLBoolean, GraphQLFieldConfig, GraphQLFieldConfigMap,  GraphQLInt,
 GraphQLObjectType, GraphQLSchema, GraphQLString, } from 'graphql'
 
 import { Model } from '../model/model'
+import { IGraphQLQueryConfig } from './graphql-decorators'
 
 export class GraphQLSchemaBuilder {
   private queries: GraphQLFieldConfigMap<any, any> = {}
@@ -74,6 +75,35 @@ export class GraphQLSchemaBuilder {
     })
   }
 
+  fromConfig(target: any) {
+    if (!target.graphql) return
+
+    // queries
+    each(target.graphql.queries, (config, key) => {
+      this.addQuery(config.name, {
+        args: this.argsFromConfig(config.args),
+        resolve: async (root, args, context) => {
+          const mappedArgs = this.mapArgs(config.args, args, context)
+          return await target[key].call(target, mappedArgs)
+        },
+        type: this.typeFromConfig(config.type)
+      })
+    })
+
+    // mutations
+    each(target.graphql.mutations, (config, key) => {
+      this.addMutation(config.name, {
+        args: this.argsFromConfig(config.args),
+        resolve: async (root, args, context) => {
+          const mappedArgs = this.mapArgs(config.args, args, context)
+          const res = await target[key].call(target, mappedArgs)
+          return res === undefined ? true : res
+        },
+        type: config.type === undefined ? GraphQLBoolean : this.typeFromConfig(config.type)
+      })
+    })
+  }
+
   build() {
     const options: any = {}
 
@@ -117,10 +147,41 @@ export class GraphQLSchemaBuilder {
       case 'boolean': return GraphQLBoolean
       case 'string':
       case 'email':
-      case 'any':
-      default:
         return GraphQLString
     }
+  }
+
+  // generate graphql typed arguments from config
+  private argsFromConfig(args: any) {
+    const res: any = {}
+    each(args, (value, key) => {
+      const type = this.typeFromSpec(value)
+      if (type) res[key] = { type }
+    })
+    return res
+  }
+
+  // generate graphql type from config
+  private typeFromConfig(type: string) {
+    const res = this.typeFromSpec(type)
+    if (res) return res
+    if (type.substr(type.length - 2, 2) === '[]') {
+      type = type.substr(0, type.length - 2)
+      if (!this.types[type]) throw new Error(`Missing graphql type: ${type}`)
+      return new GraphQLList(this.types[type])
+    }
+    if (!this.types[type]) throw new Error(`Missing graphql type: ${type}`)
+    return this.types[type]
+  }
+
+  // map arguments to params
+  private mapArgs(config: any, args: any, context: any) {
+    each(config, (value, name) => {
+      if (typeof value === 'function') {
+        args[name] = value(context)
+      }
+    })
+    return args
   }
 
 }

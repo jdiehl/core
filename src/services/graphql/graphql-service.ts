@@ -7,9 +7,11 @@ import { CoreService } from '../../core-service'
 import { Model } from '../model/model'
 import { GraphQLSchemaBuilder } from './graphql-schema-builder'
 
+export * from './graphql-decorators'
+
 export interface IGraphQLConfig {
   graphiql?: boolean
-  models: string[]
+  models?: string[]
 }
 
 export class GraphQLService extends CoreService {
@@ -43,9 +45,13 @@ export class GraphQLService extends CoreService {
     const { models, graphiql } = this.config.graphql
 
     // build model interfaces from config
-    for (const name of models) {
+    if (models) for (const name of models) {
       this.addModel(this.services.model.get(name))
     }
+
+    each(this.services, service => {
+      if (service.graphql) this.builder.fromConfig(service)
+    })
 
     // build the schema
     const schema = this.builder.build()

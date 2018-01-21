@@ -37,7 +37,7 @@ export class Model<M extends IDbObject = any> {
     return this.services.db.objectID(id)
   }
 
-  async find(query?: Partial<M>, options?: ICoreModelFindOptions): Promise<M[]> {
+  async find(query?: any, options?: ICoreModelFindOptions): Promise<M[]> {
     const cursor = this.collection.find(query)
     if (options) {
       if (options.sort) cursor.sort(options.sort)
@@ -50,7 +50,7 @@ export class Model<M extends IDbObject = any> {
     return objects
   }
 
-  async findOne(query: string | Partial<M>): Promise<M> {
+  async findOne(query: string | any): Promise<M> {
     if (typeof query === 'string') query = { _id: this.objectID(query) } as Partial<M>
     let object = await this.collection.findOne(query)
     if (!object) throw new ErrorNotFound()
@@ -69,7 +69,7 @@ export class Model<M extends IDbObject = any> {
     return object
   }
 
-  async update(query: string | Partial<M>, values: Partial<M>): Promise<void> {
+  async update(query: string | any, values: Partial<M>): Promise<void> {
     if (!this.validate(values, 'update')) throw new ErrorBadRequest()
     if (this.transformParams) values = await this.transformParams(values)
     if (typeof query === 'string') query = { _id: this.objectID(query) } as Partial<M>
@@ -77,7 +77,16 @@ export class Model<M extends IDbObject = any> {
     if (res.modifiedCount !== 1) throw new ErrorNotFound()
   }
 
-  async delete(query: string | Partial<M>): Promise<void> {
+  async upsert(query: string | any, values: Partial<M>): Promise<void> {
+    // TODO: add query to values
+    if (!this.validate(values, 'update')) throw new ErrorBadRequest()
+    if (this.transformParams) values = await this.transformParams(values)
+    if (typeof query === 'string') query = { _id: this.objectID(query) } as Partial<M>
+    const res = await this.collection.updateOne(query, { $set: values }, { upsert: true })
+    if (res.modifiedCount !== 1) throw new ErrorNotFound()
+  }
+
+  async delete(query: string | any): Promise<void> {
     if (typeof query === 'string') query = { _id: this.objectID(query) } as Partial<M>
     const res = await this.collection.deleteOne(query)
     if (res.deletedCount !== 1) throw new ErrorNotFound()

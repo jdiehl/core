@@ -15,8 +15,8 @@ export interface ICoreModelFindOptions {
 }
 
 export class Model<M extends IDbObject = any> {
-  transform: (object: any) => Promise<M>
-  transformParams: (params: Partial<M>) => Promise<any>
+  transform?: (object: any) => Promise<M>
+  transformParams?: (params: Partial<M>) => Promise<any>
 
   protected collection: IDbCollection
   protected validator?: Validator

@@ -15,7 +15,7 @@ export interface IGraphQLConfig {
 }
 
 export class GraphQLService extends CoreService {
-  private builder: GraphQLSchemaBuilder
+  private builder!: GraphQLSchemaBuilder
 
   // CoreService
 

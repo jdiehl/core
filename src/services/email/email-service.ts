@@ -4,7 +4,7 @@ import { CoreService } from '../../core-service'
 import { IEmailSendOptions, IEmailSendResult } from './email-interface'
 
 export class EmailService extends CoreService {
-  transporter: Transporter
+  transporter!: Transporter
 
   async send(options: IEmailSendOptions): Promise<IEmailSendResult> {
     const res = await this.transporter.sendMail(options)

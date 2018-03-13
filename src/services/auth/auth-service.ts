@@ -9,7 +9,7 @@ import { User } from './user'
 export * from './user'
 
 export class AuthService<Profile = {}> extends CoreService {
-  private user: User
+  private user!: User
 
   async makeSalt(): Promise<string > {
     const { saltlen, encoding } = this.config.auth!

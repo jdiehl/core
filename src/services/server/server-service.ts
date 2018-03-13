@@ -9,8 +9,8 @@ import { ICoreConfig } from '../../core-interface'
 import { CoreService } from '../../core-service'
 
 export class ServerService extends CoreService {
-  instance: Server
-  server: Koa
+  instance!: Server
+  server!: Koa
 
   async beforeInit() {
     this.server = new Koa()

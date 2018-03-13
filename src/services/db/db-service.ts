@@ -5,7 +5,7 @@ import { DbClientMongodb } from './db-client-mongodb'
 import { IDbClient, IDbCollection, IDbObjectID } from './db-interface'
 
 export class DbService extends CoreService {
-  private client: IDbClient
+  private client!: IDbClient
 
   collection<T>(name: string): IDbCollection<T> {
     if (!this.client) throw new Error('Missing Database Configuration')

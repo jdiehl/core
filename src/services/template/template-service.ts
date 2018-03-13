@@ -10,7 +10,7 @@ export class TemplateService extends CoreService {
 
   private templates: Record<string, string> = {}
   private renderers: Record<string, (vars: Record<string, any>) => Promise<string>> = {}
-  private md: MarkdownIt.MarkdownIt
+  private md!: MarkdownIt.MarkdownIt
 
   async beforeInit() {
     if (this.config.template && this.config.template.templates) {

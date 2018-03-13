@@ -6,7 +6,7 @@ import { IDbCollection } from '../db/db-interface'
 import { IStats } from './stats-interface'
 
 export class StatsService extends CoreService {
-  stats: IDbCollection
+  stats!: IDbCollection
 
   async store(context: ICoreContext, date: Date, time: number): Promise<void> {
     if (!this.config.stats) throw new Error('Missing stats configuration')

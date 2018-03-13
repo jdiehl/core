@@ -8,7 +8,7 @@ import { CacheClientRedis } from './cache-client-redis'
 import { ICacheClient, ICacheStore } from './cache-interface'
 
 export class CacheService extends CoreService {
-  private client: ICacheClient
+  private client!: ICacheClient
 
   get sessionStore(): ICacheStore {
     return {

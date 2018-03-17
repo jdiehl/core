@@ -9,5 +9,5 @@ export type Validate = (obj: any) => boolean
 export type ValidatorType = 'number' | 'boolean' | 'string' | 'email' | 'date' | 'any'
 
 export interface IValidationSpec {
-  [key: string]: Validator | ValidatorType
+  [key: string]: Validate | ValidatorType
 }

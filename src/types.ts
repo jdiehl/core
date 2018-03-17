@@ -1,4 +1,4 @@
-import { IUser } from './services/user/user-interface'
+import { IUser } from './services/auth/auth-interface'
 
 declare module 'koa' {
   // tslint:disable-next-line:interface-name

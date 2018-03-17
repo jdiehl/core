@@ -31,15 +31,13 @@ const col = mongo.__collection = {
   updateOne: jest.fn()
 }
 
-const client = mongo.__client = {
+const db = mongo.__db = {
   close: jest.fn(),
   collection: jest.fn(),
   dropCollection: jest.fn()
 }
 
-mongo.MongoClient = {
-  connect: jest.fn()
-}
+mongo.connect = jest.fn()
 
 mongo.__reset = () => {
   cur.count.mockImplementation(mockResolve()).mockClear()
@@ -63,10 +61,10 @@ mongo.__reset = () => {
   col.insertOne.mockImplementation(mockResolve({ insertedCount: 1, insertedId: 'id1' })).mockClear()
   col.updateMany.mockImplementation(mockResolve({ modifiedCount: 2 })).mockClear()
   col.updateOne.mockImplementation(mockResolve({ modifiedCount: 1 })).mockClear()
-  client.close.mockImplementation(mockResolve()).mockClear()
-  client.collection.mockReturnValue(col).mockClear()
-  client.dropCollection.mockImplementation(mockResolve()).mockClear()
-  mongo.MongoClient.connect.mockImplementation(mockResolve(client)).mockClear()
+  db.close.mockImplementation(mockResolve()).mockClear()
+  db.collection.mockReturnValue(col).mockClear()
+  db.dropCollection.mockImplementation(mockResolve()).mockClear()
+  mongo.connect.mockImplementation(mockResolve(db)).mockClear()
 }
 mongo.__reset()
 

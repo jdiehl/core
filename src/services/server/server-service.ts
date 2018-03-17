@@ -44,7 +44,7 @@ export class ServerService extends CoreService {
   }
 
   use(middleware: any) {
-    if (this.server) this.server.use(middleware)
+    this.server.use(middleware)
   }
 
 }

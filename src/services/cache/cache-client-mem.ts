@@ -4,12 +4,10 @@ import { Url } from 'url'
 import { ICacheClient } from './cache-interface'
 
 export class CacheClientMem implements ICacheClient {
-  private store: Record<string, any>
-  private expires: Record<string, any>
+  private store: Record<string, any> = {}
+  private expires: Record<string, any> = {}
 
   async init(config: string): Promise<void> {
-    this.store = {}
-    this.expires = {}
   }
 
   async destroy(): Promise<void> {

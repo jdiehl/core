@@ -1,8 +1,8 @@
-type contextFunction = (context: any) => any
+export type GraphQLContextFunction = (context: any) => any
 export interface IGraphQLQueryConfig {
   name: string
   type?: string
-  args?: { [name: string]: string | contextFunction }
+  args?: { [name: string]: string | GraphQLContextFunction }
 }
 
 function setup(target: any) {

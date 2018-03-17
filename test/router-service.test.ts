@@ -10,10 +10,10 @@ const request = makeRequest({ json: true, resolveWithFullResponse: true, simple:
 class Service extends CoreService {
   get = jest.fn(context => context.body = { foo: 'bar' })
   async init() {
-    const router = this.services.router.add('test')
+    const router = this.services.router.add('/test')
     router.get('/', this.get)
     const m = this.services.model.add('model')
-    this.services.router.addModel('model', m)
+    this.services.router.addModel('/model', m)
   }
 }
 

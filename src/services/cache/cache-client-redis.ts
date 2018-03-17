@@ -5,7 +5,7 @@ import { Url } from 'url'
 import { ICacheClient } from './cache-interface'
 
 export class CacheClientRedis implements ICacheClient {
-  private client: RedisClient
+  private client!: RedisClient
 
   async init(config: string): Promise<void> {
     this.client = createClient(config)

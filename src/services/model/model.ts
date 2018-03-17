@@ -3,7 +3,7 @@ import { clone, mapAsync } from '@didie/utils'
 import { ICoreConfig, ICoreContext, ICoreServices } from '../../core-interface'
 import { CoreService } from '../../core-service'
 import { ErrorBadRequest, ErrorNotFound } from '../../errors'
-import { IDbCollection, IDbIndexOptions, IDbObject } from '../db/db-interface'
+import { IDbCollection, IDbIndexOptions, IDbObject, IDbObjectID } from '../db/db-interface'
 import { DbService } from '../db/db-service'
 import { IValidationSpec, ValidationMode, Validator } from '../validation/validation-interface'
 
@@ -33,7 +33,7 @@ export class Model<M extends IDbObject = any> {
     this.collection.createIndex(fieldOrSpec, options)
   }
 
-  objectID(id: string) {
+  objectID(id: string): IDbObjectID {
     return this.services.db.objectID(id)
   }
 

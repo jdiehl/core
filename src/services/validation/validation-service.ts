@@ -31,9 +31,9 @@ export class ValidationService extends CoreService {
       return each(obj, (value, key) => {
         const type = spec[key]
         if (!type) return false
-        const validator = typeof type === 'function' ? type : this.validators[type]
-        if (!validator) return false
-        return validator(value)
+        const validate: Validate = typeof type === 'function' ? type : this.validators[type]
+        if (!validate) return false
+        return validate(value)
       })
     }
   }

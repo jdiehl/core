@@ -24,20 +24,20 @@ afterEach(async () => {
 })
 
 test('should connect to the database server and open a collection', async () => {
-  expect(mongo.MongoClient.connect).toHaveBeenCalledTimes(1)
-  expect(mongo.MongoClient.connect).toHaveBeenCalledWith('mongodb://host/db')
-  expect(mongo.__client.collection).toHaveBeenCalledTimes(1)
-  expect(mongo.__client.collection).toHaveBeenCalledWith('test')
+  expect(mongo.connect).toHaveBeenCalledTimes(1)
+  expect(mongo.connect).toHaveBeenCalledWith('mongodb://host/db')
+  expect(mongo.__db.collection).toHaveBeenCalledTimes(1)
+  expect(mongo.__db.collection).toHaveBeenCalledWith('test')
   expect(col).toBe(mongo.__collection)
 })
 
 test('should close the database connection', async () => {
   db.destroy()
-  expect(mongo.__client.close).toHaveBeenCalledTimes(1)
+  expect(mongo.__db.close).toHaveBeenCalledTimes(1)
 })
 
 test('should drop a collection', async () => {
   db.drop('foo')
-  expect(mongo.__client.dropCollection).toHaveBeenCalledTimes(1)
-  expect(mongo.__client.dropCollection).toHaveBeenCalledWith('foo')
+  expect(mongo.__db.dropCollection).toHaveBeenCalledTimes(1)
+  expect(mongo.__db.dropCollection).toHaveBeenCalledWith('foo')
 })

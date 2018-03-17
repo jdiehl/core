@@ -1,6 +1,6 @@
 {
   "name": "@didie/core",
-  "version": "1.0.11",
+  "version": "1.0.12-pre",
   "description": "Server Core",
   "main": "index.js",
   "types": "index.d.js",
